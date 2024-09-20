@@ -10,6 +10,8 @@
     </parent>
     <modules>
         <module>user-service</module>
+        <module>document-service</module>
+        <module>gateway-service</module>
     </modules>
 
     <properties>
