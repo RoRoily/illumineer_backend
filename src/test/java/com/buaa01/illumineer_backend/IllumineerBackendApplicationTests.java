@@ -1,10 +1,10 @@
-package com.illumineer.user_service;
+package com.buaa01.illumineer_backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserServiceApplicationTests {
+class IllumineerBackendApplicationTests {
 
     @Test
     void contextLoads() {
