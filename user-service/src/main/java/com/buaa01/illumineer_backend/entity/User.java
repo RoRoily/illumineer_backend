@@ -3,11 +3,13 @@ package com.buaa01.illumineer_backend.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import jdk.jfr.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -32,10 +34,10 @@ public class User {
     private List<Category> field;// 相关领域
     private String institution;
     //需要在Redis中存储的信息
-    //名下论文集合
-    //合作者/关联者
-    //收藏夹
-    //下载记录
+    //名下论文集合 papers
+    //合作者/关联者 collaborator
+    //收藏夹 collections
+    //下载记录 downloads
 
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date createDate;
