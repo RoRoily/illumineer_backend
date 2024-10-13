@@ -142,6 +142,7 @@ public class UserAccountServiceImpl implements UserAccountService {
             // 把完整的用户信息存入redis，时间跟token一样，注意单位
             // 这里缓存的user信息建议只供读取uid用，其中的状态等非静态数据可能不准，所以 redis另外存值
             String jsonString = JSON.toJSONString(user);
+            //reCommit
             redisTemplate.opsForValue().set(
                     "security:user:" + user.getUid(),
                     jsonString,
