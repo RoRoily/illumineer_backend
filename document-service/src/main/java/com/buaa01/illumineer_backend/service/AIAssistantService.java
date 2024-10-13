@@ -60,17 +60,14 @@ public class AIAssistantService {
         // 解析响应数据
         if (response.getStatusCode() == HttpStatus.OK) {
             // 提取AI生成的关键词
-            // 这里需要根据实际返回的JSON结构进行解析
-            String keywords = parseKeywordsFromResponse(response.getBody());
-            return keywords;
+            return parseKeywordsFromResponse(response.getBody());
         } else {
             return "Error: " + response.getStatusCode();
         }
     }
 
     private String parseKeywordsFromResponse(String responseBody) {
-        // 解析JSON响应体并提取关键词
-        // 这里需要根据实际返回的JSON结构进行解析
+        // 解析JSON结构
         return "parsed_keywords";
     }
 }
