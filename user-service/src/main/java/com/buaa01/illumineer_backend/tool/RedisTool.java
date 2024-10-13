@@ -14,6 +14,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -467,15 +471,6 @@ public class RedisTool {
     }
 
     /**
-     * 获取hashKey对应的所有键值
-     * @param key 键
-     * @return 对应的多个键值
-     */
-    public Map<Object, Object> hashGet(String key) {
-        return redisTemplate.opsForHash().entries(key);
-    }
-
-    /**
      * 查询SET大小
      * @param key 键
      * @return 键key对应集合的大小
@@ -496,7 +491,7 @@ public class RedisTool {
 
     //--------------------无序集合Set相关操作结束--------------------
 
-    //--------------------字符串存储String相关操作开始--------------------
+    //--------------------字符串String/单个实体对象存储相关操作开始--------------------
 
     /**
      * 存储简单数据类型
@@ -601,26 +596,206 @@ public class RedisTool {
     }
 
     /**
+     * 删除简单数据类型或实体类
+     * @param key 键
+     */
+    public void deleteValue(String key) {
+        redisTemplate.opsForValue().getOperations().delete(key);
+    }
+
+    /**
+     * 删除多个key
+     * @param keys 键的集合
+     */
+    public void deleteValues(Collection<String> keys) {
+        redisTemplate.opsForValue().getOperations().delete(keys);
+    }
+
+    /**
+     * 递增，将这个键对应的值+1，如果没有键，则创建它，并且值初始化为1
+     * 应用场景：
+     * 计数器：可以用于计数操作，例如网站的访问次数、事件的触发次数等。
+     * 乐观锁：在并发场景中，通过使用 Redis 作为计数器来控制资源访问。
+     * @param key 键
+     */
+    public void increment(String key) {
+        redisTemplate.opsForValue().increment(key, 1);
+    }
+    /**
+     * 递减，将这个键对应的值-1，如果没有键，则创建它，并且值初始化为-1
+     * 应用场景：
+     * 计数器：可以用于计数操作，例如网站的访问次数、事件的触发次数等。
+     * 乐观锁：在并发场景中，通过使用 Redis 作为计数器来控制资源访问。
+     * @param key 键
+     */
+    public void decrement(String key) {
+        redisTemplate.opsForValue().decrement(key, 1);
+    }
+
+    //--------------------字符串String/单个实体对象存储相关操作结束--------------------
+
+    //--------------------哈希存储相关操作开始--------------------
+
+    /**
+     * 获取hashKey对应的所有键值
+     * 假设 Redis 中有一个哈希表，键为 "user:1001"，包含如下数据：
+     * {
+     *   "name": "Alice",
+     *   "age": 25,
+     *   "city": "Beijing"
+     * }
+     * 调用 hashGet("user:1001") 会返回这个map。
+     * @param key 键
+     * @return 对应的多个键值
+     */
+    public Map<Object, Object> hashGet(String key) {
+        try {
+            return redisTemplate.opsForHash().entries(key);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 获取map中的指定hashKey对应的数据
+     * 假设 Redis 中有一个哈希表，键为 "user:1001"，包含如下数据：
+     * {
+     *   "name": "Alice",
+     *   "age": 25,
+     *   "city": "Beijing"
+     * }
+     * 调用 hashGet("user:1001", "name") 会返回 "Alice"。
+     * 如果调用 hashGet("user:1001", "email")，由于哈希表中没有这个字段，返回值为 null。
+     * @param key 键
+     * @param hashKey 哈希键
+     * @return 哈希键对应的对象值
+     */
+    public Object hashGet(String key, String hashKey) {
+        try {
+            return redisTemplate.opsForHash().get(key, hashKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 把map存到redis中
+     * @param key 键
+     * @param map map
+     */
+    public void hashPut(String key, Map map) {
+        redisTemplate.opsForHash().putAll(key, map);
+    }
+
+    /**
+     * 把数据存储在map中指定hashKey的value
+     * @param key 键
+     * @param hashKey 哈希键
+     * @param value 存入的值
+     */
+    public void hashPut(String key, String hashKey, Object value) {
+        redisTemplate.opsForHash().put(key, hashKey, value);
+    }
+
+    /**
+     * 删除map中指定hashKey
+     * @param key 键
+     * @param hashKeys map中的哈希键
+     * @return 删除的值的个数
+     */
+    public Long hashDelete(String key, Object... hashKeys) {
+        return redisTemplate.opsForHash().delete(key, hashKeys);
+    }
+
+    //--------------------哈希存储相关操作结束--------------------
+
+    //--------------------List相关操作开始--------------------
+
+    /**
      * 获取list中全部数据
-     * @param key
-     * @param clazz
-     * @return
+     * @param key 键
+     * @param clazz 类型
+     * @return 列表
      */
     public <T> List<T> getAllList(String key, Class<T> clazz) {
-        List list = this.redisTemplate.opsForList().range(key, 0, -1);
+        List<Object> list = this.redisTemplate.opsForList().range(key, 0, -1);
         List<T> resultList = new ArrayList<>();
-        for (Object temp : list) {
+        for (Object temp : Objects.requireNonNull(list)) {
             resultList.add(JSON.parseObject((String) temp, clazz));
         }
         return resultList;
     }
 
     /**
-     * 删除简单数据类型或实体类
-     * @param key
+     * 把list存入redis
+     * @param key 键
+     * @return 存入的个数
      */
-    public void deleteValue(String key) {
-        redisTemplate.opsForValue().getOperations().delete(key);
+    public Long setAllList(String key, List list) {
+        List<String> dataList = new ArrayList<>();
+        for (Object temp : list) {
+            dataList.add(JSON.toJSONString(temp));
+        }
+        return this.redisTemplate.opsForList().rightPushAll(key, dataList);
     }
 
+    //--------------------List相关操作结束--------------------
+
+    //--------------------数据库相关操作开始--------------------
+
+    /**
+     * 将当前数据库的 key 移动到给定的数据库 db 当中
+     * 以上数据库指的是redis自带的数据库，有16个，编号0-15
+     * @param key     key
+     * @param dbIndex 目标DB
+     * @return 是否成功
+     */
+    public Boolean move(String key, int dbIndex) {
+        return redisTemplate.move(key, dbIndex);
+    }
+
+    /**
+     * 从当前数据库中随机返回一个 key
+     * @return 随机的 key
+     */
+    public String randomKey() {
+        return redisTemplate.randomKey();
+    }
+
+    /**
+     * 批量获取
+     * @param keys key 集合
+     * @return 值列表
+     */
+    public List<Object> multiGet(Collection<String> keys) {
+        return redisTemplate.opsForValue().multiGet(keys);
+    }
+
+    /**
+     * 设置一个有效期至午夜12点的缓存
+     * @param key 键
+     * @param value 值
+     */
+    public void setExValueForToday(String key, Object value) {
+        //获取当天剩余秒数
+        LocalDateTime midnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        long remainTime = ChronoUnit.SECONDS.between(LocalDateTime.now(),midnight);
+        log.info("当天剩余秒数：{}", remainTime);
+        redisTemplate.opsForValue().set(key, value, remainTime, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 设置一个有效期至周日午夜12点的缓存
+     * @param key 键
+     * @param value 值
+     */
+    public void setExValueForWeekend(String key, Object value) {
+        //获取本周剩余秒数
+        LocalDateTime midnight = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        long remainTime = ChronoUnit.SECONDS.between(LocalDateTime.now(),midnight);
+        log.info("本周剩余秒数：{}", remainTime);
+        redisTemplate.opsForValue().set(key, value, remainTime, TimeUnit.SECONDS);
+    }
 }
