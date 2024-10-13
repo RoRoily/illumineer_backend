@@ -30,5 +30,6 @@ public class Paper {
     private Integer ref_times; //引用次数
     private Integer fav_time; //收藏次数
     private List<Integer> refs; //引用文献
+    private Integer stats; // 0 正常 1 已删除
 
 }

@@ -10,4 +10,11 @@ public interface PaperService {
      * @return Paper 文献实体类
      */
     CustomResponse getPaperByPid(Integer pid);
+
+    /**
+     * 根据（属性是否等于某个值）获取文献信息
+     * @param map 包含attrs和values：String
+     * @return 文献信息
+     */
+    CustomResponse getPapersByAttr(String attr, String value);
 }

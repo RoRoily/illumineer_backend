@@ -36,4 +36,27 @@ public class PaperServiceImpl implements PaperService {
         customResponse.setData(map);
         return customResponse;
     }
+
+    @Override
+    public CustomResponse getPapersByAttr(String attr, String value) {
+        CustomResponse customResponse = new CustomResponse();
+        Paper paper = null;
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(attr, value);
+        paper = paperMapper.selectOne(queryWrapper);
+        Map<String, Object> map = new HashMap<>();
+        map.put("title",paper.getTitle());
+        map.put("essAbs", paper.getEssAbs());
+        map.put("keywords",paper.getKeywords());
+        map.put("contentUrl",paper.getContentUrl());
+        map.put("auths",paper.getAuths());
+        map.put("field",paper.getField());
+        map.put("publishDate",paper.getPublishDate());
+        map.put("derivation",paper.getDerivation());
+        map.put("ref_times", paper.getRef_times());
+        map.put("fav_times",paper.getFav_time());
+        map.put("refs",paper.getRefs());
+        customResponse.setData(map);
+        return customResponse;
+    }
 }

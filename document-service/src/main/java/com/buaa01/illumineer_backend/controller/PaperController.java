@@ -34,4 +34,24 @@ public class PaperController {
             return customResponse;
         }
     }
+
+    /**
+     * 根据（属性是否等于某个值）获取文献信息
+     * @param map 包含attrs和values：String
+     * @return 文献信息
+     */
+    @GetMapping("/paper/get_attr")
+    public CustomResponse getPapersByAttr(@RequestBody Map<String, String> map) {
+        String attr = map.get("attr");
+        String value = map.get("value");
+        try {
+            return paperService.getPapersByAttr(attr, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("无法根据attr获取文献信息！");
+            return customResponse;
+        }
+    }
 }

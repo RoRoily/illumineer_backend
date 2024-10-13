@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Select;
 public interface PaperMapper extends BaseMapper<Paper> {
 
     // 获取指定文献ID的详细信息
-    @Select("select * from paper where pid = #{pid}")
+    @Select("select * from paper where pid = #{pid} and status = 0")
     Paper getPaperByPid(Integer pid);
 }
