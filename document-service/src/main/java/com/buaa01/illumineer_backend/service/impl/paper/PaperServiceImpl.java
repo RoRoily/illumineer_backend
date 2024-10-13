@@ -34,6 +34,10 @@ public class PaperServiceImpl implements PaperService {
         queryWrapper.eq("pid", pid);
 //        paper = paperMapper.selectOne(queryWrapper);
         paper = paperMapper.getPaperByPid(pid);
+
+        // 文献引用格式
+        List<String> references = generateRef(paper.getAuths(), paper.getTitle(), paper.getDerivation());
+
         Map<String, Object> map = new HashMap<>();
         map.put("title",paper.getTitle());
         map.put("essAbs", paper.getEssAbs());
@@ -149,5 +153,17 @@ public class PaperServiceImpl implements PaperService {
             }
         });
         return papers;
+    }
+
+    List<String> generateRef(Map<String, Integer> auths, String title, String derivation) {
+        List<String> references = new ArrayList<>();
+        String ref = "";
+        for (String auth : auths.keySet()) {
+            ref = ref + auth + ",";
+        }
+        ref += ". " + title + ". " + derivation;
+
+        references.add(ref);
+        return references;
     }
 }
