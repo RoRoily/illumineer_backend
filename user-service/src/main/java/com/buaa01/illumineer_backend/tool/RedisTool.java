@@ -1,6 +1,8 @@
 package com.buaa01.illumineer_backend.tool;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -518,6 +520,28 @@ public class RedisTool {
     }
 
     /**
+     * 使用默认有效期存储实体类，将实体类转换成JSON
+     * @param key 键
+     * @param value 值
+     */
+    public void setExObjectValue(String key, Object value) {
+        String jsonString = JSON.toJSONString(value);
+        setExValue(key, jsonString);
+    }
+
+    /**
+     * 使用指定有效期存储实体类
+     * @param key 键
+     * @param value 值
+     * @param time 指定的有效期时间
+     * @param timeUnit 单位
+     */
+    public void setExObjectValue(String key, Object value, long time, TimeUnit timeUnit) {
+        String jsonString = JSON.toJSONString(value);
+        setExValue(key, jsonString, time, timeUnit);
+    }
+
+    /**
      * 使用 默认有效期 和 默认时间单位（秒） 存储简单数据类型
      * @param key 键
      * @param value 对象值
@@ -546,4 +570,57 @@ public class RedisTool {
     public void setExValue(String key, Object value, long time, TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, time, timeUnit);
     }
+
+    /**
+     * 获取简单数据类型
+     * @param key 键
+     * @return 键对应的值object，单个值，不是集合
+     */
+    public Object getValue(Object key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 获取实体类的JSONString
+     * @param key 键
+     * @return JSON字符串
+     */
+    public String getObjectString(String key) {
+        return (String) redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 根据传入的类型获取实体类
+     */
+    public <T> T getObjectByClass(String key, Class<T> clazz) {
+        String objectString = (String) redisTemplate.opsForValue().get(key);
+        if (StringUtils.isNotBlank(objectString)) {
+            return JSONObject.parseObject(objectString, clazz);
+        }
+        return null;
+    }
+
+    /**
+     * 获取list中全部数据
+     * @param key
+     * @param clazz
+     * @return
+     */
+    public <T> List<T> getAllList(String key, Class<T> clazz) {
+        List list = this.redisTemplate.opsForList().range(key, 0, -1);
+        List<T> resultList = new ArrayList<>();
+        for (Object temp : list) {
+            resultList.add(JSON.parseObject((String) temp, clazz));
+        }
+        return resultList;
+    }
+
+    /**
+     * 删除简单数据类型或实体类
+     * @param key
+     */
+    public void deleteValue(String key) {
+        redisTemplate.opsForValue().getOperations().delete(key);
+    }
+
 }
