@@ -1,12 +1,15 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.service.user.UserFavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 public class UserFavoriteController {
@@ -17,7 +20,7 @@ public class UserFavoriteController {
      * 新增用户收藏夹
      * **/
     @PostMapping("/user/fav/createFav")
-    public CustomResponse createFav(){
+    public CustomResponse createFav()  {
         return userFavoriteService.createFav();
     }
 
@@ -38,7 +41,7 @@ public class UserFavoriteController {
     /**
      * 查找用户的所有收藏夹
      * @param
-     * @return CustomResponse List<Integer> 收藏夹fid的list
+     * @return CustomResponse List<Integer> 收藏夹fid的set,不是list!
      * **/
     @GetMapping("/user/fav/searchAll")
     public CustomResponse searchAll(){

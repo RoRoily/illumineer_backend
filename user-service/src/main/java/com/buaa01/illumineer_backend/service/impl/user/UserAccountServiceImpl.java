@@ -2,9 +2,11 @@ package com.buaa01.illumineer_backend.service.impl.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.FidnumSingleton;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAccountService;
+import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +20,17 @@ import java.util.Map;
 @Service
 public class UserAccountServiceImpl implements UserAccountService {
 
-
+    FidnumSingleton fidnumInstance = FidnumSingleton.getInstance();
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisTool redisTool;
+
+    @Autowired
 
     /**
      * 用户注册
@@ -101,6 +107,12 @@ public class UserAccountServiceImpl implements UserAccountService {
         User newUser = User.setNewUser(encodedPassword,username,email);
         //更新数据库
         userMapper.insert(newUser);
+
+
+        //创建收藏夹
+        String fidsKey = "uForFav:" + newUser.getUid();
+        redisTool.storeZSetByTime(fidsKey,fidnumInstance.addFidnum());
+
 
         messageUnreadMapper.insert(new MessageUnread(newUser.getUid(),0,0,0,0,0,0));
         favoriteMapper.insert(new Favorite(newUser.getUid(), newUser.getUid(), 1, 1, null, "默认收藏夹", "", 0, null));
