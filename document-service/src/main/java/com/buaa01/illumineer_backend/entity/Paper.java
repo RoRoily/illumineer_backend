@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -20,7 +21,7 @@ public class Paper {
     private String essAbs; //文章摘要
     private List<String> keywords;
     private String contentUrl;
-    private List<Integer> auths; //文章作者
+    private Map<String, Integer> auths; //文章作者
     private List<Category> field; //相关领域
     private Date publishDate; //出版时间
     private String derivation;//来源

@@ -23,7 +23,7 @@ public class PaperController {
      * @param pid 文献ID
      * @return 文献信息
      */
-    @GetMapping("/paper/get")
+    @GetMapping("/get")
     public CustomResponse getPaperByPid(@RequestParam("pid") Integer pid) {
         try {
             return paperService.getPaperByPid(pid);
@@ -37,41 +37,23 @@ public class PaperController {
     }
 
     /**
-     * 根据（属性是否等于某个值）获取文献信息
-     * @param map 包含attrs和values：String
+     * 一框式检索接口：搜索文献（分页、排序）
+     * @param keyword 搜索内容
+     * @param offset 第几页
+     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @return 文献信息
      */
-    @GetMapping("/paper/get_attr")
-    public CustomResponse getPapersByAttr(@RequestBody Map<String, String> map) {
-        String attr = map.get("attr");
-        String value = map.get("value");
+    @GetMapping("/search")
+    public CustomResponse searchPapers(@RequestParam("keyword") String keyword,
+                                          @RequestParam("offset") Integer offset,
+                                          @RequestParam("type") Integer sortType) {
         try {
-            return paperService.getPapersByAttr(attr, value);
+            return paperService.searchPapers(keyword, offset, sortType);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
             customResponse.setCode(500);
-            customResponse.setMessage("无法根据attr获取文献信息！");
-            return customResponse;
-        }
-    }
-
-    /**
-     * 根据（属性是否等于某个值）获取文献信息
-     * @param map 包含attrs和values：List
-     * @return 文献信息
-     */
-    @GetMapping("/paper/get_attrs")
-    public CustomResponse getPapersByAttrs(@RequestBody Map<String, List<String>> map) {
-        List<String> attrs = map.get("attrs");
-        List<String> values = map.get("values");
-        try {
-            return paperService.getPapersByAttrs(attrs, values);
-        } catch (Exception e) {
-            e.printStackTrace();
-            CustomResponse customResponse = new CustomResponse();
-            customResponse.setCode(500);
-            customResponse.setMessage("无法根据attr获取文献信息！");
+            customResponse.setMessage("无法获取文献信息！");
             return customResponse;
         }
     }
