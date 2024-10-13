@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.service.paper.PaperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 public class PaperController {
 
     @Autowired
-    private PaperMapper paperMapper;
+    private PaperService paperService;
 
     /**
      * 根据pid获取文献信息
@@ -22,18 +23,15 @@ public class PaperController {
      * @return 文献信息
      */
     @GetMapping("/paper/get")
-
     public CustomResponse getPaperByPid(@RequestParam("pid") Integer pid) {
-        CustomResponse responseResult = new CustomResponse();
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("pid", pid);
-        paper = paperMapper.selectOne(queryWrapper);
-        Map<String, Object> map = new HashMap<>();
-        map.put("essAbs", paper.getEssAbs());
-        map.put("contentUrl",paper.getContentUrl());
-        map.put("title",paper.getTitle());
-        responseResult.setData(map);
-        return responseResult;
+        try {
+            return paperService.getPaperByPid(pid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("无法根据pid获取文献信息！");
+            return customResponse;
+        }
     }
 }

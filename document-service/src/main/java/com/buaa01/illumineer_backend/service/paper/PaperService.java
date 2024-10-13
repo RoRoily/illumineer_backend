@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.paper;
 
+import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 
 public interface PaperService {
@@ -8,5 +9,5 @@ public interface PaperService {
      * @param pid 文献ID
      * @return Paper 文献实体类
      */
-    Paper getPaperByPid(Integer pid);
+    CustomResponse getPaperByPid(Integer pid);
 }
