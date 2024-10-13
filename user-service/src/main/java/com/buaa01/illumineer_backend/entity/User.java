@@ -42,4 +42,5 @@ public class User {
     private Date createDate;
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date deleteDate;
+
 }
