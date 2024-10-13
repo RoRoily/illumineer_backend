@@ -19,6 +19,7 @@ public class Paper {
     private Integer pid;
     //文章的相关信息
     private String title;
+    private List<String> writers;
     private String essAbs; //文章摘要
     private List<String> keywords;
     private String contentUrl;

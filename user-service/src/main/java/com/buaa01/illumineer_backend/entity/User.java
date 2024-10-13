@@ -17,7 +17,7 @@ public class User {
     private Integer uid;
     //账号的相关信息
     private String avatar;
-    private String account;
+    private String email;
     private String password;
     private String nickName;
     private String description;
@@ -42,4 +42,29 @@ public class User {
     private Date createDate;
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date deleteDate;
+
+    static public User setNewUser(String encodedPassword,String username,String email){
+        Date now = new Date();
+        User new_user = new User(
+                null,
+                "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png", //头像的url
+                email,
+                encodedPassword,
+                username,
+                null,
+                "https://tinypic.host/images/2023/11/15/69PB2Q5W9D2U7L.png", //背景的url
+                1, //默认为最低权限的用户
+                false, //未实名
+                0, //账户状态正常
+                null, //姓名
+                null, //authId
+                null, //性别
+                null, //相关领域
+                null, //所在机构
+                now,
+                null
+        );
+        return new_user;
+    }
+
 }
