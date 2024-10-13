@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,6 +47,26 @@ public class PaperController {
         String value = map.get("value");
         try {
             return paperService.getPapersByAttr(attr, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("无法根据attr获取文献信息！");
+            return customResponse;
+        }
+    }
+
+    /**
+     * 根据（属性是否等于某个值）获取文献信息
+     * @param map 包含attrs和values：List
+     * @return 文献信息
+     */
+    @GetMapping("/paper/get_attrs")
+    public CustomResponse getPapersByAttrs(@RequestBody Map<String, List<String>> map) {
+        List<String> attrs = map.get("attrs");
+        List<String> values = map.get("values");
+        try {
+            return paperService.getPapersByAttrs(attrs, values);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
