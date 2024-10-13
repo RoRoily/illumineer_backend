@@ -15,7 +15,8 @@ public class FilterServiceImpl implements FilterService {
     public CustomResponse ResultFilter(ArrayList<Paper> papers, ScreenCondition sc) {
 
         List<Paper> filteredPapers = papers.stream()
-                .filter(paper -> (sc.getYear().isEmpty() || sc.getYear().contains(paper.getYear())) &&
+                .filter(paper -> (sc.getYear().isEmpty()
+                        || sc.getYear().contains(transDatetoYear(paper.getPublishDate()))) &&
                         (sc.getType().isEmpty() || sc.getType().contains(paper.getType())) &&
                         (sc.getDerivation().isEmpty() || sc.getDerivation().contains(paper.getDerivation())) &&
                         (sc.getTheme().isEmpty() || sc.getTheme().contains(paper.getTheme())))
@@ -25,4 +26,12 @@ public class FilterServiceImpl implements FilterService {
         customResponse.setData(filteredPapers);
         return customResponse;
     }
+
+    public String transDatetoYear(Date date) { // 将发布日期转化为年
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        return String.valueOf(year);
+    }
+
 }
