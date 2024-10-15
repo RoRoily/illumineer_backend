@@ -45,6 +45,8 @@ public class PaperServiceImpl implements PaperService {
         map.put("contentUrl",paper.getContentUrl());
         map.put("auths",paper.getAuths());
         map.put("field",paper.getField());
+        map.put("type",paper.getType());
+        map.put("theme",paper.getTheme());
         map.put("publishDate",paper.getPublishDate());
         map.put("derivation",paper.getDerivation());
         map.put("ref_times", paper.getRef_times());
