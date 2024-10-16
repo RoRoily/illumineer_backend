@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Favorite {
     //用户的默认收藏夹fid = uid
-    @TableId(type = IdType.AUTO)
     private Integer fid;    // 收藏夹ID
     private Integer uid;    // 所属用户ID
     private Integer type;   // 收藏夹类型 1默认收藏夹 2用户创建

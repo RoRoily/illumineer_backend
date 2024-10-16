@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class History {
-    @TableId(type = IdType.AUTO)
     private Integer hid;    // 历史记录ID
     private Integer uid;    // 所属用户ID
     private Integer count;  // 收藏夹中文章数量

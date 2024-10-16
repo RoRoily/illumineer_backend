@@ -508,6 +508,7 @@ public class RedisTool {
         redisTemplate.opsForValue().set(key, value);
     }
 
+
     /**
      * 实体类转换成string再进行操作（JSON）
      * 不用更新的缓存信息
@@ -518,6 +519,7 @@ public class RedisTool {
         String jsonString = JSON.toJSONString(value);
         setValue(key, jsonString);
     }
+
 
     /**
      * 使用默认有效期存储实体类，将实体类转换成JSON

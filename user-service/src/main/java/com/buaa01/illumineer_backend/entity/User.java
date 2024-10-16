@@ -21,7 +21,7 @@ public class User {
     private String avatar;
     private String email;
     private String password;
-    private String nickName;
+    private String Username;
     private String description;
     private String background; //背景图
     //账号状态的相关信息

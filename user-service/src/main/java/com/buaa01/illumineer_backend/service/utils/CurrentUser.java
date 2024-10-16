@@ -1,6 +1,5 @@
 package com.buaa01.illumineer_backend.service.utils;
 
-
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.bilimili.buaa13.service.impl.user.UserDetailsImpl;
