@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,7 +32,7 @@ public class User {
     private String name;
     private Integer authId;
     private Integer gender;
-    private List<Category> field;// 相关领域
+    private Map<Category,Integer> field;// 相关领域
     private String institution; //所在机构
     //需要在Redis中存储的信息
     //名下论文集合

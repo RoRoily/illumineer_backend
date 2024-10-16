@@ -1,7 +1,7 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.FidnumSingleton;
+import com.buaa01.illumineer_backend.entity.singleton.FidnumSingleton;
 import com.buaa01.illumineer_backend.service.user.UserFavoriteService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;

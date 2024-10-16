@@ -1,4 +1,4 @@
-package com.buaa01.illumineer_backend.entity;
+package com.buaa01.illumineer_backend.entity.singleton;
 
 public class FidnumSingleton {
 

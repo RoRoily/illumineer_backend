@@ -2,8 +2,10 @@ package com.buaa01.illumineer_backend.service.impl.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.FidnumSingleton;
+import com.buaa01.illumineer_backend.entity.Favorite;
+import com.buaa01.illumineer_backend.entity.singleton.FidnumSingleton;
 import com.buaa01.illumineer_backend.entity.User;
+import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAccountService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
@@ -13,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Map;
 
 @Slf4j
@@ -29,8 +30,9 @@ public class UserAccountServiceImpl implements UserAccountService {
     private UserMapper userMapper;
     @Autowired
     private RedisTool redisTool;
-
     @Autowired
+    private FavoriteMapper favoriteMapper;
+
 
     /**
      * 用户注册
@@ -109,13 +111,17 @@ public class UserAccountServiceImpl implements UserAccountService {
         userMapper.insert(newUser);
 
 
-        //创建收藏夹
+        //创建收藏夹 Redis中和数据库中
         String fidsKey = "uForFav:" + newUser.getUid();
         redisTool.storeZSetByTime(fidsKey,fidnumInstance.addFidnum());
+        favoriteMapper.insert(new Favorite(newUser.getUid(),newUser.getUid(),1,"默认收藏夹",0,0));
+
+        //创建历史记录 Redis中和数据库中 创建键质对即可
+        String hidsKey = "uForHis" + newUser.getUid();
+        redisTool.
+                //502 517
 
 
-        messageUnreadMapper.insert(new MessageUnread(newUser.getUid(),0,0,0,0,0,0));
-        favoriteMapper.insert(new Favorite(newUser.getUid(), newUser.getUid(), 1, 1, null, "默认收藏夹", "", 0, null));
         favoriteMapper.insert(new Favorite(5000+ newUser.getUid(), newUser.getUid(), 1, 1, null, "历史记录", "", 0, null));
         UserRecordString userRecordString = userRecordService.saveUserRecordToString(userRecord);
         userRecordService.saveUserRecordStringToDatabase(userRecordString);
@@ -129,7 +135,8 @@ public class UserAccountServiceImpl implements UserAccountService {
  * 用户登录
  * */
     @Override
-    public CustomResponse login(String username, String password) {;
+    public CustomResponse login(String username, String password) {
+
         Map<String,Object> loginUserMap = getLoginUser(account, password);
         User user = (User) loginUserMap.get("loginUser");
         CustomResponse customResponse = loginUserMap.containsKey("customResponse") ? (CustomResponse) loginUserMap.get("customResponse") : null;
