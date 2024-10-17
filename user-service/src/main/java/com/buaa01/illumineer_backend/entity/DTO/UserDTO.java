@@ -25,4 +25,5 @@ public class UserDTO {
     private Integer status; // 0为管理员,1~9为不同权限的用户
     private Boolean isVerify; //是否已实名认证
     private String institution; //所在机构
+    private Integer stats;
 }

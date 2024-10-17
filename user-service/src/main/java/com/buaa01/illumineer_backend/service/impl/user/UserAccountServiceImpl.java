@@ -10,6 +10,7 @@ import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.mapper.HistoryMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAccountService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -37,6 +39,10 @@ public class UserAccountServiceImpl implements UserAccountService {
     @Autowired
     private AuthenticationProvider authenticationProvider;
 
+    @Autowired
+    private CurrentUser currentUser;
+    @Autowired
+    private UserService userService;
     @Autowired
     private HistoryMapper historyMapper;
     @Autowired
@@ -199,6 +205,7 @@ public class UserAccountServiceImpl implements UserAccountService {
         userDTO.setStatus(user.getStatus());
         userDTO.setUsername(user.getUsername());
         userDTO.setIsVerify(user.getIsVerify());
+        userDTO.setStats(user.getStats());
 
         Map<String, Object> final_map = new HashMap<>();
         final_map.put("token", token);
@@ -213,31 +220,228 @@ public class UserAccountServiceImpl implements UserAccountService {
      * **/
     @Override
     public CustomResponse adminLogin(String username, String password) {
-        return null;
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(username, password);
+        Authentication authenticate = authenticationProvider.authenticate(authenticationToken);
+        UserDetailsImpl loginUser = (UserDetailsImpl) authenticate.getPrincipal();
+        User user = loginUser.getUser();
+        CustomResponse customResponse = new CustomResponse();
+        // 普通用户无权访问
+        if (user.getStatus() != 0) {
+            customResponse.setCode(403);
+            customResponse.setMessage("您不是管理员，无权访问");
+            return customResponse;
+        }
+
+        // 顺便更新redis中的数据,默认存活一小时
+        redisTool.setExObjectValue("logUid:"+ user.getUid(),user); // 默认存活1小时
+
+        // 检查账号状态，1 表示封禁中，不允许登录
+        if (user.getStats() == 1) {
+            customResponse.setCode(403);
+            customResponse.setMessage("账号异常，封禁中");
+            return customResponse;
+        }
+        //将uid封装成一个jwttoken，同时token也会被缓存到redis中
+        String token = jwtUtil.createToken(user.getUid().toString(), "admin");
+        try {
+            redisTool.setExObjectValue("securityUid:" + user.getUid(),user,60L*60*24*2, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("存储redis数据失败");
+            throw e;
+        }
+        // 每次登录顺便返回user信息，就省去再次发送一次获取用户个人信息的请求
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUid(user.getUid());
+        userDTO.setAvatar(user.getAvatar());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setInstitution(user.getInstitution());
+        userDTO.setStatus(user.getStatus());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setIsVerify(user.getIsVerify());
+        userDTO.setStats(user.getStats());
+
+        Map<String, Object> final_map = new HashMap<>();
+        final_map.put("token", token);
+        final_map.put("user", userDTO);
+        customResponse.setMessage("欢迎回来，管理员");
+        customResponse.setData(final_map);
+        return customResponse;
     }
 
+
+
+    /**
+     * 获取用户个人信息
+     * @return CustomResponse对象
+     */
     @Override
     public CustomResponse personalInfo() {
-        return null;
+        Integer loginUserId = currentUser.getUserId();
+        UserDTO userDTO = userService.getUserById(loginUserId);
+
+        // 从redis中获取最新数据
+        User user = redisTool.getObjectByClass("user" + loginUserId,User.class);
+        // 如果redis中没有user数据，就从mysql中获取并更新到redis
+        if (user == null) {
+            user = userMapper.selectById(loginUserId);
+            User finalUser = user;
+            CompletableFuture.runAsync(() -> {
+                redisTool.setExObjectValue("user:" + finalUser.getUid(), finalUser);  // 默认存活1小时
+            }, taskExecutor);
+        }
+
+
+        CustomResponse customResponse = new CustomResponse();
+        // 检查账号状态，1 表示封禁中，不允许登录，2表示账号注销了
+        if (userDTO.getStats() == 2) {
+            customResponse.setCode(404);
+            customResponse.setMessage("账号已注销");
+            return customResponse;
+        }
+        if (userDTO.getStats() == 1) {
+            customResponse.setCode(403);
+            customResponse.setMessage("账号异常，封禁中");
+            return customResponse;
+        }
+
+        customResponse.setData(userDTO);
+        return customResponse;
     }
 
+    /**
+     * 获取管理员个人信息
+     * @return CustomResponse对象
+     */
     @Override
     public CustomResponse adminPersonalInfo() {
-        return null;
+        Integer LoginUserId = currentUser.getUserId();
+
+        // 从redis中获取最新数据
+        User user = redisTool.getObjectByClass("user" + loginUserId,User.class);
+        // 如果redis中没有user数据，就从mysql中获取并更新到redis
+        if (user == null) {
+            user = userMapper.selectById(loginUserId);
+            User finalUser = user;
+            CompletableFuture.runAsync(() -> {
+                redisTool.setExObjectValue("user:" + finalUser.getUid(), finalUser);  // 默认存活1小时
+            }, taskExecutor);
+        }
+
+        CustomResponse customResponse = new CustomResponse();
+
+        // 普通用户无权访问
+        if (user.getStatus() != 0) {
+            customResponse.setCode(403);
+            customResponse.setMessage("您不是管理员，无权访问");
+            return customResponse;
+        }
+        // 检查账号状态，1 表示封禁中，不允许登录，2表示已注销
+        if (user.getStats() == 2) {
+            customResponse.setCode(404);
+            customResponse.setMessage("账号已注销");
+            return customResponse;
+        }
+        if (user.getStats() == 1) {
+            customResponse.setCode(403);
+            customResponse.setMessage("账号异常，封禁中");
+            return customResponse;
+        }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUid(user.getUid());
+        userDTO.setAvatar(user.getAvatar());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setInstitution(user.getInstitution());
+        userDTO.setStatus(user.getStatus());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setIsVerify(user.getIsVerify());
+        userDTO.setStats(user.getStats());
+
+
+        customResponse.setData(userDTO);
+        return customResponse;
     }
 
+
+    /**
+     * 退出登录，清空redis中相关用户登录认证
+     */
     @Override
     public void logout() {
+        Integer LoginUserId = currentUser.getUserId();
+        // 清除redis中该用户的登录认证数据
+        redisUtil.delValue("token:user:" + LoginUserId);
+        redisUtil.delValue("security:user:" + LoginUserId);
+        redisUtil.delMember("login_member", LoginUserId);   // 从在线用户集合中移除
+        redisUtil.deleteKeysWithPrefix("whisper:" + LoginUserId + ":"); // 清除全部在聊天窗口的状态
 
+        // 断开全部该用户的channel 并从 userChannel 移除该用户
+        Set<Channel> userChannels = IMServer.userChannel.get(LoginUserId);
+        if (userChannels != null) {
+            for (Channel channel : userChannels) {
+                try {
+                    channel.close().sync(); // 等待通道关闭完成
+                } catch (InterruptedException e) {
+                    // 处理异常，如果有必要的话
+                    e.printStackTrace();
+                }
+            }
+            IMServer.userChannel.remove(LoginUserId);
+        }
     }
 
+    /**
+     * 管理员退出登录，清空redis中相关管理员登录认证
+     */
     @Override
     public void adminLogout() {
-
+        Integer LoginUserId = currentUser.getUserId();
+        // 清除redis中该用户的登录认证数据
+        redisUtil.delValue("token:admin:" + LoginUserId);
+        redisUtil.delValue("security:admin:" + LoginUserId);
     }
 
     @Override
     public CustomResponse updatePassword(String pw, String npw) {
-        return null;
+        CustomResponse customResponse = new CustomResponse();
+        if (npw == null || npw.length() == 0) {
+            customResponse.setCode(500);
+            customResponse.setMessage("密码不能为空");
+            return customResponse;
+        }
+
+        // 取出当前登录的用户
+        UsernamePasswordAuthenticationToken authenticationToken1 =
+                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails1 = (UserDetailsImpl) authenticationToken1.getPrincipal();
+        User user = userDetails1.getUser();
+
+        // 验证旧密码
+        UsernamePasswordAuthenticationToken authenticationToken2 =
+                new UsernamePasswordAuthenticationToken(user.getUsername(), pw);
+        try {
+            authenticationProvider.authenticate(authenticationToken2);
+        } catch (Exception e) {
+            customResponse.setCode(403);
+            customResponse.setMessage("密码不正确");
+            return customResponse;
+        }
+
+        if (Objects.equals(pw, npw)) {
+            customResponse.setCode(500);
+            customResponse.setMessage("新密码不能与旧密码相同");
+            return customResponse;
+        }
+
+        String encodedPassword = passwordEncoder.encode(npw);  // 密文存储
+
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("uid", user.getUid()).set("password", encodedPassword);
+        userMapper.update(null, updateWrapper);
+
+        logout();
+        adminLogout();
+        return customResponse;
     }
 }
+
