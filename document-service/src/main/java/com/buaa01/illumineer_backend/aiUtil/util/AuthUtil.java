@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.aiUtil.util;
 
-import com.xyb.xfxh.session.Configuration;
+import com.buaa01.illumineer_backend.aiUtil.session.Configuration;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

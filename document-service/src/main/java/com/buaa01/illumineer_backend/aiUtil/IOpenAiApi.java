@@ -1,7 +1,7 @@
 package com.buaa01.illumineer_backend.aiUtil;
 
-import com.xyb.xfxh.dto.RequestDTO;
-import com.xyb.xfxh.dto.ResponseDTO;
+import com.buaa01.illumineer_backend.aiUtil.dto.RequestDTO;
+import com.buaa01.illumineer_backend.aiUtil.dto.ResponseDTO;
 import io.reactivex.Single;
 import retrofit2.http.Body;
 import retrofit2.http.POST;

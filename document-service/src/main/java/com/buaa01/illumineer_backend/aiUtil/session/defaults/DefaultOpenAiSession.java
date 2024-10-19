@@ -1,11 +1,11 @@
 package com.buaa01.illumineer_backend.aiUtil.session.defaults;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xyb.xfxh.IOpenAiApi;
-import com.xyb.xfxh.dto.RequestDTO;
-import com.xyb.xfxh.session.Configuration;
-import com.xyb.xfxh.session.OpenAiSession;
-import com.xyb.xfxh.util.AuthUtil;
+import com.buaa01.illumineer_backend.aiUtil.IOpenAiApi;
+import com.buaa01.illumineer_backend.aiUtil.dto.RequestDTO;
+import com.buaa01.illumineer_backend.aiUtil.session.Configuration;
+import com.buaa01.illumineer_backend.aiUtil.session.OpenAiSession;
+import com.buaa01.illumineer_backend.aiUtil.util.AuthUtil;
 import okhttp3.*;
 import okhttp3.sse.EventSource;
 

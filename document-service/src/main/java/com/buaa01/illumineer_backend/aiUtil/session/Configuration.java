@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.aiUtil.session;
 
-import com.xyb.xfxh.IOpenAiApi;
+import com.buaa01.illumineer_backend.aiUtil.IOpenAiApi;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;

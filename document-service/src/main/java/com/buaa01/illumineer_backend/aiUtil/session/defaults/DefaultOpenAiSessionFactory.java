@@ -1,10 +1,10 @@
 package com.buaa01.illumineer_backend.aiUtil.session.defaults;
 
-import com.xyb.xfxh.IOpenAiApi;
-import com.xyb.xfxh.interceptor.OpenAiInterceptor;
-import com.xyb.xfxh.session.Configuration;
-import com.xyb.xfxh.session.OpenAiSession;
-import com.xyb.xfxh.session.OpenAiSessionFactory;
+import com.buaa01.illumineer_backend.aiUtil.IOpenAiApi;
+import com.buaa01.illumineer_backend.aiUtil.interceptor.OpenAiInterceptor;
+import com.buaa01.illumineer_backend.aiUtil.session.Configuration;
+import com.buaa01.illumineer_backend.aiUtil.session.OpenAiSession;
+import com.buaa01.illumineer_backend.aiUtil.session.OpenAiSessionFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
