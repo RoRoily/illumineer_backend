@@ -48,5 +48,15 @@
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+            <version>3.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.BUAA01</groupId>
+            <artifactId>gateway-service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

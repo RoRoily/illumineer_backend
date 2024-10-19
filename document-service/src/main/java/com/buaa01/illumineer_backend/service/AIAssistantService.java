@@ -41,7 +41,7 @@ public class AIAssistantService {
         Map<String, Object> payload = new HashMap<>();
         payload.put("header", Collections.singletonMap("app_id", appId));
         Map<String, Object> parameter = new HashMap<>();
-        parameter.put("domain", "generalv3");
+        parameter.put("domain", "Ultra4.0");
         parameter.put("temperature", 0.5);
         parameter.put("max_tokens", 4096);
         payload.put("parameter", Collections.singletonMap("chat", parameter));
