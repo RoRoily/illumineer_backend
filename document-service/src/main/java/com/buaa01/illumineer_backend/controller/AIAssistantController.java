@@ -17,8 +17,8 @@ public class AIAssistantController {
     }
 
     @PostMapping("/AI/generateKeywords")
-    public ResponseEntity<String> generateKeywords(@RequestParam String query) {
-        String keywords = aiAssistantService.generateKeywords(query);
+    public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
+        String keywords = aiAssistantService.StartChat(query);
         return ResponseEntity.ok(keywords);
     }
 }

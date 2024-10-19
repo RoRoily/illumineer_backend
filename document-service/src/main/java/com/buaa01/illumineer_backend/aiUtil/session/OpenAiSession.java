@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.aiUtil.session;
 
-import com.xyb.xfxh.dto.RequestDTO;
+import com.buaa01.illumineer_backend.aiUtil.dto.RequestDTO;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 

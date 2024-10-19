@@ -2,8 +2,8 @@ package com.buaa01.illumineer_backend.aiUtil.interceptor;
 
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
-import com.xyb.xfxh.common.Constants;
-import com.xyb.xfxh.session.Configuration;
+import com.buaa01.illumineer_backend.aiUtil.common.Constants;
+import com.buaa01.illumineer_backend.aiUtil.session.Configuration;
 import lombok.SneakyThrows;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -80,8 +80,7 @@ public class OpenAiInterceptor implements Interceptor {
 
         System.out.println(encodeToString);
         // 构建request
-        Request request = new Request.Builder()
-                .url(original.url())
+        Request request = new Request.Builder().url(original.url())
                 .header(Header.AUTHORIZATION.getValue(), "authorization " + encodeToString)
                 .header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
                 .method(original.method(), original.body())

@@ -20,6 +20,6 @@ public class ServiceConfig {
 
     @Bean
     public AIAssistantService aiAssistantService(RestTemplate restTemplate) {
-        return new AIAssistantService(restTemplate, appId, apiKey, apiSecret);
+        return new AIAssistantService(appId, apiKey, apiSecret);
     }
 }
