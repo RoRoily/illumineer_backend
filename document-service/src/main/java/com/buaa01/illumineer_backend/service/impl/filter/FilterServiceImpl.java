@@ -1,6 +1,5 @@
 package com.buaa01.illumineer_backend.service.impl.filter;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.ScreenCondition;

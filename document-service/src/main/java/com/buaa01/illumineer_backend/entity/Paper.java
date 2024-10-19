@@ -20,8 +20,8 @@ public class Paper {
     private String contentUrl;
     private Map<String, Integer> auths; // 文章作者
     private List<String> field; // 相关领域
-    private String Type; // 文章类型 (期刊、论文、会议、报纸) // sql add
-    private String Theme; // 文章主题 // sql add
+    private String type; // 文章类型 (期刊、论文、会议、报纸) // sql add
+    private String theme; // 文章主题 // sql add
     private Date publishDate; // 出版时间
     private String derivation;// 来源
     private Integer ref_times; // 引用次数

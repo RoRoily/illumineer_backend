@@ -1,21 +1,25 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class PaperServiceImpl implements PaperService {
@@ -34,9 +38,6 @@ public class PaperServiceImpl implements PaperService {
         queryWrapper.eq("pid", pid);
 //        paper = paperMapper.selectOne(queryWrapper);
         paper = paperMapper.getPaperByPid(pid);
-
-        // 文献引用格式
-        List<String> references = generateRef(paper.getAuths(), paper.getTitle(), paper.getDerivation());
 
         Map<String, Object> map = new HashMap<>();
         map.put("title",paper.getTitle());
@@ -157,15 +158,209 @@ public class PaperServiceImpl implements PaperService {
         return papers;
     }
 
-    List<String> generateRef(Map<String, Integer> auths, String title, String derivation) {
-        List<String> references = new ArrayList<>();
-        String ref = "";
-        for (String auth : auths.keySet()) {
-            ref = ref + auth + ",";
-        }
-        ref += ". " + title + ". " + derivation;
+    /**
+     * 根据 pid 返回引用量
+     * @param pid 文章 id
+     * @return 引用量
+     */
+    public CustomResponse getRefTimes(int pid) {
+        CustomResponse customResponse = new CustomResponse();
+        Paper paper = null;
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", pid);
+//        paper = paperMapper.selectOne(queryWrapper);
+        paper = paperMapper.getPaperByPid(pid);
 
-        references.add(ref);
-        return references;
+        Map<String, Object> map = new HashMap<>();
+        map.put("ref_times",paper.getRef_times());
+        customResponse.setData(map);
+        return customResponse;
+    }
+
+    /**
+     * 根据 pid 增加引用量
+     * @param pid 文章 id
+     */
+    public CustomResponse addRefTimes(int pid) {
+        CustomResponse customResponse = new CustomResponse();
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+        updateWrapper.setSql("ref_times = ref_times + 1");
+
+        paperMapper.update(null, updateWrapper);
+
+        customResponse.setMessage("增加引用量成功！");
+        return customResponse;
+    }
+
+    /**
+     * 根据 pid 增加收藏量
+     * @param pid 文章 id
+     */
+    public CustomResponse addFavTimes(int pid) {
+        CustomResponse customResponse = new CustomResponse();
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+        updateWrapper.setSql("fav_times = fav_times + 1");
+
+        paperMapper.update(null, updateWrapper);
+
+        customResponse.setMessage("增加收藏量成功！");
+        return customResponse;
+    }
+
+    /**
+     * 根据 pid 上传新的文章
+     * @param paper 文章
+     * @param content 文章内容（文件）
+     */
+    public CustomResponse uploadPaper(Paper paper, MultipartFile content) {
+        CustomResponse customResponse = new CustomResponse();
+
+        // 保存文件到 OSS，返回URL
+        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        if (contentUrl == null) {
+            log.warn("OSS URL 为空，合并操作终止");
+            customResponse.setMessage("无法生成文章url！");
+            customResponse.setCode(500);
+            return customResponse;
+        }
+
+        // 将文章信息封装
+        paper.setContentUrl(contentUrl);
+
+        // 存入数据库
+        paperMapper.insert(paper);
+        esTool.addPaper(paperMapper);
+
+        customResponse.setMessage("文章上传成功！");
+        return customResponse;
+    }
+
+    /**
+     * 更新作者（已认证）
+     * @param pid
+     * @param aid
+     * @return
+     */
+    public CustomResponse updateAuth(int pid, int aid) {
+        CustomResponse customResponse = new CustomResponse();
+
+        if (getAuthorByAid() == null) { // 查找作者
+            customResponse.setMessage("该作者不存在");
+            return customResponse;
+        }
+
+        Paper paper = null;
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", pid);
+        paper = paperMapper.getPaperByPid(pid);
+
+        Map<String, Integer> auths = paper.getAuths();
+        String author = getAuthorByAid().getAuthor();
+        if (auths.containsValue(aid)) { // 存在此作者
+            // 存在此作者，删除
+            auths.remove(author);
+            paper.setAuths(auths);
+        } else { // 不存在此作者
+            // 将该作者加入pid的作者列表中
+            auths.put(author, aid);
+            paper.setAuths(auths);
+        }
+
+        // 更新数据库
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+        updateWrapper.setSql("auths = " + auths);
+        paperMapper.update(null, updateWrapper);
+
+        return customResponse;
+    }
+
+    /**
+     * 更新作者（已认证）
+     * @param pid
+     * @param author
+     * @return
+     */
+    public CustomResponse updateAuth(int pid, String author) {
+        CustomResponse customResponse = new CustomResponse();
+
+        Paper paper = null;
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("pid", pid);
+        paper = paperMapper.getPaperByPid(pid);
+
+        Map<String, Integer> auths = paper.getAuths();
+        if (auths.get(author) != null) { // 存在此作者
+            // 存在此作者，删除
+            auths.remove(author);
+            paper.setAuths(auths);
+        } else { // 不存在此作者
+            // 将该作者加入pid的作者列表中
+            auths.put(author, null);
+            paper.setAuths(auths);
+        }
+
+        // 更新数据库
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+        updateWrapper.setSql("auths = " + auths);
+        paperMapper.update(null, updateWrapper);
+
+        return customResponse;
+    }
+
+    /**
+     * 删除文章
+     * @param pid
+     * @return
+     */
+    public CustomResponse deletePaper(int pid) {
+        CustomResponse customResponse = new CustomResponse();
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+        updateWrapper.setSql("stats = 1");
+
+        paperMapper.update(null, updateWrapper);
+
+        customResponse.setMessage("文章删除成功！");
+        return customResponse;
+    }
+
+    /**
+     * 修改文章信息
+     * @param
+     * @return
+     */
+    public CustomResponse updatePaper(int pid,
+                               String title,
+                               String essAbs,
+                               String keywords,
+                               MultipartFile content,
+                               String field,
+                               String type,
+                               String theme,
+                               Date publishDate,
+                               String derivation) {
+        CustomResponse customResponse = new CustomResponse();
+
+        // 保存文件到 OSS，返回URL
+        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        if (contentUrl == null) {
+            log.warn("OSS URL 为空，合并操作终止");
+            customResponse.setMessage("无法生成文章url！");
+            customResponse.setCode(500);
+            return customResponse;
+        }
+
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", contentUrl = " + contentUrl + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation);
+
+        paperMapper.update(null, updateWrapper);
+
+        customResponse.setMessage("文章更新成功！");
+        return customResponse;
     }
 }
