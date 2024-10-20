@@ -25,7 +25,7 @@ public interface PaperService {
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @return 文献信息
      */
-    CustomResponse searchPapers(String keyword, Integer offset, Integer sortType);
+    CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType);
 
     /**
      * 根据 pid 返回引用量

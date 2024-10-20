@@ -59,17 +59,17 @@ public class PaperServiceImpl implements PaperService {
 
     // 一框式检索：模糊查询 + 排序 + 分页
     @Override
-    public CustomResponse searchPapers(String keyword, Integer offset, Integer sortType) {
+    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType) {
         List<Paper> papers = null;
 
         // 1. 模糊搜索：keyword
-        papers = searchByKeyword(keyword);
+        papers = searchByKeyword(condition, keyword);
 
         // 2. searchbByOrder 对搜索结果进行排序：sortType
         papers = searchByOrder(papers, sortType);
 
         // 3. searchByPage 对排序结果进行分页，并将当前页 offset 需要的内容返回
-        papers = searchByPage(papers, 20, offset);
+        papers = searchByPage(papers, size, offset);
 
         // 4. 返回结果
         CustomResponse customResponse = new CustomResponse();
@@ -82,10 +82,10 @@ public class PaperServiceImpl implements PaperService {
      * @param keyword 搜索内容
      * @return 文献信息
      */
-    List<Paper> searchByKeyword(String keyword) {
+    List<Paper> searchByKeyword(String condition, String keyword) {
         try {
             List<Paper> list = new ArrayList<>();
-            Query query = Query.of(q -> q.multiMatch(m -> m.fields("title", "essAbs", "keywords", "field").query(keyword)));
+            Query query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
             SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
             SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
             for (Hit<Paper> hit : searchResponse.hits().hits()) {

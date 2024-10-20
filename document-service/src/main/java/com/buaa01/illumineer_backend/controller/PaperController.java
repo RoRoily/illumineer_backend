@@ -38,17 +38,21 @@ public class PaperController {
 
     /**
      * 一框式检索接口：搜索文献（分页、排序）
+     * @param condition 搜索内容
      * @param keyword 搜索内容
+     * @param size 搜索内容
      * @param offset 第几页
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @return 文献信息
      */
     @GetMapping("/search")
-    public CustomResponse searchPapers(@RequestParam("keyword") String keyword,
-                                          @RequestParam("offset") Integer offset,
-                                          @RequestParam("type") Integer sortType) {
+    public CustomResponse searchPapers(@RequestParam("condition") String condition,
+                                       @RequestParam("keyword") String keyword,
+                                       @RequestParam("size") Integer size,
+                                       @RequestParam("offset") Integer offset,
+                                       @RequestParam("type") Integer sortType) {
         try {
-            return paperService.searchPapers(keyword, offset, sortType);
+            return paperService.searchPapers(condition, keyword, size, offset, sortType);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
