@@ -38,9 +38,9 @@ public class PaperController {
 
     /**
      * 一框式检索接口：搜索文献（分页、排序）
-     * @param condition 搜索内容
+     * @param condition 筛选条件（选择查找的字段）
      * @param keyword 搜索内容
-     * @param size 搜索内容
+     * @param size 一页多少条内容
      * @param offset 第几页
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @return 文献信息
