@@ -1,3 +1,4 @@
+package com.buaa01.illumineer_backend.entity;
 import javax.persistence.*;
 
 @Entity

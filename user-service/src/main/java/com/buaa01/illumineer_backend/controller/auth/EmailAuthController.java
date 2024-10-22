@@ -1,6 +1,10 @@
+package com.buaa01.illumineer_backend.controller.auth;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import com.buaa01.illumineer_backend.service.email.EmailService;
+import com.buaa01.illumineer_backend.entity.Institution;
+import com.buaa01.illumineer_backend.entity.User;
 
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
