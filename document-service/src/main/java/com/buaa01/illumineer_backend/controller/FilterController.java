@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.ScreenCondition;
 import com.buaa01.illumineer_backend.service.filter.FilterService;
 
@@ -27,7 +27,7 @@ public class FilterController {
      */
 
     @PostMapping("paper/search/filter")
-    public CustomResponse ResultFilter(@RequestParam ArrayList<Paper> papers,
+    public CustomResponse ResultFilter(@RequestParam ArrayList<Papers> papers,
             @RequestBody Map<String, ArrayList<String>> screencondition) {
 
         ScreenCondition sc = new ScreenCondition(screencondition);

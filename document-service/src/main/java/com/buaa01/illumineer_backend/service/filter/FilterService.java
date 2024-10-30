@@ -1,7 +1,7 @@
 package com.buaa01.illumineer_backend.service.filter;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.ScreenCondition;
 
 import java.util.ArrayList;
@@ -15,5 +15,5 @@ public interface FilterService {
      * 
      * @return CustomResponse
      */
-    CustomResponse ResultFilter(ArrayList<Paper> papers, ScreenCondition sc);
+    CustomResponse ResultFilter(ArrayList<Papers> papers, ScreenCondition sc);
 }

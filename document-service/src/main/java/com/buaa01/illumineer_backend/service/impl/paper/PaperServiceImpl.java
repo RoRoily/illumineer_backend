@@ -8,7 +8,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,8 @@ public class PaperServiceImpl implements PaperService {
     @Override
     public CustomResponse getPaperByPid(Integer pid) {
         CustomResponse customResponse = new CustomResponse();
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        Papers paper = null;
+        QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
 //        paper = paperMapper.selectOne(queryWrapper);
         paper = paperMapper.getPaperByPid(pid);
@@ -60,7 +60,7 @@ public class PaperServiceImpl implements PaperService {
     // 一框式检索：模糊查询 + 排序 + 分页
     @Override
     public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType) {
-        List<Paper> papers = null;
+        List<Papers> papers = null;
 
         // 1. 模糊搜索：keyword
         papers = searchByKeyword(condition, keyword);
@@ -82,13 +82,13 @@ public class PaperServiceImpl implements PaperService {
      * @param keyword 搜索内容
      * @return 文献信息
      */
-    List<Paper> searchByKeyword(String condition, String keyword) {
+    List<Papers> searchByKeyword(String condition, String keyword) {
         try {
-            List<Paper> list = new ArrayList<>();
+            List<Papers> list = new ArrayList<>();
             Query query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
             SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
-            SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
-            for (Hit<Paper> hit : searchResponse.hits().hits()) {
+            SearchResponse<Papers> searchResponse = client.search(searchRequest, Papers.class);
+            for (Hit<Papers> hit : searchResponse.hits().hits()) {
                 if (hit.source() != null) {
                     list.add(hit.source());
                 }
@@ -107,7 +107,7 @@ public class PaperServiceImpl implements PaperService {
      * @param offset 第几页
      * @return 文献信息
      */
-    List<Paper> searchByPage(List<Paper> papers, Integer pageNum, Integer offset) {
+    List<Papers> searchByPage(List<Papers> papers, Integer pageNum, Integer offset) {
         if (offset == null || offset == 0) {
             offset = 1;
         }
@@ -122,7 +122,7 @@ public class PaperServiceImpl implements PaperService {
             return Collections.emptyList();
         }
         endIndex = Math.min(endIndex, papers.size());
-        List<Paper> sublist = papers.subList(startIndex, endIndex);
+        List<Papers> sublist = papers.subList(startIndex, endIndex);
         if (sublist.isEmpty()) {
             return Collections.emptyList();
         }
@@ -141,10 +141,10 @@ public class PaperServiceImpl implements PaperService {
      * @param sortType 根据这个来进行排序 // 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @return 文献信息
      */
-    List<Paper> searchByOrder(List<Paper> papers, Integer sortType) {
-        papers.sort(new Comparator<Paper>() {
+    List<Papers> searchByOrder(List<Papers> papers, Integer sortType) {
+        papers.sort(new Comparator<Papers>() {
             @Override
-            public int compare(Paper p1, Paper p2) {
+            public int compare(Papers p1, Papers p2) {
                 if (sortType == 1) {
                     return p2.getPublishDate().compareTo(p1.getPublishDate());
                 } else if (sortType == 2) {
@@ -165,8 +165,8 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse getRefTimes(int pid) {
         CustomResponse customResponse = new CustomResponse();
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        Papers paper = null;
+        QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
 //        paper = paperMapper.selectOne(queryWrapper);
         paper = paperMapper.getPaperByPid(pid);
@@ -183,7 +183,7 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse addRefTimes(int pid) {
         CustomResponse customResponse = new CustomResponse();
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
         updateWrapper.setSql("ref_times = ref_times + 1");
 
@@ -199,7 +199,7 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse addFavTimes(int pid) {
         CustomResponse customResponse = new CustomResponse();
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
         updateWrapper.setSql("fav_times = fav_times + 1");
 
@@ -214,7 +214,7 @@ public class PaperServiceImpl implements PaperService {
      * @param paper 文章
      * @param content 文章内容（文件）
      */
-    public CustomResponse uploadPaper(Paper paper, MultipartFile content) {
+    public CustomResponse uploadPaper(Papers paper, MultipartFile content) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -251,8 +251,8 @@ public class PaperServiceImpl implements PaperService {
             return customResponse;
         }
 
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        Papers paper = null;
+        QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
         paper = paperMapper.getPaperByPid(pid);
 
@@ -269,7 +269,7 @@ public class PaperServiceImpl implements PaperService {
         }
 
         // 更新数据库
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
         updateWrapper.setSql("auths = " + auths);
         paperMapper.update(null, updateWrapper);
@@ -286,8 +286,8 @@ public class PaperServiceImpl implements PaperService {
     public CustomResponse updateAuth(int pid, String author) {
         CustomResponse customResponse = new CustomResponse();
 
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        Papers paper = null;
+        QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
         paper = paperMapper.getPaperByPid(pid);
 
@@ -303,7 +303,7 @@ public class PaperServiceImpl implements PaperService {
         }
 
         // 更新数据库
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
         updateWrapper.setSql("auths = " + auths);
         paperMapper.update(null, updateWrapper);
@@ -318,7 +318,7 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse deletePaper(int pid) {
         CustomResponse customResponse = new CustomResponse();
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
         updateWrapper.setSql("stats = 1");
 
@@ -354,7 +354,7 @@ public class PaperServiceImpl implements PaperService {
             return customResponse;
         }
 
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
         updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", contentUrl = " + contentUrl + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation);
 
