@@ -30,7 +30,7 @@ public class User {
     private String name;
     private Integer gender;
     private String background;
-    private List<Category> field;// 相关领域
+    private List<String> field ;// 相关领域
     private String institution;
     //需要在Redis中存储的信息
     //名下论文集合 papers
