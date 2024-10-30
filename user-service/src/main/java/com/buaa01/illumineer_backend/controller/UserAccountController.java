@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.service.user.UserAccountService;
 
 import java.util.Map;
 
@@ -15,17 +16,18 @@ public class UserAccountController {
 
     /**
      * 注册接口
-     * @param map 包含usernam password confirmedPassWord 的 map
+     * @param map 包含username password confirmedPassWord e-mail的 map
      * @return CustomResponse对象
      */
 
     @PostMapping("user/account/register")
     public CustomResponse register(@RequestBody Map<String,String> map){
+        String email = map.get("email");
         String username = map.get("username");
-        String passWord = map.get("password");
-        String comfirmedPassWord =  map.get("confirmedPassWord");
+        String password = map.get("password");
+        String confirmedPassword =  map.get("confirmedPassWord");
         try {
-            return userAccountService.register(username, password, confirmedPassword);
+            return userAccountService.register(username, password, confirmedPassword,email);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
@@ -38,26 +40,26 @@ public class UserAccountController {
 
     /**
     * 登录接口
-     * @param map 包含username password confirmedPassWord 的map
+     * @param map 包含email password  的map
      * @return CustomResponse对象
      * */
     @PostMapping("/user/account/login")
     public CustomResponse login(@RequestBody Map<String,String> map){
-        String username = map.get("username");
+        String email = map.get("email");
         String password = map.get("password");
-        return userAccountService.login(username,password);
+        return userAccountService.login(email,password);
     }
 
     /**
      * 管理员登录接口
-     * @param map 包含 username password 的 map
+     * @param map 包含 email password 的 map
      * @return CustomResponse对象
      */
     @PostMapping("/admin/account/login")
     public CustomResponse adminLogin(@RequestBody Map<String, String> map) {
-        String username = map.get("username");
+        String email = map.get("email");
         String password = map.get("password");
-        return userAccountService.adminLogin(username, password);
+        return userAccountService.adminLogin(email, password);
     }
 
     /**
