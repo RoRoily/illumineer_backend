@@ -48,5 +48,11 @@
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apiguardian</groupId>
+            <artifactId>apiguardian-api</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <!-- swagger3-->
     </dependencies>
 </project>
