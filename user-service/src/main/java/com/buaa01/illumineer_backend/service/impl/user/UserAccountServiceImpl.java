@@ -370,10 +370,12 @@ public class UserAccountServiceImpl implements UserAccountService {
     public void logout() {
         Integer LoginUserId = currentUser.getUserId();
         // 清除redis中该用户的登录认证数据
-        redisUtil.delValue("token:user:" + LoginUserId);
-        redisUtil.delValue("security:user:" + LoginUserId);
-        redisUtil.delMember("login_member", LoginUserId);   // 从在线用户集合中移除
-        redisUtil.deleteKeysWithPrefix("whisper:" + LoginUserId + ":"); // 清除全部在聊天窗口的状态
+
+        redisTool.deleteValue("token:user:" + LoginUserId);
+        redisTool.deleteValue("security:user:" + LoginUserId);
+        //FIXME : 这里在线用户集合是set还是zset?
+        redisTool.deleteSetMember("login_member", LoginUserId);   // 从在线用户集合中移除
+        redisTool.deleteByPrefix("whisper" + LoginUserId + ":"); // 清除全部在聊天窗口的状态
 
         // 断开全部该用户的channel 并从 userChannel 移除该用户
         Set<Channel> userChannels = IMServer.userChannel.get(LoginUserId);
@@ -397,9 +399,13 @@ public class UserAccountServiceImpl implements UserAccountService {
     public void adminLogout() {
         Integer LoginUserId = currentUser.getUserId();
         // 清除redis中该用户的登录认证数据
-        redisUtil.delValue("token:admin:" + LoginUserId);
-        redisUtil.delValue("security:admin:" + LoginUserId);
+        redisTool.deleteValue("token:admin:" + LoginUserId);
+        redisTool.deleteValue("security:admin:" + LoginUserId);
     }
+
+    /**
+     * 更新密码
+     * */
 
     @Override
     public CustomResponse updatePassword(String pw, String npw) {
