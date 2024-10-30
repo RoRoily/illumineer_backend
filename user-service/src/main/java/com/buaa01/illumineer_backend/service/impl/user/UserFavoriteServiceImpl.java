@@ -61,19 +61,19 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         return customResponse;
     }
 
-/**
- * 查找用户的所有文件夹
- * 默认为登录的用户
- * 返回的收藏夹data为一个set
- * **/
-    @Override
-    public CustomResponse searchAll(){
-        CustomResponse customResponse = new CustomResponse();
-        String favKey =  "uForFav:" + currentUser.getUserId();
-        Set<Object> fids = redisTool.zRange(favKey,0,-1);
-        customResponse.setMessage("返回所有收藏夹成功");
-        customResponse.setCode(200);
-        customResponse.setData(fids);
-        return customResponse;
-    }
+    /**
+     * 查找用户的所有文件夹
+     * 默认为登录的用户
+     * 返回的收藏夹data为一个set
+     * **/
+        @Override
+        public CustomResponse searchAll(){
+            CustomResponse customResponse = new CustomResponse();
+            String favKey =  "uForFav:" + currentUser.getUserId();
+            Set<Object> fids = redisTool.zRange(favKey,0,-1);
+            customResponse.setMessage("返回所有收藏夹成功");
+            customResponse.setCode(200);
+            customResponse.setData(fids);
+            return customResponse;
+        }
 }

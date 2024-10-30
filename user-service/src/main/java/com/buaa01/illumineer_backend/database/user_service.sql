@@ -41,3 +41,63 @@ CREATE TABLE `favorite` (
                             PRIMARY KEY (`fid`),
                             UNIQUE KEY `fid` (`fid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='收藏夹';
+
+
+DROP TABLE IF EXISTS 'institutions';
+
+CREATE TABLE institutions (
+                              id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                              domain VARCHAR(255) UNIQUE NOT NULL,  -- 机构邮箱域名
+                              name VARCHAR(255) NOT NULL            -- 机构名称
+);
+
+INSERT INTO institutions (domain, name) VALUES
+                                            ('buaa.edu.cn', '北京航空航天大学'),
+                                            ('tsinghua.edu.cn', '清华大学'),
+                                            ('pku.edu.cn', '北京大学'),
+                                            ('fudan.edu.cn', '复旦大学'),
+                                            ('sjtu.edu.cn', '上海交通大学'),
+                                            ('whu.edu.cn', '武汉大学'),
+                                            ('zju.edu.cn', '浙江大学'),
+                                            ('hust.edu.cn', '华中科技大学'),
+                                            ('nankai.edu.cn', '南开大学'),
+                                            ('nju.edu.cn', '南京大学'),
+                                            ('bjut.edu.cn', '北京工业大学'),
+                                            ('ustc.edu.cn', '中国科学技术大学'),
+                                            ('ecust.edu.cn', '东华大学'),
+                                            ('scu.edu.cn', '四川大学'),
+                                            ('dhu.edu.cn', '东华大学'),
+                                            ('scut.edu.cn', '华南理工大学'),
+                                            ('cumtb.edu.cn', '中国矿业大学（北京）'),
+                                            ('xmu.edu.cn', '厦门大学'),
+                                            ('whut.edu.cn', '武汉理工大学'),
+                                            ('tsinghua.edu.cn', '清华大学'),
+                                            ('hhu.edu.cn', '河海大学'),
+                                            ('zju.edu.cn', '浙江大学'),
+                                            ('sdust.edu.cn', '山东科技大学'),
+                                            ('hnu.edu.cn', '湖南大学'),
+                                            ('hnu.edu.cn', '华南农业大学'),
+                                            ('nwu.edu.cn', '西北大学'),
+                                            ('njut.edu.cn', '南京工业大学'),
+                                            ('gxu.edu.cn', '桂林理工大学'),
+                                            ('cas.cn', '中国科学院'),  -- 中国科学院
+                                            ('caas.cn', '中国农业科学院'),  -- 中国农业科学院
+                                            ('chineseacademyofsciences.org', '中国科学院'),  -- Chinese Academy of Sciences
+                                            ('nims.go.jp', '国家材料科学研究所'),  -- National Institute for Materials Science (Japan)
+                                            ('nih.gov', '美国国立卫生研究院'),  -- National Institutes of Health (USA)
+                                            ('harvard.edu', '哈佛大学'),  -- Harvard University (USA)
+                                            ('stanford.edu', '斯坦福大学'),  -- Stanford University (USA)
+                                            ('mit.edu', '麻省理工学院'),  -- Massachusetts Institute of Technology (USA)
+                                            ('ox.ac.uk', '牛津大学'),  -- University of Oxford (UK)
+                                            ('cam.ac.uk', '剑桥大学'),  -- University of Cambridge (UK)
+                                            ('imperial.ac.uk', '帝国理工学院'),  -- Imperial College London (UK)
+                                            ('ethz.ch', '瑞士联邦理工学院苏黎世分校'),  -- ETH Zurich (Switzerland)
+                                            ('max-planck-gesellschaft.de', '马克斯·普朗克学会'),  -- Max Planck Society (Germany)
+                                            ('fraunhofer.de', '弗劳恩霍夫协会'),  -- Fraunhofer Society (Germany)
+                                            ('cnrs.fr', '国家科学研究中心'),  -- Centre National de la Recherche Scientifique (France)
+                                            ('un.org', '联合国'),  -- United Nations
+                                            ('who.int', '世界卫生组织'),  -- World Health Organization
+                                            ('unesco.org', '联合国教科文组织') ; -- United Nations Educational, Scientific and Cultural Organization
+
+
+
