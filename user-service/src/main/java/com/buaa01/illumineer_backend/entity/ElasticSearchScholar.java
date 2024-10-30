@@ -4,15 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 响应包装类
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-// 自定义响应对象
-public class CustomResponse {
-    private int code = 200;
-    private String message = "OK";
-    private Object data;
+public class ElasticSearchScholar {
+    //es存储的学者类
+    private String name;
 }

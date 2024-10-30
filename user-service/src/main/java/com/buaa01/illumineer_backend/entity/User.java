@@ -33,10 +33,10 @@ public class User {
     private List<String> field ;// 相关领域
     private String institution;
     //需要在Redis中存储的信息
-    //名下论文集合
-    //合作者/关联者
-    //收藏夹
-    //下载记录
+    //名下论文集合 papers
+    //合作者/关联者 collaborator
+    //收藏夹 collections
+    //下载记录 downloads
 
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date createDate;
