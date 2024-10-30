@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
-import com.buaa01.illumineer_backend.MessageMapper.MessageMapper;
+import com.buaa01.illumineer_backend.mapper.MessageMapper;
 import com.buaa01.illumineer_backend.entity.Message;
 import com.buaa01.illumineer_backend.service.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 @Service

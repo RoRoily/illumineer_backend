@@ -1,10 +1,13 @@
-package com.example.demo.handler;
+package com.buaa01.illumineer_backend.handler;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 public class LongListTypeHandler extends BaseTypeHandler<List<Long>> {
