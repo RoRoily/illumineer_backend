@@ -1,7 +1,7 @@
 package com.buaa01.illumineer_backend.service.paper;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,7 +51,7 @@ public interface PaperService {
      * @param paper 文章
      * @param content 文章内容（文件）
      */
-    CustomResponse uploadPaper(Paper paper, MultipartFile content);
+    CustomResponse uploadPaper(Papers paper, MultipartFile content);
 
     /**
      * 更新作者（已认证）

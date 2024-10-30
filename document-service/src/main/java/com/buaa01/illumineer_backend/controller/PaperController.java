@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ public class PaperController {
 
     /**
      * 根据pid获取文献信息
+     * 
      * @param pid 文献ID
      * @return 文献信息
      */
@@ -38,19 +39,20 @@ public class PaperController {
 
     /**
      * 一框式检索接口：搜索文献（分页、排序）
+     * 
      * @param condition 筛选条件（选择查找的字段）
-     * @param keyword 搜索内容
-     * @param size 一页多少条内容
-     * @param offset 第几页
-     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param keyword   搜索内容
+     * @param size      一页多少条内容
+     * @param offset    第几页
+     * @param sortType  根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @return 文献信息
      */
     @GetMapping("/search")
     public CustomResponse searchPapers(@RequestParam("condition") String condition,
-                                       @RequestParam("keyword") String keyword,
-                                       @RequestParam("size") Integer size,
-                                       @RequestParam("offset") Integer offset,
-                                       @RequestParam("type") Integer sortType) {
+            @RequestParam("keyword") String keyword,
+            @RequestParam("size") Integer size,
+            @RequestParam("offset") Integer offset,
+            @RequestParam("type") Integer sortType) {
         try {
             return paperService.searchPapers(condition, keyword, size, offset, sortType);
         } catch (Exception e) {
@@ -64,6 +66,7 @@ public class PaperController {
 
     /**
      * 根据 pid 返回引用量
+     * 
      * @param pid 文章 id
      * @return 引用量
      */
@@ -82,6 +85,7 @@ public class PaperController {
 
     /**
      * 根据 pid 增加引用量
+     * 
      * @param pid 文章 id
      * @return
      */
@@ -100,6 +104,7 @@ public class PaperController {
 
     /**
      * 根据 pid 增加收藏量
+     * 
      * @param pid 文章 id
      * @return
      */
@@ -118,6 +123,7 @@ public class PaperController {
 
     /**
      * 上传新的文章
+     * 
      * @param title
      * @param essAbs
      * @param keywords
@@ -131,15 +137,16 @@ public class PaperController {
      */
     @PostMapping("/upload")
     public CustomResponse uploadPaper(@RequestParam("title") String title,
-                                                 @RequestParam("essAbs") String essAbs,
-                                                 @RequestParam("keywords") String keywords,
-                                                 @RequestParam("content") MultipartFile content,
-                                                 @RequestParam("field") String field,
-                                                 @RequestParam("type") String type,
-                                                 @RequestParam("theme") String theme,
-                                                 @RequestParam("publishDate") Date publishDate,
-                                                 @RequestParam("derivation") String derivation) {
-        Paper paper = new Paper(null, title, essAbs, Arrays.stream(keywords.split(" ")).toList(), null, null, Arrays.stream(field.split(" ")).toList(), type, theme, publishDate, derivation, 0, 0, null, 0);
+            @RequestParam("essAbs") String essAbs,
+            @RequestParam("keywords") String keywords,
+            @RequestParam("content") MultipartFile content,
+            @RequestParam("field") String field,
+            @RequestParam("type") String type,
+            @RequestParam("theme") String theme,
+            @RequestParam("publishDate") Date publishDate,
+            @RequestParam("derivation") String derivation) {
+        Papers paper = new Papers(null, title, essAbs, Arrays.stream(keywords.split(" ")).toList(), null, null,
+                Arrays.stream(field.split(" ")).toList(), type, theme, publishDate, derivation, 0, 0, null, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
@@ -153,13 +160,14 @@ public class PaperController {
 
     /**
      * 更新作者（已认证）
+     * 
      * @param pid
      * @param aid
      * @return
      */
     @PostMapping("/updateAuth")
     public CustomResponse updateAuth(@RequestParam("pid") int pid,
-                                      @RequestParam("aid") int aid) {
+            @RequestParam("aid") int aid) {
         try {
             return paperService.updateAuth(pid, aid);
         } catch (Exception e) {
@@ -173,13 +181,14 @@ public class PaperController {
 
     /**
      * 更新作者（未认证）
+     * 
      * @param pid
      * @param author
      * @return
      */
     @PostMapping("/updateAuth")
     public CustomResponse updateAuth(@RequestParam("pid") int pid,
-                                      @RequestParam("author") String author) {
+            @RequestParam("author") String author) {
         try {
             return paperService.updateAuth(pid, author);
         } catch (Exception e) {
@@ -193,6 +202,7 @@ public class PaperController {
 
     /**
      * 删除文章
+     * 
      * @param pid
      * @return
      */
@@ -211,6 +221,7 @@ public class PaperController {
 
     /**
      * 修改文章信息
+     * 
      * @param pid
      * @param essAbs
      * @param keywords
@@ -224,17 +235,18 @@ public class PaperController {
      */
     @PostMapping("/update")
     public CustomResponse updatePaper(@RequestParam("pid") int pid,
-                                      @RequestParam("title") String title,
-                                      @RequestParam("essAbs") String essAbs,
-                                      @RequestParam("keywords") String keywords,
-                                      @RequestParam("content") MultipartFile content,
-                                      @RequestParam("field") String field,
-                                      @RequestParam("type") String type,
-                                      @RequestParam("theme") String theme,
-                                      @RequestParam("publishDate") Date publishDate,
-                                      @RequestParam("derivation") String derivation) {
+            @RequestParam("title") String title,
+            @RequestParam("essAbs") String essAbs,
+            @RequestParam("keywords") String keywords,
+            @RequestParam("content") MultipartFile content,
+            @RequestParam("field") String field,
+            @RequestParam("type") String type,
+            @RequestParam("theme") String theme,
+            @RequestParam("publishDate") Date publishDate,
+            @RequestParam("derivation") String derivation) {
         try {
-            return paperService.updatePaper(pid, title, essAbs, keywords, content, field, type, theme, publishDate, derivation);
+            return paperService.updatePaper(pid, title, essAbs, keywords, content, field, type, theme, publishDate,
+                    derivation);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
