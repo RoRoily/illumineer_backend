@@ -71,7 +71,7 @@ public class UserAuthController {
      * @return CustomResponse对象
      * **/
     @PostMapping("user/auth/claim")
-    public CustomResponse claim(@RequestBody List<Integer> p=idList){
+    public CustomResponse claim(@RequestBody List<Integer> pidList){
         try {
             return userAuthService.claim(pidList);
         } catch (Exception e) {
