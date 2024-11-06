@@ -4,10 +4,12 @@ import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.ScreenCondition;
 import com.buaa01.illumineer_backend.service.filter.FilterService;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.*;
 
+@Service
 public class FilterServiceImpl implements FilterService {
 
     @Override

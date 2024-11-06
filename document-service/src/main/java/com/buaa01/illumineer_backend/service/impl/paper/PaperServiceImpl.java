@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class PaperServiceImpl implements PaperService {
 
-    @Autowired
+//    @Autowired
     private ElasticsearchClient client;
 
     @Autowired
@@ -392,7 +392,8 @@ public class PaperServiceImpl implements PaperService {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
-        String contentUrl = ossTool.uploadPaperContent(content, "content");
+//        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        String contentUrl = "";
         if (contentUrl == null) {
             log.warn("OSS URL 为空，合并操作终止");
             customResponse.setMessage("无法生成文章url！");
@@ -405,7 +406,7 @@ public class PaperServiceImpl implements PaperService {
 
         // 存入数据库
         paperMapper.insert(paper);
-        esTool.addPaper(paperMapper);
+//        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
         return customResponse;
@@ -420,35 +421,35 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse updateAuth(int pid, int aid) {
         CustomResponse customResponse = new CustomResponse();
-
-        if (getAuthorByAid() == null) { // 查找作者
-            customResponse.setMessage("该作者不存在");
-            return customResponse;
-        }
-
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("pid", pid);
-        paper = paperMapper.getPaperByPid(pid);
-
-        Map<String, Integer> auths = paper.getAuths();
-        String author = getAuthorByAid().getAuthor();
-        if (auths.containsValue(aid)) { // 存在此作者
-            // 存在此作者，删除
-            auths.remove(author);
-            paper.setAuths(auths);
-        } else { // 不存在此作者
-            // 将该作者加入pid的作者列表中
-            auths.put(author, aid);
-            paper.setAuths(auths);
-        }
-
-        // 更新数据库
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("auths = " + auths);
-        paperMapper.update(null, updateWrapper);
-
+//
+//        if (getAuthorByAid() == null) { // 查找作者
+//            customResponse.setMessage("该作者不存在");
+//            return customResponse;
+//        }
+//
+//        Paper paper = null;
+//        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("pid", pid);
+//        paper = paperMapper.getPaperByPid(pid);
+//
+//        Map<String, Integer> auths = paper.getAuths();
+//        String author = getAuthorByAid().getAuthor();
+//        if (auths.containsValue(aid)) { // 存在此作者
+//            // 存在此作者，删除
+//            auths.remove(author);
+//            paper.setAuths(auths);
+//        } else { // 不存在此作者
+//            // 将该作者加入pid的作者列表中
+//            auths.put(author, aid);
+//            paper.setAuths(auths);
+//        }
+//
+//        // 更新数据库
+//        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+//        updateWrapper.eq("pid", pid);
+//        updateWrapper.setSql("auths = " + auths);
+//        paperMapper.update(null, updateWrapper);
+//
         return customResponse;
     }
 
@@ -524,7 +525,8 @@ public class PaperServiceImpl implements PaperService {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
-        String contentUrl = ossTool.uploadPaperContent(content, "content");
+//        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        String contentUrl = "";
         if (contentUrl == null) {
             log.warn("OSS URL 为空，合并操作终止");
             customResponse.setMessage("无法生成文章url！");
