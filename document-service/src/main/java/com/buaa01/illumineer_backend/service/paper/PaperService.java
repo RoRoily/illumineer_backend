@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface PaperService {
@@ -22,12 +23,25 @@ public interface PaperService {
 
     /**
      * 一框式检索接口：搜索文献（分页、排序）
+     * @param condition 筛选条件（选择查找的字段）
      * @param keyword 搜索内容
+     * @param size 一页多少条内容
      * @param offset 第几页
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order 0=降序，1=升序
      * @return 文献信息
      */
-    CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType);
+    CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order);
+
+    /**
+     * 高级检索
+     * @param conditions 条件：logic(and/or/not), condition, keyword
+     * @param size 一页多少条内容
+     * @param offset 第几页
+     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order 0=降序，1=升序
+     */
+    CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order);
 
     /**
      * 根据 pid 返回引用量
