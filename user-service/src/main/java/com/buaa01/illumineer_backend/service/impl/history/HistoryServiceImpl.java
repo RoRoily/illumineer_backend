@@ -99,7 +99,7 @@ public class HistoryServiceImpl implements HistoryService {
     public CustomResponse insertInHistory(Integer pid){
         CustomResponse customResponse = new CustomResponse();
 
-        return customResponse
+        return customResponse;
     }
 
     /**

@@ -24,6 +24,6 @@ public class Achievements {
     private LocalDate publishDate;
     /** 收藏次数 */
     private Integer fav_time;
-    /** 状态 0 正常 1 已删除 2 审核中 */
+    /** 状态: 0 正常 1 已删除 2 审核中 */
     private Integer stats; //
 }

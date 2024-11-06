@@ -5,6 +5,7 @@ import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.ScreenCondition;
 import com.buaa01.illumineer_backend.service.filter.FilterService;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.*;
 
@@ -26,11 +27,7 @@ public class FilterServiceImpl implements FilterService {
         return customResponse;
     }
 
-    public String transDatetoYear(Date date) { // 将发布日期转化为年
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int year = calendar.get(Calendar.YEAR);
-        return String.valueOf(year);
+    public String transDatetoYear(LocalDate date) { // 将发布日期转化为年
+        return String.valueOf(date.getYear());
     }
-
 }

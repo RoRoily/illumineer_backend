@@ -40,30 +40,31 @@ public class PaperServiceImpl implements PaperService {
         Papers paper = null;
         QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
-//        paper = paperMapper.selectOne(queryWrapper);
+        // paper = paperMapper.selectOne(queryWrapper);
         paper = paperMapper.getPaperByPid(pid);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("title",paper.getTitle());
+        map.put("title", paper.getTitle());
         map.put("essAbs", paper.getEssAbs());
-        map.put("keywords",paper.getKeywords());
-        map.put("contentUrl",paper.getContentUrl());
-        map.put("auths",paper.getAuths());
-        map.put("field",paper.getField());
-        map.put("type",paper.getType());
-        map.put("theme",paper.getTheme());
-        map.put("publishDate",paper.getPublishDate());
-        map.put("derivation",paper.getDerivation());
+        map.put("keywords", paper.getKeywords());
+        map.put("contentUrl", paper.getContentUrl());
+        map.put("auths", paper.getAuths());
+        map.put("field", paper.getField());
+        map.put("type", paper.getType());
+        map.put("theme", paper.getTheme());
+        map.put("publishDate", paper.getPublishDate());
+        map.put("derivation", paper.getDerivation());
         map.put("ref_times", paper.getRef_times());
-        map.put("fav_times",paper.getFav_time());
-        map.put("refs",paper.getRefs());
+        map.put("fav_times", paper.getFav_time());
+        map.put("refs", paper.getRefs());
         customResponse.setData(map);
         return customResponse;
     }
 
     // 一框式检索：模糊查询 + 排序 + 分页
     @Override
-    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order) {
+    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType,
+            Integer order) {
         // 模糊搜索：keyword
         List<Paper> papers = null;
         papers = searchByKeyword(condition, keyword);
@@ -73,7 +74,8 @@ public class PaperServiceImpl implements PaperService {
 
     // 高级检索
     @Override
-    public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order) {
+    public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset,
+            Integer sortType, Integer order) {
         String condStr = "";
         for (Map<String, String> condition : conditions) {
             if (condition.get("logic").equals("0")) {
@@ -90,7 +92,8 @@ public class PaperServiceImpl implements PaperService {
         return getSearchResult(papers, sortType, order, size, offset);
     }
 
-    private CustomResponse getSearchResult(List<Paper> papers, Integer sortType, Integer order, Integer size, Integer offset) {
+    private CustomResponse getSearchResult(List<Paper> papers, Integer sortType, Integer order, Integer size,
+            Integer offset) {
         Map<String, Object> result = new HashMap<>();
 
         List<Map.Entry<String, Integer>> years = null;
@@ -125,6 +128,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 获取筛选字段的选项
+     * 
      * @param papers
      */
     Map<String, List<Map.Entry<String, Integer>>> getOptions(List<Paper> papers) {
@@ -202,6 +206,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 模糊查询
+     * 
      * @param keyword 搜索内容
      * @return 文献信息
      */
@@ -225,9 +230,10 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 分页
-     * @param papers 搜索的结果
+     * 
+     * @param papers  搜索的结果
      * @param pageNum 一页的条目数量
-     * @param offset 第几页
+     * @param offset  第几页
      * @return 文献信息
      */
     List<Papers> searchByPage(List<Papers> papers, Integer pageNum, Integer offset) {
@@ -249,20 +255,21 @@ public class PaperServiceImpl implements PaperService {
         if (sublist.isEmpty()) {
             return Collections.emptyList();
         }
-//        List<Map<String, Object>> mapList = new ArrayList<>();
-//        for(Paper paper : papers) {
-//            Map<String, Object> map = getPaperMap(paper);
-//            mapList.add(map);
-//        }
-//        return mapList;
+        // List<Map<String, Object>> mapList = new ArrayList<>();
+        // for(Paper paper : papers) {
+        // Map<String, Object> map = getPaperMap(paper);
+        // mapList.add(map);
+        // }
+        // return mapList;
         return sublist;
     }
 
     /**
      * 排序
-     * @param papers 搜索的结果
+     * 
+     * @param papers   搜索的结果
      * @param sortType 根据这个来进行排序 // 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
+     * @param order    0=降序，1=升序
      * @return 文献信息
      */
     List<Paper> searchByOrder(List<Paper> papers, Integer sortType, Integer order) {
@@ -303,6 +310,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 返回引用量
+     * 
      * @param pid 文章 id
      * @return 引用量
      */
@@ -311,17 +319,18 @@ public class PaperServiceImpl implements PaperService {
         Papers paper = null;
         QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
-//        paper = paperMapper.selectOne(queryWrapper);
+        // paper = paperMapper.selectOne(queryWrapper);
         paper = paperMapper.getPaperByPid(pid);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("ref_times",paper.getRef_times());
+        map.put("ref_times", paper.getRef_times());
         customResponse.setData(map);
         return customResponse;
     }
 
     /**
      * 根据 pid 增加引用量
+     * 
      * @param pid 文章 id
      */
     public CustomResponse addRefTimes(int pid) {
@@ -338,6 +347,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 增加收藏量
+     * 
      * @param pid 文章 id
      */
     public CustomResponse addFavTimes(int pid) {
@@ -354,7 +364,8 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 上传新的文章
-     * @param paper 文章
+     * 
+     * @param paper   文章
      * @param content 文章内容（文件）
      */
     public CustomResponse uploadPaper(Papers paper, MultipartFile content) {
@@ -382,6 +393,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 更新作者（已认证）
+     * 
      * @param pid
      * @param aid
      * @return
@@ -422,6 +434,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 更新作者（已认证）
+     * 
      * @param pid
      * @param author
      * @return
@@ -456,6 +469,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 删除文章
+     * 
      * @param pid
      * @return
      */
@@ -473,19 +487,20 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 修改文章信息
+     * 
      * @param
      * @return
      */
     public CustomResponse updatePaper(int pid,
-                               String title,
-                               String essAbs,
-                               String keywords,
-                               MultipartFile content,
-                               String field,
-                               String type,
-                               String theme,
-                               Date publishDate,
-                               String derivation) {
+            String title,
+            String essAbs,
+            String keywords,
+            MultipartFile content,
+            String field,
+            String type,
+            String theme,
+            Date publishDate,
+            String derivation) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -499,7 +514,8 @@ public class PaperServiceImpl implements PaperService {
 
         UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", contentUrl = " + contentUrl + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation);
+        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", contentUrl = " + contentUrl + ", type = "
+                + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation);
 
         paperMapper.update(null, updateWrapper);
 

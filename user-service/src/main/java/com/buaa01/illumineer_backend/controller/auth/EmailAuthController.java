@@ -21,7 +21,7 @@ public class EmailAuthController {
     @Value("${verification.url}")
     private String verificationUrl;
 
-    public AuthController(UserRepository userRepository, EmailService emailService) {
+    public EmailAuthController(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.emailService = emailService;
     }
