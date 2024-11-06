@@ -1,6 +1,5 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
-import cn.hutool.core.lang.tree.Tree;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
