@@ -139,7 +139,8 @@ public class PaperController {
                                                  @RequestParam("theme") String theme,
                                                  @RequestParam("publishDate") Date publishDate,
                                                  @RequestParam("derivation") String derivation) {
-        Paper paper = new Paper(null, title, essAbs, Arrays.stream(keywords.split(" ")).toList(), null, null, Arrays.stream(field.split(" ")).toList(), type, theme, publishDate, derivation, 0, 0, null, 0);
+        Paper paper = new Paper(null, title, essAbs, Arrays.stream(keywords.split(" ")).toList(), null, null,
+                null, type, theme, publishDate, derivation, 0, 0, null, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
