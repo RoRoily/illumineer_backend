@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
+import cn.hutool.core.lang.tree.Tree;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -13,6 +14,8 @@ import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
+@Service
 public class PaperServiceImpl implements PaperService {
 
     @Autowired
@@ -59,22 +63,141 @@ public class PaperServiceImpl implements PaperService {
 
     // 一框式检索：模糊查询 + 排序 + 分页
     @Override
-    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType) {
+    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order) {
+        // 模糊搜索：keyword
         List<Paper> papers = null;
-
-        // 1. 模糊搜索：keyword
         papers = searchByKeyword(condition, keyword);
 
+        return getSearchResult(papers, sortType, order, size, offset);
+    }
+
+    // 高级检索
+    @Override
+    public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order) {
+        String condStr = "";
+        for (Map<String, String> condition : conditions) {
+            if (condition.get("logic").equals("0")) {
+                condStr = condStr + condition.get("condition") + "LIKE %" + condition.get("keyword") + "%";
+            } else if (condition.get("logic").equals("1")) {
+                condStr = condStr + " AND " + condition.get("condition") + "LIKE %" + condition.get("keyword") + "%";
+            } else if (condition.get("logic").equals("2")) {
+                condStr = condStr + " OR " + condition.get("condition") + "LIKE %" + condition.get("keyword") + "%";
+            } else if (condition.get("logic").equals("3")) {
+                condStr = condStr + condition.get("condition") + "NOT LIKE %" + condition.get("keyword") + "%";
+            }
+        }
+        List<Paper> papers = paperMapper.getAdvancedSearchPapers(condStr);
+        return getSearchResult(papers, sortType, order, size, offset);
+    }
+
+    private CustomResponse getSearchResult(List<Paper> papers, Integer sortType, Integer order, Integer size, Integer offset) {
+        Map<String, Object> result = new HashMap<>();
+
+        List<Map.Entry<String, Integer>> years = null;
+        List<Map.Entry<String, Integer>> derivations = null;
+        List<Map.Entry<String, Integer>> types = null;
+        List<Map.Entry<String, Integer>> themes = null;
+
+        // 1. 根据搜索结果获取筛选字段的选择项
+        Map<String, List<Map.Entry<String, Integer>>> options = getOptions(papers);
+        years = options.get("years");
+        derivations = options.get("derivations");
+        types = options.get("types");
+        themes = options.get("themes");
+
         // 2. searchbByOrder 对搜索结果进行排序：sortType
-        papers = searchByOrder(papers, sortType);
+        papers = searchByOrder(papers, sortType, order);
 
         // 3. searchByPage 对排序结果进行分页，并将当前页 offset 需要的内容返回
         papers = searchByPage(papers, size, offset);
 
         // 4. 返回结果
         CustomResponse customResponse = new CustomResponse();
-        customResponse.setData(papers);
+        result.put("result", papers); // 搜索结果
+        result.put("year", years); // 年份（从出版时间publishDate解析）
+        result.put("derivation", derivations); // 来源
+        result.put("type", types); // 类型
+        result.put("theme", themes); // 主题
+
+        customResponse.setData(result);
         return customResponse;
+    }
+
+    /**
+     * 获取筛选字段的选项
+     * @param papers
+     */
+    Map<String, List<Map.Entry<String, Integer>>> getOptions(List<Paper> papers) {
+        Map<String, Integer> years = new LinkedHashMap<>();
+        Map<String, Integer> derivations = new LinkedHashMap<>();
+        Map<String, Integer> types = new LinkedHashMap<>();
+        Map<String, Integer> themes = new LinkedHashMap<>();
+
+        for (Paper paper : papers) {
+            // year
+            if (years.get(paper.getPublishDate().getYear() + "") == null) {
+                years.put(paper.getPublishDate().getYear() + "", 0);
+            } else {
+                years.put(paper.getPublishDate().getYear() + "", years.get(paper.getPublishDate().getYear() + "") + 1);
+            }
+            // derivations
+            if (derivations.get(paper.getDerivation()) == null) {
+                derivations.put(paper.getDerivation(), 0);
+            } else {
+                derivations.put(paper.getDerivation(), derivations.get(paper.getDerivation()) + 1);
+            }
+            // types
+            if (types.get(paper.getType()) == null) {
+                types.put(paper.getType(), 0);
+            } else {
+                types.put(paper.getType(), types.get(paper.getType()) + 1);
+            }
+            // themes
+            if (themes.get(paper.getTheme()) == null) {
+                themes.put(paper.getTheme(), 0);
+            } else {
+                themes.put(paper.getTheme(), themes.get(paper.getTheme()) + 1);
+            }
+        }
+
+        // 按值大到小进行排序
+        // 1. 将LinkedHashMap转换为List
+        List<Map.Entry<String, Integer>> yearsList = new ArrayList<>(years.entrySet());
+        List<Map.Entry<String, Integer>> derivationsList = new ArrayList<>(years.entrySet());
+        List<Map.Entry<String, Integer>> typesList = new ArrayList<>(years.entrySet());
+        List<Map.Entry<String, Integer>> themesList = new ArrayList<>(years.entrySet());
+        // 2. 使用 Comparator 对 List 进行排序
+        Collections.sort(yearsList, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        Collections.sort(derivationsList, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        Collections.sort(typesList, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        Collections.sort(themesList, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+
+        Map<String, List<Map.Entry<String, Integer>>> options = new HashMap<>();
+        options.put("years", yearsList);
+        options.put("derivations", derivationsList);
+        options.put("types", typesList);
+        options.put("themes", themesList);
+        return options;
     }
 
     /**
@@ -139,22 +262,42 @@ public class PaperServiceImpl implements PaperService {
      * 排序
      * @param papers 搜索的结果
      * @param sortType 根据这个来进行排序 // 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order 0=降序，1=升序
      * @return 文献信息
      */
-    List<Paper> searchByOrder(List<Paper> papers, Integer sortType) {
-        papers.sort(new Comparator<Paper>() {
-            @Override
-            public int compare(Paper p1, Paper p2) {
-                if (sortType == 1) {
-                    return p2.getPublishDate().compareTo(p1.getPublishDate());
-                } else if (sortType == 2) {
-                    return p2.getRef_times() - p1.getRef_times();
-                } else if (sortType == 3) {
-                    return p2.getFav_time() - p1.getFav_time();
+    List<Paper> searchByOrder(List<Paper> papers, Integer sortType, Integer order) {
+        // 降序
+        if (order == 0) {
+            papers.sort(new Comparator<Paper>() {
+                @Override
+                public int compare(Paper p1, Paper p2) {
+                    if (sortType == 1) {
+                        return p2.getPublishDate().compareTo(p1.getPublishDate());
+                    } else if (sortType == 2) {
+                        return p2.getRef_times() - p1.getRef_times();
+                    } else if (sortType == 3) {
+                        return p2.getFav_time() - p1.getFav_time();
+                    }
+                    return 0;
                 }
-                return 0;
-            }
-        });
+            });
+        }
+        // 升序
+        else if (order == 1) {
+            papers.sort(new Comparator<Paper>() {
+                @Override
+                public int compare(Paper p1, Paper p2) {
+                    if (sortType == 1) {
+                        return p1.getPublishDate().compareTo(p2.getPublishDate());
+                    } else if (sortType == 2) {
+                        return p1.getRef_times() - p2.getRef_times();
+                    } else if (sortType == 3) {
+                        return p1.getFav_time() - p2.getFav_time();
+                    }
+                    return 0;
+                }
+            });
+        }
         return papers;
     }
 
@@ -334,15 +477,15 @@ public class PaperServiceImpl implements PaperService {
      * @return
      */
     public CustomResponse updatePaper(int pid,
-                               String title,
-                               String essAbs,
-                               String keywords,
-                               MultipartFile content,
-                               String field,
-                               String type,
-                               String theme,
-                               Date publishDate,
-                               String derivation) {
+                                      String title,
+                                      String essAbs,
+                                      String keywords,
+                                      MultipartFile content,
+                                      String field,
+                                      String type,
+                                      String theme,
+                                      Date publishDate,
+                                      String derivation) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
