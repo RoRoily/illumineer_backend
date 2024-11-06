@@ -16,9 +16,15 @@ public class AIAssistantController {
         this.aiAssistantService = aiAssistantService;
     }
 
+    /**
+     * AI推荐领域内关键词
+     * @param query 查询的领域
+     * @return 返回关键词（用空格隔开）
+     * @throws Exception 异常情况
+     */
     @PostMapping("/AI/generateKeywords")
     public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
-        String keywords = aiAssistantService.StartChat(query);
+        String keywords = aiAssistantService.StartChat("我想调查“" + query + "”领域的论文资料，请帮我推荐相关的关键词，尽量简短，只用空格隔开。");
         return ResponseEntity.ok(keywords);
     }
 }
