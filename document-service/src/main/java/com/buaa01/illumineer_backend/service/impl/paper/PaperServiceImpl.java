@@ -105,7 +105,7 @@ public class PaperServiceImpl implements PaperService {
         types = options.get("types");
         themes = options.get("themes");
 
-        // 2. searchbByOrder 对搜索结果进行排序：sortType
+        // 2. searchByOrder 对搜索结果进行排序：sortType
         papers = searchByOrder(papers, sortType, order);
 
         // 3. searchByPage 对排序结果进行分页，并将当前页 offset 需要的内容返回
