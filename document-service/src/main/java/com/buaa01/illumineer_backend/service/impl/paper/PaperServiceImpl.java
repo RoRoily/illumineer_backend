@@ -5,33 +5,55 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.mapper.SearchResultPaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
+import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import redis.clients.jedis.Jedis;
 
+import javax.json.Json;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class PaperServiceImpl implements PaperService {
 
-//    @Autowired
+    @Autowired
+    private RedisTool redisTool;
+
+    @Autowired
     private ElasticsearchClient client;
 
     @Autowired
+    @Qualifier("taskExecutor")
+    private Executor taskExecutor;
+
+    @Autowired
     private PaperMapper paperMapper;
+    @Autowired
+    private SearchResultPaperMapper searchResultPaperMapper;
 
     @Override
     public CustomResponse getPaperByPid(Integer pid) {
@@ -64,8 +86,11 @@ public class PaperServiceImpl implements PaperService {
     @Override
     public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order) {
         // 模糊搜索：keyword
-        List<Paper> papers = null;
+        List<SearchResultPaper> papers = null;
         papers = searchByKeyword(condition, keyword);
+
+        deleteFromRedis();
+        saveToRedis(papers);
 
         return getSearchResult(papers, sortType, order, size, offset);
     }
@@ -73,31 +98,22 @@ public class PaperServiceImpl implements PaperService {
     // 高级检索
     @Override
     public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order) {
-        Set<Paper> papers1 = new HashSet<>();
-        Set<Paper> papers2 = new HashSet<>();
+        Set<SearchResultPaper> papers1 = new HashSet<>();
+        Set<SearchResultPaper> papers2 = new HashSet<>();
 
         for (Map<String, String> condition : conditions) {
-            // 对该查询条件进行模糊查询
-            try {
-                Query query;
-                if (condition.get("logic").equals("3")) { // NOT
-                    query = Query.of(q -> q.bool(b -> b.mustNot(mn -> mn.match(m -> m.field(condition.get("condition")).query(condition.get("keyword"))))));
-                } else {
-                    query = Query.of(q -> q.match(m -> m.field(condition.get("condition")).query(condition.get("keyword"))));
-                }
-                SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
-                SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
-                for (Hit<Paper> hit : searchResponse.hits().hits()) {
-                    if (hit.source() != null) {
-                        if (papers1.isEmpty()) {
-                            papers1.add(hit.source());
-                        } else {
-                            papers2.add(hit.source());
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                log.error("查询ES相关文献文档时出错了：" + e);
+            // 对该查询条件进行查询
+            QueryWrapper<SearchResultPaper> queryWrapper = Wrappers.query();
+            if (condition.get("logic").equals("3")) { // NOT
+                queryWrapper.notLike(condition.get("condition"), condition.get("keyword"));
+            } else {
+                queryWrapper.like(condition.get("condition"), condition.get("keyword"));
+            }
+            List<SearchResultPaper> papers = searchResultPaperMapper.selectList(queryWrapper);
+            if (papers1.isEmpty()) {
+                papers1 = papers.stream().collect(Collectors.toSet());
+            } else {
+                papers2 = papers.stream().collect(Collectors.toSet());
             }
 
             // 进行集合运算
@@ -109,11 +125,15 @@ public class PaperServiceImpl implements PaperService {
             papers2.clear();
         }
 
-        List<Paper> papers = papers1.stream().toList();
+        List<SearchResultPaper> papers = papers1.stream().toList();
+
+        deleteFromRedis();
+        saveToRedis(papers);
+
         return getSearchResult(papers, sortType, order, size, offset);
     }
 
-    private CustomResponse getSearchResult(List<Paper> papers, Integer sortType, Integer order, Integer size, Integer offset) {
+    private CustomResponse getSearchResult(List<SearchResultPaper> papers, Integer sortType, Integer order, Integer size, Integer offset) {
         Map<String, Object> result = new HashMap<>();
 
         List<Map.Entry<String, Integer>> years = null;
@@ -151,13 +171,13 @@ public class PaperServiceImpl implements PaperService {
      *
      * @param papers
      */
-    Map<String, List<Map.Entry<String, Integer>>> getOptions(List<Paper> papers) {
+    Map<String, List<Map.Entry<String, Integer>>> getOptions(List<SearchResultPaper> papers) {
         Map<String, Integer> years = new LinkedHashMap<>();
         Map<String, Integer> derivations = new LinkedHashMap<>();
         Map<String, Integer> types = new LinkedHashMap<>();
         Map<String, Integer> themes = new LinkedHashMap<>();
 
-        for (Paper paper : papers) {
+        for (SearchResultPaper paper : papers) {
             // year
             if (years.get(paper.getPublishDate().getYear() + "") == null) {
                 years.put(paper.getPublishDate().getYear() + "", 0);
@@ -230,13 +250,13 @@ public class PaperServiceImpl implements PaperService {
      * @param keyword 搜索内容
      * @return 文献信息
      */
-    List<Paper> searchByKeyword(String condition, String keyword) {
+    List<SearchResultPaper> searchByKeyword(String condition, String keyword) {
         try {
-            List<Paper> list = new ArrayList<>();
+            List<SearchResultPaper> list = new ArrayList<>();
             Query query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
             SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
-            SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
-            for (Hit<Paper> hit : searchResponse.hits().hits()) {
+            SearchResponse<SearchResultPaper> searchResponse = client.search(searchRequest, Paper.class);
+            for (Hit<SearchResultPaper> hit : searchResponse.hits().hits()) {
                 if (hit.source() != null) {
                     list.add(hit.source());
                 }
@@ -256,7 +276,7 @@ public class PaperServiceImpl implements PaperService {
      * @param offset  第几页
      * @return 文献信息
      */
-    List<Paper> searchByPage(List<Paper> papers, Integer pageNum, Integer offset) {
+    List<SearchResultPaper> searchByPage(List<SearchResultPaper> papers, Integer pageNum, Integer offset) {
         if (offset == null || offset == 0) {
             offset = 1;
         }
@@ -271,7 +291,7 @@ public class PaperServiceImpl implements PaperService {
             return Collections.emptyList();
         }
         endIndex = Math.min(endIndex, papers.size());
-        List<Paper> sublist = papers.subList(startIndex, endIndex);
+        List<SearchResultPaper> sublist = papers.subList(startIndex, endIndex);
         if (sublist.isEmpty()) {
             return Collections.emptyList();
         }
@@ -292,12 +312,12 @@ public class PaperServiceImpl implements PaperService {
      * @param order    0=降序，1=升序
      * @return 文献信息
      */
-    List<Paper> searchByOrder(List<Paper> papers, Integer sortType, Integer order) {
+    List<SearchResultPaper> searchByOrder(List<SearchResultPaper> papers, Integer sortType, Integer order) {
         // 降序
         if (order == 0) {
-            papers.sort(new Comparator<Paper>() {
+            papers.sort(new Comparator<SearchResultPaper>() {
                 @Override
-                public int compare(Paper p1, Paper p2) {
+                public int compare(SearchResultPaper p1, SearchResultPaper p2) {
                     if (sortType == 1) {
                         return p2.getPublishDate().compareTo(p1.getPublishDate());
                     } else if (sortType == 2) {
@@ -311,9 +331,9 @@ public class PaperServiceImpl implements PaperService {
         }
         // 升序
         else if (order == 1) {
-            papers.sort(new Comparator<Paper>() {
+            papers.sort(new Comparator<SearchResultPaper>() {
                 @Override
-                public int compare(Paper p1, Paper p2) {
+                public int compare(SearchResultPaper p1, SearchResultPaper p2) {
                     if (sortType == 1) {
                         return p1.getPublishDate().compareTo(p2.getPublishDate());
                     } else if (sortType == 2) {
@@ -542,5 +562,30 @@ public class PaperServiceImpl implements PaperService {
 
         customResponse.setMessage("文章更新成功！");
         return customResponse;
+    }
+
+    // 将查询结果存到 redis 中
+    public void saveToRedis(List<SearchResultPaper> searchResultPapers) {
+        for (SearchResultPaper paper : searchResultPapers) {
+            CompletableFuture.runAsync(() -> {
+                redisTool.setExObjectValue("paper" + paper.getPid(), paper);    // 异步更新到redis
+            }, taskExecutor);
+        }
+    }
+
+    // 从 redis 中获取暂存信息
+    public List<SearchResultPaper> getFromRedis() {
+        List<SearchResultPaper> papers = new ArrayList<>();
+        Set<String> keySet = redisTool.getKeysByPrefix("paper");
+        for (String key : keySet) {
+            SearchResultPaper paper = redisTool.getObjectByClass(key, SearchResultPaper.class);
+            papers.add(paper);
+        }
+        return papers;
+    }
+
+    // 删除 redis 中的信息
+    public void deleteFromRedis() {
+        redisTool.deleteByPrefix("paper");
     }
 }

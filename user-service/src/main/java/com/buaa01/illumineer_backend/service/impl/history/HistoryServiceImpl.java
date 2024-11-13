@@ -16,8 +16,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 @Service
 public class HistoryServiceImpl implements HistoryService {
+
     @Autowired
     private HistoryMapper historyMapper;
+
     @Autowired
     private UserMapper userMapper;
 

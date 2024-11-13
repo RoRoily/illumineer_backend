@@ -27,12 +27,11 @@ public class FilterController {
      */
 
     @PostMapping("paper/search/filter")
-    public CustomResponse ResultFilter(@RequestParam ArrayList<Paper> papers,
-            @RequestBody Map<String, ArrayList<String>> screencondition) {
+    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> screencondition) {
 
         ScreenCondition sc = new ScreenCondition(screencondition);
         try {
-            return filterService.ResultFilter(papers, sc);
+            return filterService.ResultFilter(sc);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

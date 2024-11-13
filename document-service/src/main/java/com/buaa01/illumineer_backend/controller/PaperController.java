@@ -66,7 +66,7 @@ public class PaperController {
 
     /**
      * 高级检索
-     * @param conditions 条件：logic(none=0/and=1/or=2/not=3), condition, keyword
+     * @param conditions 条件：logic(none=0/and=1/or=2/not=3), condition, keyword（传 name 或者 %name%）
      * @param size 一页多少条内容
      * @param offset 第几页
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
