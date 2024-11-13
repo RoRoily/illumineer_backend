@@ -3,62 +3,70 @@ package com.buaa01.illumineer_backend.service.impl.user;
 import com.buaa01.illumineer_backend.mapper.MessageMapper;
 import com.buaa01.illumineer_backend.entity.Message;
 import com.buaa01.illumineer_backend.service.MessageService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
+
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.stereotype.Service;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
 public class MessageServiceImpl implements MessageService {
     @Autowired
     private MessageMapper messageMapper;
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public ArrayList<Message> sendMsg(Integer receiver1, Integer receiver2, Integer type) {
+    public ArrayList<Message> sendMsg(Integer receiver1, Integer receiver2, Integer type) throws JsonProcessingException {
         ArrayList<Message> messages = new ArrayList<>();
-        Message message1 = new Message();//发给原告
-        Message message2 = new Message();//发给被告
+        Message message1 = new Message(); // 发给原告
+        Message message2 = new Message(); // 发给被告
         message1.setSender(1);
         message1.setReceiver(receiver1);
-        message1.setContent("请向被告申请调解");
+        message1.setContent("请向被告申请调解" + LocalDateTime.now());
         message1.setType(type);
         message1.setStatus(0);
         message2.setSender(1);
         message2.setReceiver(receiver2);
-        message2.setContent("请 yourself to apply mediation");
+        message2.setContent("请自己申请调解" + LocalDateTime.now());
         message2.setType(type);
         message2.setStatus(0);
-        //messageMapper.insert(message1);
-        //messageMapper.insert(message2);
-        messageMapper.insertMsg(message1);
-        messageMapper.insertMsg(message2);
-        // 创建连接和频道
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            // 设置消息属性，包括持久化
-            AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
-                    .deliveryMode(2) // 2 表示持久化
-                    .build();
-            // 声明队列（如果队列不存在则创建）
-            channel.queueDeclare("msg" + receiver1, true, false, false, null);
-            // 发送消息
-            channel.basicPublish("", "msg" + receiver1, props, objectMapper.writeValueAsString(message1).getBytes(StandardCharsets.UTF_8));
-            channel.queueDeclare("msg" + receiver2, true, false, false, null);
-            channel.basicPublish("", "msg" + receiver2, props, objectMapper.writeValueAsString(message2).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException | TimeoutException e) {
-            throw new RuntimeException(e);
-        } finally {
-            messages.add(message1);
-            messages.add(message2);
-        }
+        // 发送消息到 Kafka
+        kafkaTemplate.send(MessageBuilder
+                .withPayload(objectMapper.writeValueAsString(message1))
+                .setHeader(KafkaHeaders.TOPIC, "topic")
+                .setHeader(KafkaHeaders.PARTITION_ID, 0)
+                .setHeader("userId", receiver1)  // 添加用户 ID 作为消息头
+                .build());
+
+        kafkaTemplate.send(MessageBuilder
+                .withPayload(objectMapper.writeValueAsString(message2))
+                .setHeader(KafkaHeaders.TOPIC, "topic")
+                .setHeader(KafkaHeaders.PARTITION_ID, 1)
+                .setHeader("userId", receiver2)  // 添加用户 ID 作为消息头
+                .build());
+        messages.add(message1);
+        messages.add(message2);
         return messages;
     }
 
