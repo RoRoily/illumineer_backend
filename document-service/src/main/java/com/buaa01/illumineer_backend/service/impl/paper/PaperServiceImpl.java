@@ -255,7 +255,7 @@ public class PaperServiceImpl implements PaperService {
             List<SearchResultPaper> list = new ArrayList<>();
             Query query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
             SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
-            SearchResponse<SearchResultPaper> searchResponse = client.search(searchRequest, Paper.class);
+            SearchResponse<SearchResultPaper> searchResponse = client.search(searchRequest, SearchResultPaper.class);
             for (Hit<SearchResultPaper> hit : searchResponse.hits().hits()) {
                 if (hit.source() != null) {
                     list.add(hit.source());
