@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.ES.ESPaper;
 import com.buaa01.illumineer_backend.entity.ES.ESSearchWord;
 import com.buaa01.illumineer_backend.entity.User;
 
@@ -28,6 +29,108 @@ import java.util.List;
 public class ESTool {
     @Autowired
     private ElasticsearchClient client;
+
+    /**
+     * 添加文章文档
+     * @param paper
+     */
+    public void addPaper(Paper paper) throws IOException {
+        try {
+            ESPaper esPaper = new ESPaper(paper.getPid(), paper.getTitle(), paper.getKeywords(),
+                    paper.getAuths(), paper.category2String(paper),paper.getType(),paper.getTheme(),paper.getPublishDate(),paper.getDerivation(), paper.getRef_times(), paper.getFav_time());
+            client.index(i -> i.index("paper").id(esPaper.getPid().toString()).document(esPaper));
+        } catch (IOException e) {
+            log.error("添加视频文档到ElasticSearch时出错了：" + e);
+            throw e;
+        }
+    }
+
+    /**
+     * 删除文章文档
+     * @param pid
+     */
+    public void deletePaper(Integer pid) throws IOException {
+        try {
+            client.delete(d -> d.index("paper").id(pid.toString()));
+        } catch (IOException e) {
+            log.error("删除ElasticSearch视频文档时失败了：" + e);
+            throw e;
+        }
+    }
+
+    /**
+     * 更新视频文档
+     * @param paper
+     */
+    public void updatePaper(Paper paper) throws IOException {
+        try {
+            ESPaper esPaper = new ESPaper(paper.getPid(), paper.getTitle(), paper.getKeywords(),
+                    paper.getAuths(), paper.category2String(paper),paper.getType(),paper.getTheme(),
+                    paper.getPublishDate(),paper.getDerivation(), paper.getRef_times(), paper.getFav_time());
+            client.update(u -> u.index("paper").id(paper.getPid().toString()).doc(esPaper), ESPaper.class);
+        } catch (IOException e) {
+            log.error("更新ElasticSearch视频文档时出错了：" + e);
+            throw e;
+        }
+    }
+
+    //-----------------更新到这里----------------//
+
+    /**
+     * 查询相关数据数量
+     * @param keyword
+     * @param onlyPass  是否只查询过审的
+     * @return
+     */
+    public Long getPaperCount(String keyword, boolean onlyPass) {
+        try {
+            Query query = Query.of(q -> q.multiMatch(m -> m.fields("title", "tags").query(keyword)));
+            Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(1)))));
+            Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
+            CountRequest countRequest;
+            if (onlyPass) {
+                countRequest = new CountRequest.Builder().index("paper").query(bool).build();
+            } else {
+                countRequest = new CountRequest.Builder().index("paper").query(query).build();
+            }
+            CountResponse countResponse = client.count(countRequest);
+            return countResponse.count();
+        } catch (IOException e) {
+            log.error("查询ES相关视频数量时出错了：" + e);
+            return 0L;
+        }
+    }
+
+    /**
+     * 模糊匹配，分页查询
+     * @param keyword   查询关键词
+     * @param page  第几页 从1开始
+     * @param size  每页查多少条数据 一般30条
+     * @return 包含查到的数据id列表，按匹配分数排序
+     */
+    public List<Integer> searchPapersByKeyword(String keyword, Integer page, Integer size, boolean onlyPass) {
+        try {
+            List<Integer> list = new ArrayList<>();
+            Query query = Query.of(q -> q.multiMatch(m -> m.fields("title", "tags").query(keyword)));
+            Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(1)))));
+            Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
+            SearchRequest searchRequest;
+            if (onlyPass) {
+                searchRequest = new SearchRequest.Builder().index("paper").query(bool).from((page - 1) * size).size(size).build();
+            } else {
+                searchRequest = new SearchRequest.Builder().index("paper").query(query).from((page - 1) * size).size(size).build();
+            }
+            SearchResponse<ESPaper> searchResponse = client.search(searchRequest, ESPaper.class);
+            for (Hit<ESPaper> hit : searchResponse.hits().hits()) {
+                list.add(hit.source().getPid());
+            }
+            return list;
+        } catch (IOException e) {
+            log.error("查询ES相关视频文档时出错了：" + e);
+            return Collections.emptyList();
+        }
+    }
+
 
     /**
      * 添加用户文档
