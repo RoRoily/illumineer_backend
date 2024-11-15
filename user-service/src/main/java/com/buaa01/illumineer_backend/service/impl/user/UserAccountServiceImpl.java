@@ -13,6 +13,7 @@ import com.buaa01.illumineer_backend.service.user.UserAccountService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
+import com.buaa01.illumineer_backend.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -200,7 +201,7 @@ public class UserAccountServiceImpl implements UserAccountService {
         UserDTO userDTO = new UserDTO();
         userDTO.setUid(user.getUid());
         userDTO.setAvatar(user.getAvatar());
-        userDTO.setEmail(user.getEmail());
+        userDTO.setEmail(user.getAccount());
         userDTO.setInstitution(user.getInstitution());
         userDTO.setStatus(user.getStatus());
         userDTO.setUsername(user.getUsername());
