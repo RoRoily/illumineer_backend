@@ -28,4 +28,12 @@ public class Paper {
     private Integer fav_time; // 收藏次数
     private List<Integer> refs; // 引用文献
     private Integer stats; // 0 正常 1 已删除
+
+    public List<String> category2String(Paper paper){
+        List<String> cons = new ArrayList<>();
+        for(Category category: paper.getField()){
+            cons.add(category.getSubClassName());
+        }
+        return cons;
+    }
 }
