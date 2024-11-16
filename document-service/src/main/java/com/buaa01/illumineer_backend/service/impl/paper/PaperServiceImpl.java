@@ -104,6 +104,10 @@ public class PaperServiceImpl implements PaperService {
         for (Map<String, String> condition : conditions) {
             // 对该查询条件进行查询
             QueryWrapper<SearchResultPaper> queryWrapper = Wrappers.query();
+            if (condition.get("condition").equals("publishYear")) {
+                String year = condition.get("keyword");
+                condition.put("keyword", year + "-%-%");
+            }
             if (condition.get("logic").equals("3")) { // NOT
                 queryWrapper.notLike(condition.get("condition"), condition.get("keyword"));
             } else {
@@ -253,7 +257,12 @@ public class PaperServiceImpl implements PaperService {
     List<SearchResultPaper> searchByKeyword(String condition, String keyword) {
         try {
             List<SearchResultPaper> list = new ArrayList<>();
-            Query query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
+            Query query;
+            if (condition.equals("publishYear")) {
+                query = Query.of(q -> q.match(m -> m.field(condition).query(keyword + "-%-%")));
+            } else {
+                query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
+            }
             SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
             SearchResponse<SearchResultPaper> searchResponse = client.search(searchRequest, SearchResultPaper.class);
             for (Hit<SearchResultPaper> hit : searchResponse.hits().hits()) {
@@ -587,5 +596,12 @@ public class PaperServiceImpl implements PaperService {
     // 删除 redis 中的信息
     public void deleteFromRedis() {
         redisTool.deleteByPrefix("paper");
+    }
+
+    public String transDatetoYear(Date date) { // 将发布日期转化为年
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        return String.valueOf(year);
     }
 }
