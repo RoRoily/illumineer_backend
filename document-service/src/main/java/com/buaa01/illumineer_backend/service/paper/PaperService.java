@@ -98,11 +98,13 @@ public interface PaperService {
     CustomResponse updatePaper(int pid,
                                String title,
                                String essAbs,
-                               String keywords,
+                               List<String> keywords,
                                MultipartFile content,
-                               String field,
+                               Map<String, Integer> auths,
+                               List<String> field,
                                String type,
                                String theme,
                                Date publishDate,
-                               String derivation);
+                               String derivation,
+                               List<Integer> refs);
 }

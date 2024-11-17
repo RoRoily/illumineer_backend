@@ -544,13 +544,15 @@ public class PaperServiceImpl implements PaperService {
     public CustomResponse updatePaper(int pid,
                                       String title,
                                       String essAbs,
-                                      String keywords,
+                                      List<String> keywords,
                                       MultipartFile content,
-                                      String field,
+                                      Map<String, Integer> auths,
+                                      List<String> field,
                                       String type,
                                       String theme,
                                       Date publishDate,
-                                      String derivation) {
+                                      String derivation,
+                                      List<Integer> refs) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -565,7 +567,7 @@ public class PaperServiceImpl implements PaperService {
 
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", contentUrl = " + contentUrl + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation);
+        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", keywords = " + keywords + ", contentUrl = " + contentUrl + ", auths = " + auths + ", field = " + field + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation + ", refs = " + refs);
 
         paperMapper.update(null, updateWrapper);
 

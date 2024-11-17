@@ -160,14 +160,20 @@ public class PaperController {
     @PostMapping("/upload")
     public CustomResponse uploadPaper(@RequestParam("title") String title,
                                       @RequestParam("essAbs") String essAbs,
-                                      @RequestParam("keywords") String keywords,
+                                      @RequestParam("keywords") List<String> keywords,
                                       @RequestParam("content") MultipartFile content,
-                                      @RequestParam("field") String field,
+                                      @RequestParam("auths") List<String> auths,
+                                      @RequestParam("field") List<String> field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") Date publishDate,
-                                      @RequestParam("derivation") String derivation) {
-        Paper paper = new Paper(null, title, essAbs, Arrays.stream(keywords.split(" ")).toList(), null, null, Arrays.stream(field.split(" ")).toList(), type, theme, publishDate, derivation, 0, 0, null, 0);
+                                      @RequestParam("derivation") String derivation,
+                                      @RequestParam("refs") List<Integer> refs) {
+        Map<String, Integer> authsMap = new HashMap<>();
+        for (String auth: auths) {
+            authsMap.put(auth, -1);
+        }
+        Paper paper = new Paper(null, title, essAbs, keywords, null, authsMap, field, type, theme, publishDate, derivation, 0, 0, refs, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
@@ -251,18 +257,19 @@ public class PaperController {
      * @return
      */
     @PostMapping("/update")
-    public CustomResponse updatePaper(@RequestParam("pid") int pid,
-                                      @RequestParam("title") String title,
+    public CustomResponse updatePaper(@RequestParam("pid") int pid,@RequestParam("title") String title,
                                       @RequestParam("essAbs") String essAbs,
-                                      @RequestParam("keywords") String keywords,
+                                      @RequestParam("keywords") List<String> keywords,
                                       @RequestParam("content") MultipartFile content,
-                                      @RequestParam("field") String field,
+                                      @RequestParam("auths") Map<String, Integer> auths,
+                                      @RequestParam("field") List<String> field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") Date publishDate,
-                                      @RequestParam("derivation") String derivation) {
+                                      @RequestParam("derivation") String derivation,
+                                      @RequestParam("refs") List<Integer> refs) {
         try {
-            return paperService.updatePaper(pid, title, essAbs, keywords, content, field, type, theme, publishDate, derivation);
+            return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme, publishDate, derivation, refs);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
