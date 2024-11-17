@@ -46,6 +46,7 @@ public class PaperController {
      * @param offset 第几页
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @param order 0=降序，1=升序
+     * @param order 0=降序，1=升序
      * @return 文献信息
      */
     @GetMapping("/search")
@@ -55,7 +56,10 @@ public class PaperController {
                                        @RequestParam("offset") Integer offset,
                                        @RequestParam("type") Integer sortType,
                                        @RequestParam("order") Integer order) {
+                                       @RequestParam("type") Integer sortType,
+                                       @RequestParam("order") Integer order) {
         try {
+            return paperService.searchPapers(condition, keyword, size, offset, sortType, order);
             return paperService.searchPapers(condition, keyword, size, offset, sortType, order);
         } catch (Exception e) {
             e.printStackTrace();
@@ -206,6 +210,19 @@ public class PaperController {
 //            return customResponse;
 //        }
 //    }
+//    @PostMapping("/updateAuth")
+//    public CustomResponse updateAuth(@RequestParam("pid") int pid,
+//                                      @RequestParam("aid") int aid) {
+//        try {
+//            return paperService.updateAuth(pid, aid);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            CustomResponse customResponse = new CustomResponse();
+//            customResponse.setCode(500);
+//            customResponse.setMessage("作者关联失败！");
+//            return customResponse;
+//        }
+//    }
 
     /**
      * 更新作者（未认证）
@@ -214,6 +231,19 @@ public class PaperController {
      * @param author
      * @return
      */
+//    @PostMapping("/updateAuth")
+//    public CustomResponse updateAuth(@RequestParam("pid") int pid,
+//                                      @RequestParam("author") String author) {
+//        try {
+//            return paperService.updateAuth(pid, author);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            CustomResponse customResponse = new CustomResponse();
+//            customResponse.setCode(500);
+//            customResponse.setMessage("作者关联失败！");
+//            return customResponse;
+//        }
+//    }
 //    @PostMapping("/updateAuth")
 //    public CustomResponse updateAuth(@RequestParam("pid") int pid,
 //                                      @RequestParam("author") String author) {

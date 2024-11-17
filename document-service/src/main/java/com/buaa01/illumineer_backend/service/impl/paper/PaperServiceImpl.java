@@ -6,12 +6,18 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.mapper.SearchResultPaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
+import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.relational.core.sql.In;
@@ -19,20 +25,34 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import redis.clients.jedis.Jedis;
 
+import javax.json.Json;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Service
 public class PaperServiceImpl implements PaperService {
+
+    @Autowired
+    private RedisTool redisTool;
 
     @Autowired
     private ElasticsearchClient client;
 
     @Autowired
+    @Qualifier("taskExecutor")
+    private Executor taskExecutor;
+
+    @Autowired
     private PaperMapper paperMapper;
+    @Autowired
+    private SearchResultPaperMapper searchResultPaperMapper;
 
     @Override
     public CustomResponse getPaperByPid(Integer pid) {
@@ -45,6 +65,7 @@ public class PaperServiceImpl implements PaperService {
 
         Map<String, Object> map = new HashMap<>();
         map.put("title", paper.getTitle());
+        map.put("title", paper.getTitle());
         map.put("essAbs", paper.getEssAbs());
         map.put("keywords", paper.getKeywords());
         map.put("contentUrl", paper.getContentUrl());
@@ -54,7 +75,17 @@ public class PaperServiceImpl implements PaperService {
         map.put("theme", paper.getTheme());
         map.put("publishDate", paper.getPublishDate());
         map.put("derivation", paper.getDerivation());
+        map.put("keywords", paper.getKeywords());
+        map.put("contentUrl", paper.getContentUrl());
+        map.put("auths", paper.getAuths());
+        map.put("field", paper.getField());
+        map.put("type", paper.getType());
+        map.put("theme", paper.getTheme());
+        map.put("publishDate", paper.getPublishDate());
+        map.put("derivation", paper.getDerivation());
         map.put("ref_times", paper.getRef_times());
+        map.put("fav_times", paper.getFav_time());
+        map.put("refs", paper.getRefs());
         map.put("fav_times", paper.getFav_time());
         map.put("refs", paper.getRefs());
         customResponse.setData(map);
@@ -110,12 +141,20 @@ public class PaperServiceImpl implements PaperService {
 
         // 2. searchbByOrder 对搜索结果进行排序：sortType
         papers = searchByOrder(papers, sortType, order);
+        papers = searchByOrder(papers, sortType, order);
 
         // 3. searchByPage 对排序结果进行分页，并将当前页 offset 需要的内容返回
         papers = searchByPage(papers, size, offset);
 
         // 4. 返回结果
         CustomResponse customResponse = new CustomResponse();
+        result.put("result", papers); // 搜索结果
+        result.put("year", years); // 年份（从出版时间publishDate解析）
+        result.put("derivation", derivations); // 来源
+        result.put("type", types); // 类型
+        result.put("theme", themes); // 主题
+
+        customResponse.setData(result);
         result.put("result", papers); // 搜索结果
         result.put("year", years); // 年份（从出版时间publishDate解析）
         result.put("derivation", derivations); // 来源
@@ -234,6 +273,7 @@ public class PaperServiceImpl implements PaperService {
      * @param papers  搜索的结果
      * @param pageNum 一页的条目数量
      * @param offset  第几页
+     * @param offset  第几页
      * @return 文献信息
      */
     List<Papers> searchByPage(List<Papers> papers, Integer pageNum, Integer offset) {
@@ -269,6 +309,7 @@ public class PaperServiceImpl implements PaperService {
      * 
      * @param papers   搜索的结果
      * @param sortType 根据这个来进行排序 // 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order    0=降序，1=升序
      * @param order    0=降序，1=升序
      * @return 文献信息
      */
@@ -324,6 +365,7 @@ public class PaperServiceImpl implements PaperService {
 
         Map<String, Object> map = new HashMap<>();
         map.put("ref_times", paper.getRef_times());
+        map.put("ref_times", paper.getRef_times());
         customResponse.setData(map);
         return customResponse;
     }
@@ -372,7 +414,8 @@ public class PaperServiceImpl implements PaperService {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
-        String contentUrl = ossTool.uploadPaperContent(content, "content");
+//        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        String contentUrl = "";
         if (contentUrl == null) {
             log.warn("OSS URL 为空，合并操作终止");
             customResponse.setMessage("无法生成文章url！");
@@ -385,7 +428,7 @@ public class PaperServiceImpl implements PaperService {
 
         // 存入数据库
         paperMapper.insert(paper);
-        esTool.addPaper(paperMapper);
+//        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
         return customResponse;
@@ -504,7 +547,8 @@ public class PaperServiceImpl implements PaperService {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
-        String contentUrl = ossTool.uploadPaperContent(content, "content");
+//        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        String contentUrl = "";
         if (contentUrl == null) {
             log.warn("OSS URL 为空，合并操作终止");
             customResponse.setMessage("无法生成文章url！");
@@ -521,5 +565,37 @@ public class PaperServiceImpl implements PaperService {
 
         customResponse.setMessage("文章更新成功！");
         return customResponse;
+    }
+
+    // 将查询结果存到 redis 中
+    public void saveToRedis(List<SearchResultPaper> searchResultPapers) {
+        for (SearchResultPaper paper : searchResultPapers) {
+            CompletableFuture.runAsync(() -> {
+                redisTool.setExObjectValue("paper" + paper.getPid(), paper);    // 异步更新到redis
+            }, taskExecutor);
+        }
+    }
+
+    // 从 redis 中获取暂存信息
+    public List<SearchResultPaper> getFromRedis() {
+        List<SearchResultPaper> papers = new ArrayList<>();
+        Set<String> keySet = redisTool.getKeysByPrefix("paper");
+        for (String key : keySet) {
+            SearchResultPaper paper = redisTool.getObjectByClass(key, SearchResultPaper.class);
+            papers.add(paper);
+        }
+        return papers;
+    }
+
+    // 删除 redis 中的信息
+    public void deleteFromRedis() {
+        redisTool.deleteByPrefix("paper");
+    }
+
+    public String transDatetoYear(Date date) { // 将发布日期转化为年
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        return String.valueOf(year);
     }
 }
