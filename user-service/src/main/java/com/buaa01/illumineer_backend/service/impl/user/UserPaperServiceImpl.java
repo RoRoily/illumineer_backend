@@ -47,9 +47,11 @@ public class UserPaperServiceImpl implements UserPaperService {
             userPaperMapper.insert(userPaper);
         } else if (System.currentTimeMillis() - userPaper.getAcessDate().getTime() <= 30000) {
             // 如果最近30秒内播放过则不更新记录，直接返回
+            userPaper.updateWeight(1); // 浏览+1
             return userPaper;
         } else {
             userPaper.setAcessDate(new Date());
+            userPaper.updateWeight(1); // 浏览+1
             userPaperMapper.updateById(userPaper);
         }
         // 异步线程更新video表和redis
@@ -72,7 +74,7 @@ public class UserPaperServiceImpl implements UserPaperService {
         UpdateWrapper<User2Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("uid", uid).eq("pid", pid);
         if (isCollect) {
-            updateWrapper.setSql("collect = 1");
+            updateWrapper.setSql("collect = 1, weight = weight + 3"); // 收藏+3
         } else {
             updateWrapper.setSql("collect = 0");
         }
