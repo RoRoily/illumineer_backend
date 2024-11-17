@@ -1,12 +1,21 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.buaa01.illumineer_backend.entity.Category;
+import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.User2Paper;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import com.buaa01.illumineer_backend.mapper.CategoryMapper;
+import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.mapper.UserPaperMapper;
 import com.buaa01.illumineer_backend.service.user.UserPaperService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
@@ -16,6 +25,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserPaperServiceImpl implements UserPaperService {
+
+    @Autowired
+    private PaperMapper paperMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     @Autowired
     private UserPaperMapper userPaperMapper;
@@ -45,6 +63,7 @@ public class UserPaperServiceImpl implements UserPaperService {
             // 记录不存在，创建新记录
             userPaper = new User2Paper(null, uid, pid, 0, new Date());
             userPaperMapper.insert(userPaper);
+            updateIntention(uid, pid, 1); // 浏览 +1
         } else if (System.currentTimeMillis() - userPaper.getAcessDate().getTime() <= 30000) {
             // 如果最近30秒内播放过则不更新记录，直接返回
             return userPaper;
@@ -72,7 +91,8 @@ public class UserPaperServiceImpl implements UserPaperService {
         UpdateWrapper<User2Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("uid", uid).eq("pid", pid);
         if (isCollect) {
-            updateWrapper.setSql("collect = 1"); // 收藏+3
+            updateWrapper.setSql("collect = 1");
+            updateIntention(uid, pid, 3); // 收藏 +3
         } else {
             updateWrapper.setSql("collect = 0");
         }
@@ -80,5 +100,51 @@ public class UserPaperServiceImpl implements UserPaperService {
             videoServiceClient.updateVideoStatus(pid, "collect", isCollect, 1);
         }, taskExecutor);
         userPaperMapper.update(null, updateWrapper);
+    }
+
+    // 增加相应cid的权重
+    private void updateIntention(Integer uid, Integer pid, Integer addWeight) {
+        Integer cid = getCid(pid);
+        User user = getUser(uid);
+
+        // 获取最新的weight
+        Map<Integer, Integer> intention = user.getIntention();
+        Integer weight = intention.get(cid);
+        intention.put(cid, weight + addWeight);
+
+        // 更新weight
+        userMapper.updateCategory(uid, intention);
+    }
+
+    // 根据pid获得cid
+    private int getCid(Integer pid) {
+        // 根据pid找category
+        Paper paper = getPaper(pid);
+        String categoryName = paper.getCategory();
+
+        // 根据category找cid
+        Category category = null;
+        QueryWrapper<Category> categoryQueryWrapper = new QueryWrapper<>();
+        categoryQueryWrapper.eq("name", categoryName);
+        category = categoryMapper.selectOne(categoryQueryWrapper);
+        Integer cid = category.getCid();
+
+        return cid;
+    }
+
+    private Paper getPaper(Integer pid) {
+        Paper paper = null;
+        QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
+        paperQueryWrapper.eq("pid", pid);
+        paper = paperMapper.selectOne(paperQueryWrapper);
+        return paper;
+    }
+
+    private User getUser(Integer uid) {
+        User user = null;
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("uid", uid);
+        user = userMapper.selectOne(userQueryWrapper);
+        return user;
     }
 }

@@ -34,7 +34,7 @@ public class User {
     private List<String> field ;// 相关领域
     private String institution;
 
-    private Map<String, Integer> intention; // <领域, 权重> 点击+1，下载+2，收藏+3
+    private Map<Integer, Integer> intention; // <领域cid, 权重> 点击+1，下载+2，收藏+3
     //需要在Redis中存储的信息
     //名下论文集合 papers
     //合作者/关联者 collaborator
