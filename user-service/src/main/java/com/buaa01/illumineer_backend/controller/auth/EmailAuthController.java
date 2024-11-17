@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * 用户邮箱认证流程
+ * **/
 @RestController
 @RequestMapping("/auth")
 public class EmailAuthController {

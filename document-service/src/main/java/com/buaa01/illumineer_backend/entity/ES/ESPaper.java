@@ -1,7 +1,5 @@
-package com.buaa01.illumineer_backend.entity;
+package com.buaa01.illumineer_backend.entity.ES;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,11 +11,11 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SearchResultPaper {
+public class ESPaper {
     private Integer pid;
     // 文章的相关信息
     private String title; // 文章题目
-//    private String essAbs; // 文章摘要
+    //    private String essAbs; // 文章摘要
     private List<String> keywords;
     private Map<String, Integer> auths; // 文章作者
     private List<String> field; // 相关领域
@@ -27,14 +25,4 @@ public class SearchResultPaper {
     private String derivation;// 来源
     private Integer ref_times; // 引用次数
     private Integer fav_time; // 收藏次数
-    private List<Integer> refs; // 引用文献
-    private Integer stats; // 0 正常 1 已删除
-
-    public List<String> category2String(Paper paper){
-        List<String> cons = new ArrayList<>();
-        for(Category category: paper.getField()){
-            cons.add(category.getSubClassName());
-        }
-        return cons;
-    }
 }
