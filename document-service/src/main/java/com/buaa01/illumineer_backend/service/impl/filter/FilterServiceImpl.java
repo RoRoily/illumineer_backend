@@ -17,7 +17,6 @@ public class FilterServiceImpl implements FilterService {
         List<Papers> filteredPapers = papers.stream()
                 .filter(paper -> (sc.getYear().isEmpty()
                         || sc.getYear().contains(transDatetoYear(paper.getPublishDate()))) &&
-                        (sc.getType().isEmpty() || sc.getType().contains(paper.getType())) &&
                         (sc.getDerivation().isEmpty() || sc.getDerivation().contains(paper.getDerivation())) &&
                         (sc.getTheme().isEmpty() || sc.getTheme().contains(paper.getTheme())))
                 .collect(Collectors.toList());
