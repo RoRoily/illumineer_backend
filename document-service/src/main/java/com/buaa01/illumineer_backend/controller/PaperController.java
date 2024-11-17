@@ -56,10 +56,7 @@ public class PaperController {
                                        @RequestParam("offset") Integer offset,
                                        @RequestParam("type") Integer sortType,
                                        @RequestParam("order") Integer order) {
-                                       @RequestParam("type") Integer sortType,
-                                       @RequestParam("order") Integer order) {
         try {
-            return paperService.searchPapers(condition, keyword, size, offset, sortType, order);
             return paperService.searchPapers(condition, keyword, size, offset, sortType, order);
         } catch (Exception e) {
             e.printStackTrace();

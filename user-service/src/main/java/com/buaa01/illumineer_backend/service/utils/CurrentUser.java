@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.service.utils;
 
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
-import com.bilimili.buaa13.service.impl.user.UserDetailsImpl;
+//import com.bilimili.buaa13.service.impl.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +29,7 @@ public class CurrentUser {
     public Integer getUserId() {
         UsernamePasswordAuthenticationToken authenticationToken =
                 (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.getPrincipal();
+//        UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.getPrincipal();
         User suser = loginUser.getUser();   // 这里的user是登录时存的security:user，因为是静态数据，可能会跟实际的有区别，所以只能用作获取uid用
         return suser.getUid();
     }
