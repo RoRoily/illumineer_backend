@@ -18,8 +18,6 @@ public class Papers extends Achievements {
     private String title;
     /** 文章主题 */
     private String theme;
-    /** 文章类型 (期刊、论文、会议、报纸) */
-    private String Type;
     /** 文章作者 */
     private Map<String, Integer> auths;
     /** 文章来源 */
