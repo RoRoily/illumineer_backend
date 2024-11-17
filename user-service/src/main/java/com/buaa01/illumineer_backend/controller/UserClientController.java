@@ -8,6 +8,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.service.user.UserAuthService;
+import com.buaa01.illumineer_backend.service.user.UserService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.tool.RedisTool;
 import io.netty.channel.Channel;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -28,8 +31,6 @@ public class UserClientController {
     @Autowired
     private SqlSessionFactory sqlSessionFactory;
 
-    @Autowired
-    private FavoriteVideoMapper favoriteVideoMapper;
     @Autowired
     private RedisTool redisTool;
     @Autowired

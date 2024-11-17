@@ -27,11 +27,12 @@ public class CurrentUser {
      * @return 当前登录用户的uid
      */
     public Integer getUserId() {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-//        UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.getPrincipal();
-        User suser = loginUser.getUser();   // 这里的user是登录时存的security:user，因为是静态数据，可能会跟实际的有区别，所以只能用作获取uid用
-        return suser.getUid();
+//        UsernamePasswordAuthenticationToken authenticationToken =
+//                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+////        UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.getPrincipal();
+//        User suser = loginUser.getUser();   // 这里的user是登录时存的security:user，因为是静态数据，可能会跟实际的有区别，所以只能用作获取uid用
+//        return suser.getUid();
+        return 0;
     }
 
     /**
@@ -57,17 +58,18 @@ public class CurrentUser {
      *获取当前登录用户的uid
      * */
     public Integer getUserUid(){
-        AtomicReference<UsernamePasswordAuthenticationToken> authenticationToken = new AtomicReference<>((UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication());
-        AtomicReference<User> sUser = new AtomicReference<>(new User());
-        CompletableFuture<?> futureUid = CompletableFuture.runAsync(()->{
-            authenticationToken.set((UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication());
-            UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.get().getPrincipal();
-            sUser.set(loginUser.getUser());   // 这里的user是登录时存的security:user，因为是静态数据，可能会跟实际的有区别，所以只能用作获取uid用
-        },taskExecutor);
-        CompletableFuture<?> futureUser = CompletableFuture.runAsync(()->{
-            sUser.set((User) authenticationToken.get().getPrincipal());
-        },taskExecutor);
-        CompletableFuture.allOf(futureUid, futureUser).join();
-        return sUser.get().getUid();
+//        AtomicReference<UsernamePasswordAuthenticationToken> authenticationToken = new AtomicReference<>((UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication());
+//        AtomicReference<User> sUser = new AtomicReference<>(new User());
+//        CompletableFuture<?> futureUid = CompletableFuture.runAsync(()->{
+//            authenticationToken.set((UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication());
+//            UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.get().getPrincipal();
+//            sUser.set(loginUser.getUser());   // 这里的user是登录时存的security:user，因为是静态数据，可能会跟实际的有区别，所以只能用作获取uid用
+//        },taskExecutor);
+//        CompletableFuture<?> futureUser = CompletableFuture.runAsync(()->{
+//            sUser.set((User) authenticationToken.get().getPrincipal());
+//        },taskExecutor);
+//        CompletableFuture.allOf(futureUid, futureUser).join();
+//        return sUser.get().getUid();
+        return 0;
     }
 }
