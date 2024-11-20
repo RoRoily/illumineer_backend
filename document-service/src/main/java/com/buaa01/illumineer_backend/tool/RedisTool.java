@@ -14,10 +14,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -26,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RedisTool {
     @Autowired
-    private RedisTemplate<String,Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     //默认的存活时间：60*60=3600
     public static final long REDIS_DEFAULT_EXPIRE_TIME = 60 * 60;
@@ -37,98 +33,110 @@ public class RedisTool {
 
     /**
      * 设置指定的key的存活时间，单位：秒
-     * @param key 键
+     *
+     * @param key        键
      * @param expireTime 存活时间（秒）
      */
-    public void setExpire(String key,long expireTime){
-        redisTemplate.expire(key,expireTime,REDIS_DEFAULT_EXPIRE_TIME_UNIT);
+    public void setExpire(String key, long expireTime) {
+        redisTemplate.expire(key, expireTime, REDIS_DEFAULT_EXPIRE_TIME_UNIT);
     }
 
     /**
      * 根据键返回它的剩余的存活时间，单位：秒
+     *
      * @param key 键
      * @return 剩余的存活时间，如果键不存在则返回-1
      */
-    public long getExpire(String key){
-        Long expireTime = redisTemplate.getExpire(key,REDIS_DEFAULT_EXPIRE_TIME_UNIT);
-        if(expireTime == null) return -1;
+    public long getExpire(String key) {
+        Long expireTime = redisTemplate.getExpire(key, REDIS_DEFAULT_EXPIRE_TIME_UNIT);
+        if (expireTime == null) return -1;
         else return expireTime;
     }
 
     /**
      * 设置过期日期
-     * @param key 键
+     *
+     * @param key        键
      * @param expireDate 过期的日期
      * @return 是否成功执行
      */
-    public Boolean setExpireDate(String key, Date expireDate){
+    public Boolean setExpireDate(String key, Date expireDate) {
         return Boolean.TRUE.equals(redisTemplate.expireAt(key, expireDate));
     }
 
     /**
      * 移除过期时间，key将永久存在于缓存
+     *
      * @param key 键
      * @return 操作是否成功
      */
-    public Boolean persist(String key){
+    public Boolean persist(String key) {
         return Boolean.TRUE.equals(redisTemplate.persist(key));
     }
 
     /**
      * 删除指定key的缓存
+     *
      * @param key 键
      */
-    public void deleteKey(String key){
+    public void deleteKey(String key) {
         redisTemplate.delete(key);
     }
 
     /**
      * 批量删除键
+     *
      * @param keys 键的集合，set,list什么都行
      */
-    public void deleteKeys(Collection<String> keys){
+    public void deleteKeys(Collection<String> keys) {
         redisTemplate.delete(keys);
     }
 
     /**
      * 获取指定前缀的所有的key
+     *
      * @param keyPrefix 前缀
      * @return 所有前缀符合的key的集合
      */
-    public Set<String> getKeysByPrefix(String keyPrefix){
-        return redisTemplate.keys(keyPrefix+"*");
+    public Set<String> getKeysByPrefix(String keyPrefix) {
+        return redisTemplate.keys(keyPrefix + "*");
     }
 
     /**
      * 删除指定前缀的所有key的缓存
+     *
      * @param keyPrefix 前缀
      */
-    public void deleteByPrefix(String keyPrefix){
-        Set<String> keys = redisTemplate.keys(keyPrefix+"*");
-        if(keys!=null && !keys.isEmpty()){
+    public void deleteByPrefix(String keyPrefix) {
+        Set<String> keys = redisTemplate.keys(keyPrefix + "*");
+        if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }
 
     /**
      * 查询key是否存在于redis
+     *
      * @param key 键
      * @return boolean，是否存在
      */
-    public Boolean isExist(String key){
+    public Boolean isExist(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
     /**
      * 序列化key
+     *
      * @param key 键
      * @return 序列化后的字节数组
      */
-    public byte[] dump(String key){
+    public byte[] dump(String key) {
         return redisTemplate.dump(key);
     }
+
     /**
      * 从当前数据库中随机返回一个 key
+     *
      * @return 随机的 key
      */
     public String getRandomKey() {
@@ -137,6 +145,7 @@ public class RedisTool {
 
     /**
      * 修改 key 的名称
+     *
      * @param oldKey 原 key 名称
      * @param newKey 新 key 名称
      */
@@ -146,6 +155,7 @@ public class RedisTool {
 
     /**
      * 仅当 newKey 不存在时，将 oldKey 改名为 newKey
+     *
      * @param oldKey 原 key 名称
      * @param newKey 新 key 名称
      * @return 是否成功
@@ -158,7 +168,6 @@ public class RedisTool {
      * 返回 key 所储存的值的类型
      *
      * @param key key
-     *
      * @return 数据类型
      */
     public DataType type(String key) {
@@ -173,14 +182,15 @@ public class RedisTool {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class ZSetTime{
+    public static class ZSetTime {
         private Object object;
         private Date time;
     }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class ZSetScore{
+    public static class ZSetScore {
         private Object object;
         private Double score;
     }
@@ -188,33 +198,36 @@ public class RedisTool {
 
     /**
      * 按照分数，从小到大取排行榜，默认情况下redis按照从小到大排序存储
-     * @param key 键
+     *
+     * @param key   键
      * @param start 开始位置，注意，集合中第一个元素的位置是0，和数组一致
-     * @param end 结束位置
-     * <p>
-     * start 和 end 参数可以为负数，这表示从集合尾部开始的索引，例如 -1 表示最后一个元素，-2 表示倒数第二个元素，以此类推。
+     * @param end   结束位置
+     *              <p>
+     *              start 和 end 参数可以为负数，这表示从集合尾部开始的索引，例如 -1 表示最后一个元素，-2 表示倒数第二个元素，以此类推。
      * @return Object集合，根据顺序排出来的
      */
-    public Set<Object> zRange(String key,long start,long end){
-        return redisTemplate.opsForZSet().range(key,start,end);
+    public Set<Object> zRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().range(key, start, end);
     }
 
     /**
      * 按照分数，从大到小取排行榜
-     * @param key 键
+     *
+     * @param key   键
      * @param start 开始位置
-     * @param end 结束位置
+     * @param end   结束位置
      * @return 根据顺序排序的Object集合
      */
-    public Set<Object> zReverseRange(String key,long start,long end){
-        return redisTemplate.opsForZSet().reverseRange(key,start,end);
+    public Set<Object> zReverseRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().reverseRange(key, start, end);
     }
 
     /**
      * 按分数从大到小取数据，携带分数
-     * @param key 键
+     *
+     * @param key   键
      * @param start 开始位置
-     * @param end 结束位置
+     * @param end   结束位置
      * @return 从大到小排序的ZSetScore List
      */
     public List<ZSetScore> reverseRangeWithScores(String key, long start, long end) {
@@ -229,9 +242,10 @@ public class RedisTool {
 
     /**
      * 按分数从大到小取数据，携带时间（如果分数就是时间，使用这个）
-     * @param key 键
+     *
+     * @param key   键
      * @param start 开始位置
-     * @param end 结束位置
+     * @param end   结束位置
      * @return 从大到小排序的ZSetScore List
      */
     public List<ZSetTime> reverseRangeWithTimes(String key, long start, long end) {
@@ -246,52 +260,57 @@ public class RedisTool {
 
     /**
      * 按照分数，从低到高，获取排名
-     * @param key 键
+     *
+     * @param key    键
      * @param object 对象
      * @return 排名
      */
-    public Long getRank(String key,Object object){
+    public Long getRank(String key, Object object) {
         Long rank = redisTemplate.opsForZSet().rank(key, object);
-        if(rank == null) return redisTemplate.opsForZSet().size(key);
+        if (rank == null) return redisTemplate.opsForZSet().size(key);
         return rank;
     }
 
     /**
      * 按照分数，从高到低，获取排名
-     * @param key 键
+     *
+     * @param key    键
      * @param object 对象
      * @return 排名
      */
-    public Long getReserveRank(String key,Object object){
+    public Long getReserveRank(String key, Object object) {
         Long rank = redisTemplate.opsForZSet().reverseRank(key, object);
-        if(rank == null) return redisTemplate.opsForZSet().size(key);
+        if (rank == null) return redisTemplate.opsForZSet().size(key);
         return rank;
     }
 
     /**
      * 存入一条数据到sorted set    时间作为分数
-     * @param key 键
+     *
+     * @param key    键
      * @param object 对象
      */
-    public boolean storeZSetByTime(String key, Object object){
+    public boolean storeZSetByTime(String key, Object object) {
         long now = System.currentTimeMillis();
         return Boolean.TRUE.equals(redisTemplate.opsForZSet().add(key, object, now));
     }
 
     /**
      * 存入一条数据到sorted set，自定义分数
-     * @param key 键
+     *
+     * @param key    键
      * @param object 对象
-     * @param score 分数，自己设定的
+     * @param score  分数，自己设定的
      * @return 是否成功
      */
-    public boolean storeZSetByScore(String key, Object object, double score){
+    public boolean storeZSetByScore(String key, Object object, double score) {
         return Boolean.TRUE.equals(redisTemplate.opsForZSet().add(key, object, score));
     }
 
     /**
      * 将ZSetTime集合转换为TypedTuple集合
      * TypedTuple 是 Spring Data Redis 中表示 ZSet 元素及其分数的对象。
+     *
      * @param zSetTimes 自定义的类 ZSetTimes集合，可以是set或list等
      * @return TypedTuple集合，TypedTuple类第一个元素是Object，第二个元素是Score
      */
@@ -304,6 +323,7 @@ public class RedisTool {
     /**
      * 将ZSetScore集合转换为TypedTuple集合
      * TypedTuple 是 Spring Data Redis 中表示 ZSet 元素及其分数的对象。
+     *
      * @param zSetScores 自定义的类 ZSetScores集合，可以是set或list等
      * @return TypedTuple集合，TypedTuple类第一个元素是Object，第二个元素是Score
      */
@@ -315,37 +335,41 @@ public class RedisTool {
 
     /**
      * 按照时间顺序，批量将ZSetTimes存入redis
-     * @param key 键
+     *
+     * @param key       键
      * @param ZSetTimes 自定义的类 ZSetTimes，包含对象和时间
      * @return 插入元素的个数
      */
-    public Long storeZSetOfCollectionByTime(String key, Collection<ZSetTime> ZSetTimes){
-        return redisTemplate.opsForZSet().add(key,convertToTupleSetByTime(ZSetTimes));
+    public Long storeZSetOfCollectionByTime(String key, Collection<ZSetTime> ZSetTimes) {
+        return redisTemplate.opsForZSet().add(key, convertToTupleSetByTime(ZSetTimes));
     }
 
     /**
      * 按照分数排序，批量将ZSetScores存入redis
-     * @param key 键
+     *
+     * @param key        键
      * @param ZSetScores 自定义类ZSetScore，包含对象和分数
      * @return 存入对象的个数
      */
-    public Long storeZSetOfCollectionByScore(String key, Collection<ZSetScore> ZSetScores){
-        return redisTemplate.opsForZSet().add(key,convertToTupleSetByScore(ZSetScores));
+    public Long storeZSetOfCollectionByScore(String key, Collection<ZSetScore> ZSetScores) {
+        return redisTemplate.opsForZSet().add(key, convertToTupleSetByScore(ZSetScores));
     }
 
     /**
      * 查看匹配数目
-     * @param key   键
-     * @param min   起始分数
-     * @param max   结束分数
+     *
+     * @param key 键
+     * @param min 起始分数
+     * @param max 结束分数
      * @return key中符合分数条件的数目
      */
-    public Long getZCount(String key, long min, long max){
+    public Long getZCount(String key, long min, long max) {
         return redisTemplate.opsForZSet().count(key, min, max);
     }
 
     /**
      * 根据键，获取键对应的整个集合元素个数
+     *
      * @param key 键
      * @return 键对应的集合有多少个元素
      */
@@ -355,7 +379,8 @@ public class RedisTool {
 
     /**
      * 删除Set指定key下的对象
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象值
      */
     public void deleteZSetMember(String key, Object value) {
@@ -364,7 +389,8 @@ public class RedisTool {
 
     /**
      * 查询某个元素的分数
-     * @param key 键
+     *
+     * @param key   键
      * @param value 这个键对应的集合中，元素value
      * @return value在集合中的分数
      */
@@ -374,7 +400,8 @@ public class RedisTool {
 
     /**
      * 对某个元素增加分数
-     * @param key 键
+     *
+     * @param key   键
      * @param value 键key对应的集合中的元素
      * @param score 要增加的分数
      * @return 增加分数后，元素value的总分数
@@ -385,7 +412,8 @@ public class RedisTool {
 
     /**
      * 集合ZSet中是否存在目标对象
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象
      * @return 判断对象value是否在键key对应的ZSet中
      */
@@ -396,7 +424,8 @@ public class RedisTool {
 
     /**
      * 添加元素至key对应的ZSet集合中，并且根据limit限制集合的大小。按照时间顺序
-     * @param key 键
+     *
+     * @param key   键
      * @param value 待添加的元素
      * @param limit 限制集合大小
      * @return 是否添加成功。
@@ -407,7 +436,7 @@ public class RedisTool {
         Long count = this.getZSetNumber(key);
         // 如果数量大于limit，则进行清除操作，清除之前的数据
         if (count != null && count > limit) {
-            redisTemplate.opsForZSet().removeRange(key, 0, count-limit-1);
+            redisTemplate.opsForZSet().removeRange(key, 0, count - limit - 1);
         }
         return result;
     }
@@ -418,6 +447,7 @@ public class RedisTool {
 
     /**
      * 普通缓存放入
+     *
      * @param key   键
      * @param value 值
      * @return true成功 false失败
@@ -435,6 +465,7 @@ public class RedisTool {
 
     /**
      * set集合获取
+     *
      * @param key 键
      * @return key对应的集合
      */
@@ -444,7 +475,8 @@ public class RedisTool {
 
     /**
      * 集合set中是否存在目标对象
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象
      * @return 是否存在对象
      */
@@ -454,7 +486,8 @@ public class RedisTool {
 
     /**
      * 向SET中添加无过期时间的对象
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象
      */
     public void addSetMember(String key, Object value) {
@@ -463,7 +496,8 @@ public class RedisTool {
 
     /**
      * 删除SET中的数据
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象
      */
     public void deleteSetMember(String key, Object value) {
@@ -471,7 +505,18 @@ public class RedisTool {
     }
 
     /**
+     * 获取hashKey对应的所有键值
+     *
+     * @param key 键
+     * @return 对应的多个键值
+     */
+    public Map<Object, Object> hashGet(String key) {
+        return redisTemplate.opsForHash().entries(key);
+    }
+
+    /**
      * 查询SET大小
+     *
      * @param key 键
      * @return 键key对应集合的大小
      */
@@ -481,7 +526,8 @@ public class RedisTool {
 
     /**
      * 随机返回集合中count个元素的集合
-     * @param key 键
+     *
+     * @param key   键
      * @param count 返回的集合的元素个数
      * @return 随机的元素集合
      */
@@ -491,12 +537,13 @@ public class RedisTool {
 
     //--------------------无序集合Set相关操作结束--------------------
 
-    //--------------------字符串String/单个实体对象存储相关操作开始--------------------
+    //--------------------字符串存储String相关操作开始--------------------
 
     /**
      * 存储简单数据类型
      * 不用更新的缓存信息
-     * @param key 键
+     *
+     * @param key   键
      * @param value 值
      */
     public void setValue(String key, Object value) {
@@ -506,7 +553,8 @@ public class RedisTool {
     /**
      * 实体类转换成string再进行操作（JSON）
      * 不用更新的缓存信息
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象值
      */
     public void setObjectValue(String key, Object value) {
@@ -516,7 +564,8 @@ public class RedisTool {
 
     /**
      * 使用默认有效期存储实体类，将实体类转换成JSON
-     * @param key 键
+     *
+     * @param key   键
      * @param value 值
      */
     public void setExObjectValue(String key, Object value) {
@@ -526,9 +575,10 @@ public class RedisTool {
 
     /**
      * 使用指定有效期存储实体类
-     * @param key 键
-     * @param value 值
-     * @param time 指定的有效期时间
+     *
+     * @param key      键
+     * @param value    值
+     * @param time     指定的有效期时间
      * @param timeUnit 单位
      */
     public void setExObjectValue(String key, Object value, long time, TimeUnit timeUnit) {
@@ -538,7 +588,8 @@ public class RedisTool {
 
     /**
      * 使用 默认有效期 和 默认时间单位（秒） 存储简单数据类型
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象值
      */
     public void setExValue(String key, Object value) {
@@ -547,9 +598,10 @@ public class RedisTool {
 
     /**
      * 使用 指定有效期 和 默认时间单位 存储简单数据类型
-     * @param key 键
+     *
+     * @param key   键
      * @param value 对象值
-     * @param time 指定的有效期
+     * @param time  指定的有效期
      */
     public void setExValue(String key, Object value, long time) {
         setExValue(key, value, time, REDIS_DEFAULT_EXPIRE_TIME_UNIT);
@@ -557,9 +609,10 @@ public class RedisTool {
 
     /**
      * 使用 指定有效期 和 指定时间单位 存储简单数据类型
-     * @param key  键
-     * @param value 值
-     * @param time 指定的有效期时间
+     *
+     * @param key      键
+     * @param value    值
+     * @param time     指定的有效期时间
      * @param timeUnit 时间单位
      */
     public void setExValue(String key, Object value, long time, TimeUnit timeUnit) {
@@ -568,6 +621,7 @@ public class RedisTool {
 
     /**
      * 获取简单数据类型
+     *
      * @param key 键
      * @return 键对应的值object，单个值，不是集合
      */
@@ -577,6 +631,7 @@ public class RedisTool {
 
     /**
      * 获取实体类的JSONString
+     *
      * @param key 键
      * @return JSON字符串
      */
@@ -596,206 +651,28 @@ public class RedisTool {
     }
 
     /**
-     * 删除简单数据类型或实体类
-     * @param key 键
-     */
-    public void deleteValue(String key) {
-        redisTemplate.opsForValue().getOperations().delete(key);
-    }
-
-    /**
-     * 删除多个key
-     * @param keys 键的集合
-     */
-    public void deleteValues(Collection<String> keys) {
-        redisTemplate.opsForValue().getOperations().delete(keys);
-    }
-
-    /**
-     * 递增，将这个键对应的值+1，如果没有键，则创建它，并且值初始化为1
-     * 应用场景：
-     * 计数器：可以用于计数操作，例如网站的访问次数、事件的触发次数等。
-     * 乐观锁：在并发场景中，通过使用 Redis 作为计数器来控制资源访问。
-     * @param key 键
-     */
-    public void increment(String key) {
-        redisTemplate.opsForValue().increment(key, 1);
-    }
-    /**
-     * 递减，将这个键对应的值-1，如果没有键，则创建它，并且值初始化为-1
-     * 应用场景：
-     * 计数器：可以用于计数操作，例如网站的访问次数、事件的触发次数等。
-     * 乐观锁：在并发场景中，通过使用 Redis 作为计数器来控制资源访问。
-     * @param key 键
-     */
-    public void decrement(String key) {
-        redisTemplate.opsForValue().decrement(key, 1);
-    }
-
-    //--------------------字符串String/单个实体对象存储相关操作结束--------------------
-
-    //--------------------哈希存储相关操作开始--------------------
-
-    /**
-     * 获取hashKey对应的所有键值
-     * 假设 Redis 中有一个哈希表，键为 "user:1001"，包含如下数据：
-     * {
-     *   "name": "Alice",
-     *   "age": 25,
-     *   "city": "Beijing"
-     * }
-     * 调用 hashGet("user:1001") 会返回这个map。
-     * @param key 键
-     * @return 对应的多个键值
-     */
-    public Map<Object, Object> hashGet(String key) {
-        try {
-            return redisTemplate.opsForHash().entries(key);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * 获取map中的指定hashKey对应的数据
-     * 假设 Redis 中有一个哈希表，键为 "user:1001"，包含如下数据：
-     * {
-     *   "name": "Alice",
-     *   "age": 25,
-     *   "city": "Beijing"
-     * }
-     * 调用 hashGet("user:1001", "name") 会返回 "Alice"。
-     * 如果调用 hashGet("user:1001", "email")，由于哈希表中没有这个字段，返回值为 null。
-     * @param key 键
-     * @param hashKey 哈希键
-     * @return 哈希键对应的对象值
-     */
-    public Object hashGet(String key, String hashKey) {
-        try {
-            return redisTemplate.opsForHash().get(key, hashKey);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * 把map存到redis中
-     * @param key 键
-     * @param map map
-     */
-    public void hashPut(String key, Map map) {
-        redisTemplate.opsForHash().putAll(key, map);
-    }
-
-    /**
-     * 把数据存储在map中指定hashKey的value
-     * @param key 键
-     * @param hashKey 哈希键
-     * @param value 存入的值
-     */
-    public void hashPut(String key, String hashKey, Object value) {
-        redisTemplate.opsForHash().put(key, hashKey, value);
-    }
-
-    /**
-     * 删除map中指定hashKey
-     * @param key 键
-     * @param hashKeys map中的哈希键
-     * @return 删除的值的个数
-     */
-    public Long hashDelete(String key, Object... hashKeys) {
-        return redisTemplate.opsForHash().delete(key, hashKeys);
-    }
-
-    //--------------------哈希存储相关操作结束--------------------
-
-    //--------------------List相关操作开始--------------------
-
-    /**
      * 获取list中全部数据
-     * @param key 键
-     * @param clazz 类型
-     * @return 列表
+     *
+     * @param key
+     * @param clazz
+     * @return
      */
     public <T> List<T> getAllList(String key, Class<T> clazz) {
-        List<Object> list = this.redisTemplate.opsForList().range(key, 0, -1);
+        List list = this.redisTemplate.opsForList().range(key, 0, -1);
         List<T> resultList = new ArrayList<>();
-        for (Object temp : Objects.requireNonNull(list)) {
+        for (Object temp : list) {
             resultList.add(JSON.parseObject((String) temp, clazz));
         }
         return resultList;
     }
 
     /**
-     * 把list存入redis
-     * @param key 键
-     * @return 存入的个数
+     * 删除简单数据类型或实体类
+     *
+     * @param key
      */
-    public Long setAllList(String key, List list) {
-        List<String> dataList = new ArrayList<>();
-        for (Object temp : list) {
-            dataList.add(JSON.toJSONString(temp));
-        }
-        return this.redisTemplate.opsForList().rightPushAll(key, dataList);
+    public void deleteValue(String key) {
+        redisTemplate.opsForValue().getOperations().delete(key);
     }
 
-    //--------------------List相关操作结束--------------------
-
-    //--------------------数据库相关操作开始--------------------
-
-    /**
-     * 将当前数据库的 key 移动到给定的数据库 db 当中
-     * 以上数据库指的是redis自带的数据库，有16个，编号0-15
-     * @param key     key
-     * @param dbIndex 目标DB
-     * @return 是否成功
-     */
-    public Boolean move(String key, int dbIndex) {
-        return redisTemplate.move(key, dbIndex);
-    }
-
-    /**
-     * 从当前数据库中随机返回一个 key
-     * @return 随机的 key
-     */
-    public String randomKey() {
-        return redisTemplate.randomKey();
-    }
-
-    /**
-     * 批量获取
-     * @param keys key 集合
-     * @return 值列表
-     */
-    public List<Object> multiGet(Collection<String> keys) {
-        return redisTemplate.opsForValue().multiGet(keys);
-    }
-
-    /**
-     * 设置一个有效期至午夜12点的缓存
-     * @param key 键
-     * @param value 值
-     */
-    public void setExValueForToday(String key, Object value) {
-        //获取当天剩余秒数
-        LocalDateTime midnight = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        long remainTime = ChronoUnit.SECONDS.between(LocalDateTime.now(),midnight);
-        log.info("当天剩余秒数：{}", remainTime);
-        redisTemplate.opsForValue().set(key, value, remainTime, TimeUnit.SECONDS);
-    }
-
-    /**
-     * 设置一个有效期至周日午夜12点的缓存
-     * @param key 键
-     * @param value 值
-     */
-    public void setExValueForWeekend(String key, Object value) {
-        //获取本周剩余秒数
-        LocalDateTime midnight = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        long remainTime = ChronoUnit.SECONDS.between(LocalDateTime.now(),midnight);
-        log.info("本周剩余秒数：{}", remainTime);
-        redisTemplate.opsForValue().set(key, value, remainTime, TimeUnit.SECONDS);
-    }
 }

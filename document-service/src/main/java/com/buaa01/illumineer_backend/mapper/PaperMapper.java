@@ -5,8 +5,6 @@ import com.buaa01.illumineer_backend.entity.Paper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
-
 @Mapper
 public interface PaperMapper extends BaseMapper<Paper> {
 

@@ -9,11 +9,9 @@ import java.util.ArrayList;
 public interface FilterService {
     /**
      * 根据筛选条件对模糊搜索到的List进行筛选
-     * 
-     * @param ArrayList<Paper>           模糊搜索结果列表
      * @param ArrayList<ScreenCondition> 筛选条件列表
      * 
      * @return CustomResponse
      */
-    CustomResponse ResultFilter(ArrayList<Papers> papers, ScreenCondition sc);
+    CustomResponse ResultFilter(ScreenCondition sc);
 }
