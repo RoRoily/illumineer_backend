@@ -10,7 +10,7 @@ import java.util.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Paper {
+public class Papers {
 
     @TableId(type = IdType.AUTO)
     private Integer pid;

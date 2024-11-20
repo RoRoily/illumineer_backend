@@ -6,28 +6,41 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Papers extends Achievements {
+public class Papers {
     @TableId(type = IdType.AUTO)
     private Integer pid;
     /** 文章题目 */
     private String title;
     /** 文章主题 */
     private String theme;
+    /** 内容摘要 */
+    private String essAbs;
+    /** 关键词 */
+    private List<String> keywords;
     /** 文章作者 */
     private Map<String, Integer> auths;
     /** 文章来源 */
     private String derivation;
+    /** 文章类型 */
+    private String type;
+    /** 发布时间 */
+    private LocalDate publishDate;
     /** 相关领域 */
     private List<Category> field;
+    /** 收藏次数 */
+    private Integer fav_time;
     /** 被引用次数 */
     private Integer ref_times;
     /** 引用文献 */
     private List<Integer> refs;
     /** 文章链接 */
     private String contentUrl;
+    /** 状态: 0 正常 1 已删除 2 审核中 */
+    private Integer stats;
 }

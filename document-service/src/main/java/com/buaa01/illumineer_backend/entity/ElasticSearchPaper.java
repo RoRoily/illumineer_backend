@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ElasticSearchPaper {
     private Integer pid;
-    private String title; // 文章题目
+    /** 文章题目 */
+    private String title;
 }

@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.mapper.StormMapper;
 import com.buaa01.illumineer_backend.service.StormService;
 import com.buaa01.illumineer_backend.tool.StormTool;
@@ -18,7 +18,7 @@ public class StormServiceImpl implements StormService {
 
     @Override
     public String getStorm() {
-        ArrayList<Paper> articles;
+        ArrayList<Papers> articles;
         String last_update = "updated_date=2024-01-01/";
 //        String isNew = storm.check(last_update);
 //        if (!isNew.equals(last_update)) {
@@ -26,7 +26,7 @@ public class StormServiceImpl implements StormService {
         articles = storm.getPapers(last_update);
 //        }
 //        System.out.println(articles.size());
-        for (Paper article : articles)
+        for (Papers article : articles)
             stormMapper.insertPaper(article);
         return Integer.toString(articles.size());
     }

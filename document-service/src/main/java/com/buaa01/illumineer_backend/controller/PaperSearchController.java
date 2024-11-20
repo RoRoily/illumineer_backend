@@ -19,7 +19,7 @@ public class PaperSearchController {
     /**
      * 根据pid获取文献信息
      * @param pid 文献ID
-     * @return Paper
+     * @return Papers
      */
     @GetMapping("/get/id")
     public CustomResponse getPaperByPid(@RequestParam("pid") Integer pid) {
@@ -39,7 +39,7 @@ public class PaperSearchController {
     * @param: [stats 状态, size 一页的条数, offset 第几页, sortType 排序依据, order 升序/降序]
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @param order 0=降序，1=升序
-    * @return: Paper
+    * @return: Papers
     **/
     @GetMapping("/get/stats")
     public CustomResponse getPaperByStats(@RequestParam("stats") Integer stats,

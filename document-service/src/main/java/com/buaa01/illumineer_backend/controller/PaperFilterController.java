@@ -6,32 +6,30 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Papers;
-import com.buaa01.illumineer_backend.entity.ScreenCondition;
-import com.buaa01.illumineer_backend.service.filter.FilterService;
+import com.buaa01.illumineer_backend.service.paper.PaperFilterService;
+import com.buaa01.illumineer_backend.utils.FilterCondition;
 
 @RestController
-public class FilterController {
+public class PaperFilterController {
 
     @Autowired
-    private FilterService filterService;
+    private PaperFilterService filterService;
 
     /**
      * ES模糊搜索结果的进一步筛选
      * 模糊->限定
      * 
-     * @param ArrayList<Paper>   ES模糊搜索结果List
      * @param Map<String,ArrayList<String>> 筛选条件
      * 
      * @return CustomResponse对象
      */
 
-    @PostMapping("paper/search/filter")
-    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> screencondition) {
+    @PostMapping("get/filter")
+    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition) {
 
-        ScreenCondition sc = new ScreenCondition(screencondition);
+        FilterCondition sc = new FilterCondition(filtercondition);
         try {
-            return filterService.ResultFilter(sc);
+            return filterService.filterSearchResult(sc);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

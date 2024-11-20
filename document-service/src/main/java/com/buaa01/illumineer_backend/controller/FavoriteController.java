@@ -12,11 +12,12 @@ public class FavoriteController {
 
     /**
      * 查找给定收藏夹下的所有文章
+     * 
      * @param fid
      * @return CustomResponse
-     * **/
+     **/
     @GetMapping("/fav/getByFid")
-    public CustomResponse getPidsByFid(@RequestParam("fid")Integer fid){
+    public CustomResponse getPidsByFid(@RequestParam("fid") Integer fid) {
         return favoriteService.getPidsByFId(fid);
     }
 }

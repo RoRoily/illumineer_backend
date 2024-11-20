@@ -17,7 +17,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Paper {
+public class Papers {
     @TableId(type = IdType.INPUT)
     private Long pid;
     // 文章的相关信息

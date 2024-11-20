@@ -24,12 +24,12 @@ public class RedisTool {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    //默认的存活时间：60*60=3600
+    // 默认的存活时间：60*60=3600
     public static final long REDIS_DEFAULT_EXPIRE_TIME = 60 * 60;
-    //设置默认的时间单位：秒，也就是说所有的Redis相关时间操作单位都是“秒”
+    // 设置默认的时间单位：秒，也就是说所有的Redis相关时间操作单位都是“秒”
     public static final TimeUnit REDIS_DEFAULT_EXPIRE_TIME_UNIT = TimeUnit.SECONDS;
 
-    //---------------------以下是对于键key的相关操作--------------------
+    // ---------------------以下是对于键key的相关操作--------------------
 
     /**
      * 设置指定的key的存活时间，单位：秒
@@ -49,8 +49,10 @@ public class RedisTool {
      */
     public long getExpire(String key) {
         Long expireTime = redisTemplate.getExpire(key, REDIS_DEFAULT_EXPIRE_TIME_UNIT);
-        if (expireTime == null) return -1;
-        else return expireTime;
+        if (expireTime == null)
+            return -1;
+        else
+            return expireTime;
     }
 
     /**
@@ -174,11 +176,11 @@ public class RedisTool {
         return redisTemplate.type(key);
     }
 
-    //--------------------键key相关操作结束--------------------
+    // --------------------键key相关操作结束--------------------
 
-    //--------------------有序集合ZSet相关操作开始--------------------
+    // --------------------有序集合ZSet相关操作开始--------------------
 
-    //定义ZSet相关的数据类，写入redis的ZSet应当使用这两种数据
+    // 定义ZSet相关的数据类，写入redis的ZSet应当使用这两种数据
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -195,7 +197,6 @@ public class RedisTool {
         private Double score;
     }
 
-
     /**
      * 按照分数，从小到大取排行榜，默认情况下redis按照从小到大排序存储
      *
@@ -203,7 +204,8 @@ public class RedisTool {
      * @param start 开始位置，注意，集合中第一个元素的位置是0，和数组一致
      * @param end   结束位置
      *              <p>
-     *              start 和 end 参数可以为负数，这表示从集合尾部开始的索引，例如 -1 表示最后一个元素，-2 表示倒数第二个元素，以此类推。
+     *              start 和 end 参数可以为负数，这表示从集合尾部开始的索引，例如 -1 表示最后一个元素，-2
+     *              表示倒数第二个元素，以此类推。
      * @return Object集合，根据顺序排出来的
      */
     public Set<Object> zRange(String key, long start, long end) {
@@ -231,8 +233,10 @@ public class RedisTool {
      * @return 从大到小排序的ZSetScore List
      */
     public List<ZSetScore> reverseRangeWithScores(String key, long start, long end) {
-        Set<ZSetOperations.TypedTuple<Object>> result = redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
-        if (result == null) return null;
+        Set<ZSetOperations.TypedTuple<Object>> result = redisTemplate.opsForZSet().reverseRangeWithScores(key, start,
+                end);
+        if (result == null)
+            return null;
         List<ZSetScore> list = new ArrayList<>();
         for (ZSetOperations.TypedTuple<Object> tuple : result) {
             list.add(new ZSetScore(tuple.getValue(), tuple.getScore()));
@@ -249,8 +253,10 @@ public class RedisTool {
      * @return 从大到小排序的ZSetScore List
      */
     public List<ZSetTime> reverseRangeWithTimes(String key, long start, long end) {
-        Set<ZSetOperations.TypedTuple<Object>> result = redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
-        if (result == null) return null;
+        Set<ZSetOperations.TypedTuple<Object>> result = redisTemplate.opsForZSet().reverseRangeWithScores(key, start,
+                end);
+        if (result == null)
+            return null;
         List<ZSetTime> list = new ArrayList<>();
         for (ZSetOperations.TypedTuple<Object> tuple : result) {
             list.add(new ZSetTime(tuple.getValue(), new Date(Objects.requireNonNull(tuple.getScore()).longValue())));
@@ -267,7 +273,8 @@ public class RedisTool {
      */
     public Long getRank(String key, Object object) {
         Long rank = redisTemplate.opsForZSet().rank(key, object);
-        if (rank == null) return redisTemplate.opsForZSet().size(key);
+        if (rank == null)
+            return redisTemplate.opsForZSet().size(key);
         return rank;
     }
 
@@ -280,12 +287,13 @@ public class RedisTool {
      */
     public Long getReserveRank(String key, Object object) {
         Long rank = redisTemplate.opsForZSet().reverseRank(key, object);
-        if (rank == null) return redisTemplate.opsForZSet().size(key);
+        if (rank == null)
+            return redisTemplate.opsForZSet().size(key);
         return rank;
     }
 
     /**
-     * 存入一条数据到sorted set    时间作为分数
+     * 存入一条数据到sorted set 时间作为分数
      *
      * @param key    键
      * @param object 对象
@@ -441,9 +449,9 @@ public class RedisTool {
         return result;
     }
 
-    //--------------------有序集合ZSet相关操作结束--------------------
+    // --------------------有序集合ZSet相关操作结束--------------------
 
-    //--------------------无序集合Set相关操作开始--------------------
+    // --------------------无序集合Set相关操作开始--------------------
 
     /**
      * 普通缓存放入
@@ -535,9 +543,9 @@ public class RedisTool {
         return redisTemplate.opsForSet().distinctRandomMembers(key, count);
     }
 
-    //--------------------无序集合Set相关操作结束--------------------
+    // --------------------无序集合Set相关操作结束--------------------
 
-    //--------------------字符串存储String相关操作开始--------------------
+    // --------------------字符串存储String相关操作开始--------------------
 
     /**
      * 存储简单数据类型

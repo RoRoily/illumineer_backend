@@ -8,7 +8,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.mapper.SearchResultPaperMapper;
@@ -46,32 +46,33 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
     /**
      * 根据pid获取文献信息
+     * 
      * @param pid 文献ID
-     * @return Paper
+     * @return Papers
      */
     @Override
     public CustomResponse getPaperByPid(Integer pid) {
         CustomResponse customResponse = new CustomResponse();
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        Papers paper = null;
+        QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);
         paper = paperMapper.selectOne(queryWrapper);
-//        paper = paperMapper.getPaperByPid(pid);
+        // paper = paperMapper.getPaperByPid(pid);
 
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("title", paper.getTitle());
-//        map.put("essAbs", paper.getEssAbs());
-//        map.put("keywords", paper.getKeywords());
-//        map.put("contentUrl", paper.getContentUrl());
-//        map.put("auths", paper.getAuths());
-//        map.put("field", paper.getCategory());
-//        map.put("type", paper.getType());
-//        map.put("theme", paper.getTheme());
-//        map.put("publishDate", paper.getPublishDate());
-//        map.put("derivation", paper.getDerivation());
-//        map.put("ref_times", paper.getRef_times());
-//        map.put("fav_times", paper.getFav_time());
-//        map.put("refs", paper.getRefs());
+        // Map<String, Object> map = new HashMap<>();
+        // map.put("title", paper.getTitle());
+        // map.put("essAbs", paper.getEssAbs());
+        // map.put("keywords", paper.getKeywords());
+        // map.put("contentUrl", paper.getContentUrl());
+        // map.put("auths", paper.getAuths());
+        // map.put("field", paper.getCategory());
+        // map.put("type", paper.getType());
+        // map.put("theme", paper.getTheme());
+        // map.put("publishDate", paper.getPublishDate());
+        // map.put("derivation", paper.getDerivation());
+        // map.put("ref_times", paper.getRef_times());
+        // map.put("fav_times", paper.getFav_time());
+        // map.put("refs", paper.getRefs());
 
         customResponse.setData(paper);
         return customResponse;
@@ -81,19 +82,20 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @description: 根据stats返回相应的Paper
      * @param: [stats 状态, size 一页的条数, offset 第几页, sortType 排序依据, order 升序/降序]
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
-     * @return: Paper
+     * @param order    0=降序，1=升序
+     * @return: Papers
      **/
     @Override
-    public CustomResponse getPaperByStats(Integer stats, Integer size, Integer offset, Integer sortType, Integer order) {
+    public CustomResponse getPaperByStats(Integer stats, Integer size, Integer offset, Integer sortType,
+            Integer order) {
         CustomResponse customResponse = new CustomResponse();
 
-        List<Paper> papers = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        List<Papers> papers = null;
+        QueryWrapper<Papers> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("stats", stats);
         papers = paperMapper.selectList(queryWrapper);
 
-        // 1. 将 Paper 转换成 SearchReultPaper 类型
+        // 1. 将 Papers 转换成 SearchReultPaper 类型
         List<SearchResultPaper> searchResultPapers = papersToSearchResultPaper(papers);
 
         // 2. searchbByOrder 对搜索结果进行排序：sortType
@@ -109,45 +111,50 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
     /**
      * 一框式检索：搜索文献（分页、排序）
+     * 
      * @param condition 筛选条件（选择查找的字段）
-     * @param keyword 搜索内容
-     * @param size 一页多少条内容
-     * @param offset 第几页
-     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
+     * @param keyword   搜索内容
+     * @param size      一页多少条内容
+     * @param offset    第几页
+     * @param sortType  根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order     0=降序，1=升序
      * @return SearchResultPaper
      */
     @Override
-    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order) {
+    public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType,
+            Integer order) {
         // 模糊搜索：keyword
-        List<Paper> papers = null;
+        List<Papers> papers = null;
         papers = searchByKeyword(condition, keyword);
 
         List<SearchResultPaper> searchResultPapers = papersToSearchResultPaper(papers);
 
         deleteFromRedis(); // 清空上次缓存的搜索结果
-        saveToRedis(searchResultPapers); //存储新的搜索结果
+        saveToRedis(searchResultPapers); // 存储新的搜索结果
 
         return getSearchResult(searchResultPapers, sortType, order, size, offset);
     }
 
     /**
      * 高级检索
-     * @param conditions 条件：logic(none=0/and=1/or=2/not=3), condition, keyword（传 name 或者 %name%）
-     * @param size 一页多少条内容
-     * @param offset 第几页
-     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
+     * 
+     * @param conditions 条件：logic(none=0/and=1/or=2/not=3), condition, keyword（传
+     *                   name 或者 %name%）
+     * @param size       一页多少条内容
+     * @param offset     第几页
+     * @param sortType   根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order      0=降序，1=升序
      * @return SearchResultPaper
      */
     @Override
-    public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order) {
-        Set<Paper> papers1 = new HashSet<>();
-        Set<Paper> papers2 = new HashSet<>();
+    public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset,
+            Integer sortType, Integer order) {
+        Set<Papers> papers1 = new HashSet<>();
+        Set<Papers> papers2 = new HashSet<>();
 
         for (Map<String, String> condition : conditions) {
             // 对该查询条件进行查询
-            QueryWrapper<Paper> queryWrapper = Wrappers.query();
+            QueryWrapper<Papers> queryWrapper = Wrappers.query();
             if (condition.get("condition").equals("publishYear")) {
                 String year = condition.get("keyword");
                 condition.put("keyword", year + "-%-%");
@@ -159,7 +166,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 queryWrapper.eq("stats", 0);
                 queryWrapper.like(condition.get("condition"), condition.get("keyword"));
             }
-            List<Paper> papers = paperMapper.selectList(queryWrapper);
+            List<Papers> papers = paperMapper.selectList(queryWrapper);
             if (papers1.isEmpty()) {
                 papers1 = new HashSet<>(papers);
             } else {
@@ -175,7 +182,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             papers2.clear();
         }
 
-        List<Paper> papers = papers1.stream().toList();
+        List<Papers> papers = papers1.stream().toList();
         List<SearchResultPaper> searchResultPapers = papersToSearchResultPaper(papers);
 
         deleteFromRedis();
@@ -185,26 +192,25 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     }
 
     /*
-    ========== 相关方法 ==========
+     * ========== 相关方法 ==========
      */
 
-    private List<SearchResultPaper> papersToSearchResultPaper(List<Paper> papers) {
+    private List<SearchResultPaper> papersToSearchResultPaper(List<Papers> papers) {
         List<SearchResultPaper> searchResultPapers = new ArrayList<>();
 
-        for (Paper paper : papers) {
+        for (Papers paper : papers) {
             SearchResultPaper searchResultPaper = new SearchResultPaper(
                     paper.getPid(),
                     paper.getTitle(),
                     paper.getKeywords(),
                     paper.getAuths(),
-                    paper.getCategory(),
+                    paper.getField(),
                     paper.getType(),
                     paper.getTheme(),
                     paper.getPublishDate(),
                     paper.getDerivation(),
                     paper.getRef_times(),
-                    paper.getFav_time()
-            );
+                    paper.getFav_time());
             searchResultPapers.add(searchResultPaper);
         }
 
@@ -212,7 +218,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     }
 
     // 获取返回的结果：包括搜索结果 SearchResultPaper，过滤用的选项字段 option
-    private CustomResponse getSearchResult(List<SearchResultPaper> papers, Integer sortType, Integer order, Integer size, Integer offset) {
+    private CustomResponse getSearchResult(List<SearchResultPaper> papers, Integer sortType, Integer order,
+            Integer size, Integer offset) {
         Map<String, Object> result = new HashMap<>();
 
         List<Map.Entry<String, Integer>> years = null;
@@ -301,33 +308,34 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
     /**
      * 模糊查询
+     * 
      * @param keyword 搜索内容
      * @return 文献信息
      */
-    List<Paper> searchByKeyword(String condition, String keyword) {
+    List<Papers> searchByKeyword(String condition, String keyword) {
         try {
-            List<Paper> list = new ArrayList<>();
+            List<Papers> list = new ArrayList<>();
             Query query;
             if (condition.equals("publishYear")) {
-//                query = Query.of(q -> q.match(m -> m.field(condition).query(keyword + "-%-%")));
+                // query = Query.of(q -> q.match(m -> m.field(condition).query(keyword
+                // +"-%-%")));
                 query = Query.of(q -> q.bool(b -> {
-                            b.must(m -> m.match(ma -> ma.field(condition).query(keyword + "-%-%")));
-                            b.must(m -> m.match(ma -> ma.field("stats").query(0)));
-                            return b;
-                        })
-                );
+                    b.must(m -> m.match(ma -> ma.field(condition).query(keyword + "-%-%")));
+                    b.must(m -> m.match(ma -> ma.field("stats").query(0)));
+                    // b.filter(f -> f.term(t -> t.field("stats").value(0))); 是否可以改为filter来实现，以优化性能
+                    return b;
+                }));
             } else {
-//                query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
+                // query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
                 query = Query.of(q -> q.bool(b -> {
-                            b.must(m -> m.match(ma -> ma.field(condition).query(keyword)));
-                            b.must(m -> m.match(ma -> ma.field("stats").query(0)));
-                        return b;
-                    })
-                );
+                    b.must(m -> m.match(ma -> ma.field(condition).query(keyword)));
+                    b.must(m -> m.match(ma -> ma.field("stats").query(0)));
+                    return b;
+                }));
             }
             SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
-            SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
-            for (Hit<Paper> hit : searchResponse.hits().hits()) {
+            SearchResponse<Papers> searchResponse = client.search(searchRequest, Papers.class);
+            for (Hit<Papers> hit : searchResponse.hits().hits()) {
                 if (hit.source() != null) {
                     list.add(hit.source());
                 }
@@ -341,6 +349,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
     /**
      * 分页
+     * 
      * @param papers  搜索的结果
      * @param pageNum 一页的条目数量
      * @param offset  第几页
@@ -365,19 +374,22 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         if (sublist.isEmpty()) {
             return Collections.emptyList();
         }
-//        List<Map<String, Object>> mapList = new ArrayList<>();
-//        for(Paper paper : papers) {
-//            Map<String, Object> map = getPaperMap(paper);
-//            mapList.add(map);
-//        }
-//        return mapList;
+        // List<Map<String, Object>> mapList = new ArrayList<>();
+        // for(Papers paper : papers) {
+        // Map<String, Object> map = getPaperMap(paper);
+        // mapList.add(map);
+        // }
+        // return mapList;
         return sublist;
     }
 
     /**
      * 排序
+     * 
      * @param papers   搜索的结果
-     * @param sortType 根据这个来进行排序 // 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param sortType 根据这个来进行排序
+     *                 <p>
+     *                 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数，4=评价分数
      * @param order    0=降序，1=升序
      * @return 文献信息
      */
@@ -412,14 +424,14 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     }
 
     /*
-    ========== 缓存操作 ==========
+     * ========== 缓存操作 ==========
      */
 
     // 将查询结果存到 redis 中
     public void saveToRedis(List<SearchResultPaper> searchResultPapers) {
         for (SearchResultPaper paper : searchResultPapers) {
             CompletableFuture.runAsync(() -> {
-                redisTool.setExObjectValue("paper" + paper.getPid(), paper);    // 异步更新到redis
+                redisTool.setExObjectValue("paper" + paper.getPid(), paper); // 异步更新到redis
             }, taskExecutor);
         }
     }

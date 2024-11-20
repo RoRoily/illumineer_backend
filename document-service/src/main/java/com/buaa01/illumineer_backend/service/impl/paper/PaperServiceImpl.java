@@ -2,6 +2,7 @@ package com.buaa01.illumineer_backend.service.impl.paper;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -81,6 +83,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 上传新的文章
+     * 
      * @param paper   文章
      * @param content 文章内容（文件）
      */
@@ -110,7 +113,7 @@ public class PaperServiceImpl implements PaperService {
 
         // 存入数据库
         paperMapper.insert(paper);
-//        esTool.addPaper(paperMapper);
+        // esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
         return customResponse;
@@ -123,17 +126,17 @@ public class PaperServiceImpl implements PaperService {
      * @return
      */
     public CustomResponse updatePaper(int pid,
-                                      String title,
-                                      String essAbs,
-                                      List<String> keywords,
-                                      MultipartFile content,
-                                      Map<String, Integer> auths,
-                                      List<String> field,
-                                      String type,
-                                      String theme,
-                                      Date publishDate,
-                                      String derivation,
-                                      List<Integer> refs) {
+            String title,
+            String essAbs,
+            List<String> keywords,
+            MultipartFile content,
+            Map<String, Integer> auths,
+            List<Category> field,
+            String type,
+            String theme,
+            LocalDate publishDate,
+            String derivation,
+            List<Integer> refs) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -156,7 +159,10 @@ public class PaperServiceImpl implements PaperService {
 
         UpdateWrapper<Papers> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", keywords = " + keywords + ", contentUrl = " + contentUrl + ", auths = " + auths + ", field = " + field + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation + ", refs = " + refs);
+        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", keywords = " + keywords
+                + ", contentUrl = " + contentUrl + ", auths = " + auths + ", field = " + field + ", type = " + type
+                + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation + ", refs = "
+                + refs);
 
         paperMapper.update(null, updateWrapper);
 
