@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.utils;
 
-import com.buaa01.illumineer_backend.entity.Papers;
+import com.buaa01.illumineer_backend.entity.Paper;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -16,7 +16,7 @@ public class PaperSortScorer {
     /* 关键词匹配权重 */
     final static double W_KEYWORD = 0.4;
 
-    public static double calculateScore(Papers paper, List<String> userKeywords) {
+    public static double calculateScore(Paper paper, List<String> userKeywords) {
         // 引用次数评分
         double refScore = normalize(paper.getRef_times(), 1000);
         // 收藏次数评分
