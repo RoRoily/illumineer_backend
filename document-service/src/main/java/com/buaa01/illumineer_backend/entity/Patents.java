@@ -3,45 +3,37 @@ package com.buaa01.illumineer_backend.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Paper {
-
+public class Patents {
     @TableId(type = IdType.AUTO)
     private Integer pid;
-    /** 文章题目 */
-    private String title;
+    /** 申请人 */
+    private Map<String, Integer> applicants;
+    /** 专利名 */
+    private String name;
+    /** 专利编号 */
+    private String number;
+    /** ipc分类号 */
+    private String ipcClassification;
     /** 内容摘要 */
-    private String essAbs;
+    private String abstracts;
+    /** 授权时间 */
+    private LocalDate grantDate;
     /** 关键词 */
     private List<String> keywords;
-    /** 文章链接 */
-    private String contentUrl;
-    /** 文章作者 */
-    private Map<String, Integer> auths;
-    // 相关领域
-    private List<String> category;
-    /** 文章类型 */
-    private String type;
-    /** 文章主题 */
-    private String theme;
     /** 发布时间 */
     private LocalDate publishDate;
-    /** 文章来源 */
-    private String derivation;
-    /** 被引用次数 */
-    private Integer ref_times;
     /** 收藏次数 */
     private Integer fav_time;
-    /** 引用文献 */
-    private List<Integer> refs;
     /** 状态: 0 正常 1 已删除 2 审核中 */
     private Integer stats;
 }
