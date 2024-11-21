@@ -14,6 +14,8 @@ import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.mapper.SearchResultPaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
+import com.buaa01.illumineer_backend.utils.PaperSortScorer;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -418,6 +420,36 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                     return p1.getFav_time() - p2.getFav_time();
                 }
                 return 0;
+            });
+        }
+        return papers;
+    }
+
+    /**
+     * 对搜索结果进行排序,尝试使用评分制
+     * 
+     * @param papers   搜索结果
+     * @param sortType 4=按评分排序
+     * @param order    0=降序，1=升序
+     * @param keyWords 关键词
+     *                 <p>
+     *                 以提供检索契合度评分
+     * @return
+     */
+    List<SearchResultPaper> searchByOrder(List<SearchResultPaper> papers, Integer sortType, Integer order,
+            List<String> keyWords) {
+        if (sortType != 4) {
+            papers = searchByOrder(papers, sortType, order);
+        } else {
+            Map<SearchResultPaper, Double> paperScore = new HashMap<>();
+            papers.sort((p1, p2) -> {
+                double s1 = paperScore.computeIfAbsent(p1, p -> PaperSortScorer.calculateScore(p1, keyWords));
+                double s2 = paperScore.computeIfAbsent(p2, p -> PaperSortScorer.calculateScore(p2, keyWords));
+                if (order == 0) {
+                    return Double.compare(s2, s1);
+                } else {
+                    return Double.compare(s1, s2);
+                }
             });
         }
         return papers;

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.buaa01.illumineer_backend.entity.Papers;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 
 public class PaperSortScorer {
     /* 引用次数权重 */
@@ -16,22 +16,26 @@ public class PaperSortScorer {
     /* 关键词匹配权重 */
     final static double W_KEYWORD = 0.4;
 
-    public static double calculateScore(Papers paper, List<String> userKeywords) {
+    public static Double calculateScore(SearchResultPaper paper, List<String> userKeywords) {
         // 引用次数评分
         double refScore = normalize(paper.getRef_times(), 1000);
         // 收藏次数评分
         double favScore = normalize(paper.getFav_time(), 10000);
+
+        // 为了简化计算过程与次数，暂且放弃
         // 时间评分
-        double timeScore = calculateTimeScore(paper.getPublishDate());
+        // double timeScore = calculateTimeScore(paper.getPublishDate());
         // 关键词匹配度评分
         double keywordScore = calculateKeywordScore(paper.getKeywords(), userKeywords);
 
         // 综合评分
-        return W_REF * refScore + W_FAV * favScore + W_TIME * timeScore + W_KEYWORD * keywordScore;
+        // return W_REF * refScore + W_FAV * favScore + W_TIME * timeScore + W_KEYWORD *
+        // keywordScore;
+        return W_REF * refScore + W_FAV * favScore + W_KEYWORD * keywordScore;
     }
 
     /**
-     * 初步尝试归一化，但无法确定总引用量
+     * 初步尝试归一化，但无法确定总引用量与总收藏量，因此仅做一个放缩
      * 
      * @param value       分子
      * @param denominator 分母
