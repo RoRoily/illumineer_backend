@@ -324,7 +324,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 query = Query.of(q -> q.bool(b -> {
                     b.must(m -> m.match(ma -> ma.field(condition).query(keyword + "-%-%")));
                     b.must(m -> m.match(ma -> ma.field("stats").query(0)));
-                    // b.filter(f -> f.term(t -> t.field("stats").value(0))); 是否可以改为filter来实现，以优化性能
+                    // b.filter(f -> f.term(t -> t.field("stats").value(0)));
+                    // TODO: 是否可以改为filter来实现，以优化性能
                     return b;
                 }));
             } else {
