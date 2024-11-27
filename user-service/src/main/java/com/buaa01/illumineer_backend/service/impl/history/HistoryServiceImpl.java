@@ -12,12 +12,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class HistoryServiceImpl implements HistoryService {
+
     @Autowired
     private HistoryMapper historyMapper;
+
     @Autowired
     private UserMapper userMapper;
 

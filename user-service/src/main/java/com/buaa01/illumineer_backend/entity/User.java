@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -32,6 +33,8 @@ public class User {
     private String background;
     private List<String> field ;// 相关领域
     private String institution;
+
+    private Map<Integer, Integer> intention; // <领域cid, 权重> 点击+1，下载+2，收藏+3
     //需要在Redis中存储的信息
     //名下论文集合 papers
     //合作者/关联者 collaborator
@@ -42,4 +45,9 @@ public class User {
     private Date createDate;
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date deleteDate;
+
+    private String email;
+
+    public User(String encodedPassword, String username, String email) {
+    }
 }
