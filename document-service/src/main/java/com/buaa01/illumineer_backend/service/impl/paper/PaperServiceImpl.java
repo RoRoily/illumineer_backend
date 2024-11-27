@@ -11,8 +11,11 @@ import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
+import com.buaa01.illumineer_backend.tool.ElasticSearchTool;
+import com.buaa01.illumineer_backend.tool.OssTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+@Service
 @Slf4j
 public class PaperServiceImpl implements PaperService {
 
@@ -29,6 +33,11 @@ public class PaperServiceImpl implements PaperService {
 
     @Autowired
     private PaperMapper paperMapper;
+
+    @Autowired
+    private ElasticSearchTool esTool;
+    @Autowired
+    private OssTool ossTool;
 
     @Override
     public CustomResponse getPaperByPid(Integer pid) {
