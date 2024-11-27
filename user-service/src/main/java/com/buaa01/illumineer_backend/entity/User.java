@@ -47,7 +47,4 @@ public class User {
     private Date deleteDate;
 
     private String email;
-
-    public User(String encodedPassword, String username, String email) {
-    }
 }
