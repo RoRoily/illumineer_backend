@@ -71,14 +71,11 @@ public class UserPaperServiceImpl implements UserPaperService {
             userPaper.setAcessDate(new Date());
             userPaperMapper.updateById(userPaper);
         }
-        /*
         // 异步线程更新video表和redis
         CompletableFuture.runAsync(() -> {
             redisTool.sto("user_video_history:" + uid, vid);   // 添加到/更新观看历史记录
             documentServiceClient.updateVideoStatus(vid, "play", true, 1);
         }, taskExecutor);
-
-         */
         return userPaper;
     }
 
@@ -99,12 +96,9 @@ public class UserPaperServiceImpl implements UserPaperService {
         } else {
             updateWrapper.setSql("collect = 0");
         }
-        /*
         CompletableFuture.runAsync(() -> {
             videoServiceClient.updateVideoStatus(pid, "collect", isCollect, 1);
         }, taskExecutor);
-
-         */
         userPaperMapper.update(null, updateWrapper);
     }
 
