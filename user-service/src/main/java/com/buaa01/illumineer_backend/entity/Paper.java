@@ -27,7 +27,7 @@ public class Paper {
     private String contentUrl;
     @TableField(typeHandler = MapTypeHandler.class)
     private Map<String, Integer> auths; // 文章作者
-    private String field; // 相关领域
+    private String category; // 相关领域
     private String type; // 文章类型 (期刊、论文、会议、报纸) // sql add
     private String theme; // 文章主题 // sql add
     private Date publishDate; // 出版时间

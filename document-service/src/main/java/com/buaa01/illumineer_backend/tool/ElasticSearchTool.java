@@ -23,8 +23,6 @@ public class ElasticSearchTool {
     @Autowired
     private ElasticsearchClient elasticsearchClient;
 
-
-
     /**
      * 将关键词word添加入es中
      * 每次调用将创建一个新的文档，这些文档的索引是"search_word"，但是id不同(默认处理)
