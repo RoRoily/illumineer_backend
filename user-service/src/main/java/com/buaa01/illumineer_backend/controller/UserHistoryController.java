@@ -4,6 +4,7 @@ import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.History;
 import com.buaa01.illumineer_backend.service.history.HistoryService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,8 @@ public class UserHistoryController {
      */
     @GetMapping("/user/history/getAPage")
     public CustomResponse getAPage(@RequestParam("quantity")Integer quantity,@RequestParam("index")Integer index){
-        return historyService.getHistoryByPage(currentUser.getUserUid(),quantity,index);
+        CustomResponse customResponse = new CustomResponse();
+        customResponse.setData(historyService.getHistoryByPage(currentUser.getUserUid(),quantity,index));
+        return customResponse;
     }
 }

@@ -3,6 +3,7 @@ package com.buaa01.illumineer_backend.service.impl.user;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.UserService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,7 +90,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public int updateUserResume(String description) {
-        Integer loginUserId = currentUser.getUserId();
+        User currentUser = new User();
+        Integer loginUserId = currentUser.getUid();
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
@@ -108,7 +110,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int deleteUser() {
-        Integer loginUserId = currentUser.getUserId();
+        User currentUser = new User();
+        Integer loginUserId = currentUser.getUid();
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user != null) {
             redisTool.deleteKey("user" + loginUserId);

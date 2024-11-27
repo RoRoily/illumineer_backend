@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,7 +23,7 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Autowired
     private UserMapper userMapper;
-
+/*
     /**
      * 分页返回历史记录中的条目
      * @param set 查询结果的集合
@@ -31,6 +32,7 @@ public class HistoryServiceImpl implements HistoryService {
      * 并行处理
      *
      */
+    /*
     @Override
     public List<Map<String, Object>> getHistoryByPage(Set<Object> set, Integer quantity, Integer index){
         if (index == null) {
@@ -90,9 +92,15 @@ public class HistoryServiceImpl implements HistoryService {
 //        end = System.currentTimeMillis();
 //        System.out.println("封装耗时：" + (end - start));
         return mapList;
-        return customResponse;
+//        return customResponse;
     }
+    */
 
+
+    @Override
+    public List<Map<String, Object>> getHistoryByPage(Integer uid, Integer quantity, Integer offset) {
+        return null;
+    }
 
     /**
      *  在历史记录中新增条目

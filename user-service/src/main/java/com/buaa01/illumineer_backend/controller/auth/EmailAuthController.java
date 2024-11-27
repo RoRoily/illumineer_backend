@@ -6,7 +6,6 @@ import com.buaa01.illumineer_backend.service.email.EmailService;
 import com.buaa01.illumineer_backend.entity.Institution;
 import com.buaa01.illumineer_backend.entity.User;
 
-import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,7 +13,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/auth")
 public class EmailAuthController {
-
+/*
     private final UserRepository userRepository;
     private final EmailService emailService;
 
@@ -77,5 +76,6 @@ public class EmailAuthController {
 
         return ResponseEntity.ok("邮箱认证成功");
     }
+ */
 }
 

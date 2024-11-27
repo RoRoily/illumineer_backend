@@ -1,14 +1,17 @@
+package com.buaa01.illumineer_backend.service.impl.email;
+
 import com.buaa01.illumineer_backend.service.email.EmailService;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 @Service
 public class EmailServiceImpl implements EmailService {
+    @Override
+    public void sendVerificationEmail(String to, String token, String verificationUrl) throws MessagingException {
 
+    }
+/*
     private final JavaMailSender mailSender;
 
     public EmailService(JavaMailSender mailSender) {
@@ -30,4 +33,6 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
+
+ */
 }

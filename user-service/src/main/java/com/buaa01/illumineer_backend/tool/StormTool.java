@@ -218,15 +218,15 @@ public class StormTool {
             String theme = topicElement.getAsJsonObject().get("display_name").getAsString();
             article.setTheme(theme);
             String filed = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("display_name").getAsString();
-            article.setField(filed);
+            article.setTheme(filed);
             Category rs = categoryService.getCategoryByName(filed);
             if (rs == null) {
                 rs = categoryService.insertCategory(filed);
             }
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                String categoryJson = objectMapper.writeValueAsString(article.getField());
-                article.setField(categoryJson); // 存储 JSON 字符串
+                String categoryJson = objectMapper.writeValueAsString(article.getTheme());
+                article.setTheme(categoryJson); // 存储 JSON 字符串
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Error serializing Category", e);
             }
