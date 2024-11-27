@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.config;
 
-import com.example.demo.controller.UpdatePaperJob;
+import com.buaa01.illumineer_backend.controller.UpdatePaperJob;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
