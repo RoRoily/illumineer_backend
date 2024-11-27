@@ -33,7 +33,7 @@ public class Paper {
     /** 文章主题 */
     private String theme;
     /** 发布时间 */
-    private LocalDate publishDate;
+    private Date publishDate;
     /** 文章来源 */
     private String derivation;
     /** 被引用次数 */

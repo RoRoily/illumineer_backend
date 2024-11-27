@@ -2,8 +2,10 @@ package com.buaa01.illumineer_backend.utils;
 
 import com.buaa01.illumineer_backend.entity.Paper;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.List;
 
 public class PaperSortScorer {
@@ -22,7 +24,7 @@ public class PaperSortScorer {
         // 收藏次数评分
         double favScore = normalize(paper.getFav_time(), 10000);
         // 时间评分
-        double timeScore = calculateTimeScore(paper.getPublishDate());
+        double timeScore = calculateTimeScore((Date) paper.getPublishDate());
         // 关键词匹配度评分
         double keywordScore = calculateKeywordScore(paper.getKeywords(), userKeywords);
 
@@ -47,8 +49,8 @@ public class PaperSortScorer {
      * @param publishDate 发布日期
      * @return score
      */
-    private static double calculateTimeScore(LocalDate publishDate) {
-        long yearsSincePublished = ChronoUnit.YEARS.between(publishDate, LocalDate.now());
+    private static double calculateTimeScore(Date publishDate) {
+        long yearsSincePublished = ChronoUnit.YEARS.between((Temporal) publishDate, LocalDate.now());
         double lambda = 0.1; // 时间衰减系数
         return Math.exp(-lambda * yearsSincePublished);
     }
