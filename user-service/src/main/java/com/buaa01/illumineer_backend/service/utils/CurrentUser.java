@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.service.utils;
 
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
-import com.bilimili.buaa13.service.impl.user.UserDetailsImpl;
+import com.buaa01.illumineer_backend.service.impl.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

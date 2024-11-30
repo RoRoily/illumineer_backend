@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.service.impl.user;
 
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
-import com.buaa01.illumineer_backend.service.UserService;
+import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
