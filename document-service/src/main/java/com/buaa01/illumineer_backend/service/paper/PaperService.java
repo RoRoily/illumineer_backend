@@ -2,6 +2,7 @@ package com.buaa01.illumineer_backend.service.paper;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.PaperAdo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -105,4 +106,11 @@ public interface PaperService {
                                String theme,
                                Date publishDate,
                                String derivation);
+
+    /***
+     * 根据作者姓名返回包含该姓名的认领条目列表
+     * @param name 姓名
+     * **/
+    List<PaperAdo> getPaperAdoptionsByName(String name);
+
 }
