@@ -72,6 +72,7 @@ public class AIAssistantController {
             return new CustomResponse(500, "Internal Error", null);
         }
     }
+
     public static boolean isMapOfStringToObject(Object obj) {
         // 1. 检查 obj 是否是一个 Map 实例
         if (obj instanceof Map<?, ?> map) {
