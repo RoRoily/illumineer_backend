@@ -1,4 +1,6 @@
 package com.buaa01.illumineer_backend.controller.auth;
+import com.buaa01.illumineer_backend.service.email.InstitutionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,9 @@ public class EmailAuthController {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+
+    @Autowired
+    private InstitutionRepository institutionRepository;
 
     @Value("${verification.url}")
     private String verificationUrl;
