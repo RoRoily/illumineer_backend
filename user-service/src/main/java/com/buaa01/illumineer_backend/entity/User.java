@@ -19,7 +19,7 @@ public class User {
     private Integer uid;
     //账号的相关信息
     private String avatar;
-    private String account;
+    private String email;
     private String password;
     private String nickName;
     private String description;
