@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -19,20 +18,20 @@ public class User {
     private Integer uid;
     //账号的相关信息
     private String avatar;
-    private String account;
+    private String email;
     private String password;
-    private String nickName;
+    private String userName;
     private String description;
+    private String background;
     //账号状态的相关信息
     private Integer status; // 0为管理员,1~9为不同权限的用户
     private Boolean isVerify; //是否已实名认证
     private Integer stats; // 0 正常 1 封禁 2 已注销
-    private Map<Category,Integer> intension;
     //实际个人的相关信息
     private String name;
+    private Integer authId;
     private Integer gender;
-    private String background;
-    private List<String> field ;// 相关领域
+    private Map<Category,Integer> field ;// 相关领域
     private String institution;
     //需要在Redis中存储的信息
     //名下论文集合 papers
@@ -44,4 +43,27 @@ public class User {
     private Date createDate;
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date deleteDate;
+
+    static public User setNewUser(String encodedPassword,String username,String email){
+        Date now = new Date();
+        return new User(
+                null,
+                "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png", //头像的url
+                email,
+                encodedPassword,
+                username,
+                null,
+                "https://tinypic.host/images/2023/11/15/69PB2Q5W9D2U7L.png", //背景的url
+                1, //默认为最低权限的用户
+                false, //未实名
+                0, //账户状态正常
+                null, //姓名
+                null, //authId
+                null, //性别
+                null, //相关领域
+                null, //所在机构
+                now,
+                null
+        );
+    }
 }
