@@ -41,7 +41,6 @@ public class AuthUtil {
         String authorizationOrigin = String.format("api_key=\"%s\", algorithm=\"%s\", headers=\"%s\", signature=\"%s\"", apiKeyBySystem, "hmac-sha256", "host date request-line", sha);
         String encodeToString = Base64.getEncoder().encodeToString(authorizationOrigin.getBytes(StandardCharsets.UTF_8));
 
-        String most_url = url+"?authorization="+encodeToString+"&date="+date+"&host="+url.getHost();
-        return most_url;
+        return url+"?authorization="+encodeToString+"&date="+date+"&host="+url.getHost();
     }
 }

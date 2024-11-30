@@ -1,4 +1,4 @@
-package com.buaa01.illumineer_backend.service;
+package com.buaa01.illumineer_backend.service.paper;
 
 import java.util.concurrent.CompletableFuture;
 
