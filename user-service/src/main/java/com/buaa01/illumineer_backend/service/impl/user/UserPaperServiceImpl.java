@@ -3,7 +3,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.Category;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.User2Paper;
 
@@ -119,7 +119,7 @@ public class UserPaperServiceImpl implements UserPaperService {
     // 根据pid获得cid
     private int getCid(Integer pid) {
         // 根据pid找category
-        Paper paper = getPaper(pid);
+        Papers paper = getPaper(pid);
         String categoryName = paper.getCategory();
 
         // 根据category找cid
@@ -132,9 +132,9 @@ public class UserPaperServiceImpl implements UserPaperService {
         return cid;
     }
 
-    private Paper getPaper(Integer pid) {
-        Paper paper = null;
-        QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
+    private Papers getPaper(Integer pid) {
+        Papers paper = null;
+        QueryWrapper<Papers> paperQueryWrapper = new QueryWrapper<>();
         paperQueryWrapper.eq("pid", pid);
         paper = paperMapper.selectOne(paperQueryWrapper);
         return paper;

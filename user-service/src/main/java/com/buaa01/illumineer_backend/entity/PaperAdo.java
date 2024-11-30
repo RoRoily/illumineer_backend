@@ -7,6 +7,7 @@ import com.buaa01.illumineer_backend.handler.MapTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import retrofit2.http.HEAD;
 
 import java.util.Date;
 import java.util.Map;

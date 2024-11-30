@@ -18,9 +18,12 @@ public class PaperStatsServiceImpl implements PaperStatsService {
 
     /**
      * @description: 更新文章状态（0 正常 1 已删除 2 待审核）
-     * 下架文献：stats = 1
-     * 刚上传文献 / 文献被投诉：stats = 2
-     * 文献审核完毕：stats = 0
+     *               <p>
+     *               下架文献：stats = 1
+     *               <p>
+     *               刚上传文献 / 文献被投诉：stats = 2
+     *               <p>
+     *               文献审核完毕：stats = 0
      * @param: [pid, stats 要更新成什么状态]
      * @return: 是否成功更新文章状态
      **/

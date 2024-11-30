@@ -2,7 +2,6 @@ package com.buaa01.illumineer_backend.entity.singleton;
 
 public class FidnumSingleton {
 
-
     // 使用 volatile 确保线程安全
     private static volatile FidnumSingleton instance = null;
 
@@ -10,7 +9,8 @@ public class FidnumSingleton {
     private int fidnum = -1;
 
     // 私有构造函数，防止外部实例化
-    private FidnumSingleton() {}
+    private FidnumSingleton() {
+    }
 
     // 获取唯一实例的公共方法
     public static FidnumSingleton getInstance() {
@@ -33,10 +33,10 @@ public class FidnumSingleton {
     public void setFidnum(int fidnum) {
         this.fidnum = fidnum;
     }
+
     // 使fidnum+1并返回
-    public Integer addFidnum(){
-        fidnum ++;
+    public Integer addFidnum() {
+        fidnum++;
         return fidnum;
     }
 }
-
