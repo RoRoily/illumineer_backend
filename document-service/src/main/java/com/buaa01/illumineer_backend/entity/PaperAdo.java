@@ -26,16 +26,17 @@ public class PaperAdo {
     private Integer stats; // 0 正常 1 已删除
     boolean hasBeenAdoptedByTheAuth; //已经被别人认领了！
 
-    PaperAdo setNewPaperAdo(Paper paper, String name){
-       PaperAdo paperAdo = new PaperAdo();
-       paperAdo.pid = paper.getPid();
-       paperAdo.title = paper.getTitle();
-       paperAdo.auths = paper.getAuths();
-       paperAdo.publishDate = paper.getPublishDate();
-       paperAdo.stats = paper.getStats();
-       paperAdo.hasBeenAdoptedByTheAuth = false;
-       //已经被认领
-       if(paper.getAuths().get(name)!=0)paperAdo.hasBeenAdoptedByTheAuth = true;
-       return paperAdo;
+    public PaperAdo setNewPaperAdo(Paper paper, String name){
+        PaperAdo paperAdo = new PaperAdo();
+        paperAdo.pid = Long.valueOf(paper.getPid());
+        paperAdo.title = paper.getTitle();
+        paperAdo.auths = paper.getAuths();
+        paperAdo.publishDate = paper.getPublishDate();
+        paperAdo.stats = paper.getStats();
+        paperAdo.hasBeenAdoptedByTheAuth = false;
+
+        //已经被认领
+        if(paper.getAuths().get(name)!=0)paperAdo.hasBeenAdoptedByTheAuth = true;
+        return paperAdo;
     }
 }
