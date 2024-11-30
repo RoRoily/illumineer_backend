@@ -24,9 +24,9 @@ public class PaperAdo {
     private Map<String, Integer> auths; // 文章作者
     private Date publishDate; // 出版时间
     private Integer stats; // 0 正常 1 已删除
-    boolean hasBeenAdoptedByTheAuth; //已经被别人认领了！
+    boolean hasBeenAdoptedByTheAuth; // 已经被别人认领了！
 
-    public PaperAdo setNewPaperAdo(Paper paper, String name){
+    public PaperAdo setNewPaperAdo(Paper paper, String name) {
         PaperAdo paperAdo = new PaperAdo();
         paperAdo.pid = Long.valueOf(paper.getPid());
         paperAdo.title = paper.getTitle();
@@ -35,8 +35,9 @@ public class PaperAdo {
         paperAdo.stats = paper.getStats();
         paperAdo.hasBeenAdoptedByTheAuth = false;
 
-        //已经被认领
-        if(paper.getAuths().get(name)!=0)paperAdo.hasBeenAdoptedByTheAuth = true;
+        // 已经被认领
+        if (paper.getAuths().get(name) != 0)
+            paperAdo.hasBeenAdoptedByTheAuth = true;
         return paperAdo;
     }
 }

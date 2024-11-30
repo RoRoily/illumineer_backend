@@ -38,17 +38,18 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
 
     /***
      * 根据作者姓名返回包含该姓名的认领条目列表
+     * 
      * @param name 姓名
-     * **/
+     **/
     @Override
-    public CustomResponse getPaperAdoptionsByName(String name){
+    public CustomResponse getPaperAdoptionsByName(String name) {
         CustomResponse customResponse = new CustomResponse();
 
         QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
         List<Paper> papers = paperMapper.selectList(queryWrapper);
         List<PaperAdo> paperAdos = new ArrayList<>();
 
-        for (Paper paper: papers) {
+        for (Paper paper : papers) {
             Map<String, Integer> auths = paper.getAuths();
             if (auths.get(name) != null) {
                 PaperAdo paperAdo = new PaperAdo();
@@ -56,7 +57,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                 paperAdos.add(paperAdo);
                 // 缓存
                 CompletableFuture.runAsync(() -> {
-                    redisTool.setExObjectValue("AdoptObject:" + name, paper);    // 异步更新到redis
+                    redisTool.setExObjectValue("AdoptObject:" + name, paper); // 异步更新到redis
                 }, taskExecutor);
             }
         }
