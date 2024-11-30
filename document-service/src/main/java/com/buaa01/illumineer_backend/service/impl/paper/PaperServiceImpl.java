@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 import com.buaa01.illumineer_backend.tool.OssTool;
@@ -159,4 +160,14 @@ public class PaperServiceImpl implements PaperService {
         customResponse.setMessage("文章更新成功！");
         return customResponse;
     }
+    /***
+     * 根据作者姓名返回包含该姓名的认领条目列表
+     * @param name 姓名
+     * **/
+    @Override
+    public List<PaperAdo> getPaperAdoptionsByName(String name){
+
+    }
+
+
 }
