@@ -27,7 +27,7 @@ public class User {
     private Integer status; // 0为管理员,1~9为不同权限的用户
     private Boolean isVerify; //是否已实名认证
     private Integer stats; // 0 正常 1 封禁 2 已注销
-    private Map<Category,Integer> intension;
+    private Map<Category,Integer> intention;
     //实际个人的相关信息
     private String name;
     private Integer gender;
@@ -44,4 +44,30 @@ public class User {
     private Date createDate;
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")
     private Date deleteDate;
+
+    public static User setNewUser(String encodedPassword, String username, String email){
+        String avatar_url = "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png";
+        String bg_url = "https://tinypic.host/images/2023/11/15/69PB2Q5W9D2U7L.png";
+        Date now = new Date();
+        User user = new User(
+                null,
+                avatar_url,
+                email,
+                encodedPassword,
+                username,
+                "该用户还未填写自我介绍",
+                9,
+                false,
+                0,
+                null, //intention
+                null,
+                null,
+                bg_url,
+                null,
+                null,
+                now,
+                null
+        );
+        return user;
+    }
 }
