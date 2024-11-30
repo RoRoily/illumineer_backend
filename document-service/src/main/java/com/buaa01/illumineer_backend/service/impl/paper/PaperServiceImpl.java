@@ -1,6 +1,5 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
-import cn.hutool.core.lang.tree.Tree;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -10,9 +9,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.service.client.UserClientService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
+import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.relational.core.sql.In;
@@ -29,11 +29,15 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class PaperServiceImpl implements PaperService {
 
-    @Autowired
+//    @Autowired
     private ElasticsearchClient client;
 
     @Autowired
     private PaperMapper paperMapper;
+    @Autowired
+    private RedisTool redisTool;
+    @Autowired
+    private UserClientService userClientService;
 
     @Override
     public CustomResponse getPaperByPid(Integer pid) {
@@ -45,19 +49,19 @@ public class PaperServiceImpl implements PaperService {
         paper = paperMapper.getPaperByPid(pid);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("title",paper.getTitle());
+        map.put("title", paper.getTitle());
         map.put("essAbs", paper.getEssAbs());
-        map.put("keywords",paper.getKeywords());
-        map.put("contentUrl",paper.getContentUrl());
-        map.put("auths",paper.getAuths());
-        map.put("field",paper.getField());
-        map.put("type",paper.getType());
-        map.put("theme",paper.getTheme());
-        map.put("publishDate",paper.getPublishDate());
-        map.put("derivation",paper.getDerivation());
+        map.put("keywords", paper.getKeywords());
+        map.put("contentUrl", paper.getContentUrl());
+        map.put("auths", paper.getAuths());
+        map.put("field", paper.getField());
+        map.put("type", paper.getType());
+        map.put("theme", paper.getTheme());
+        map.put("publishDate", paper.getPublishDate());
+        map.put("derivation", paper.getDerivation());
         map.put("ref_times", paper.getRef_times());
-        map.put("fav_times",paper.getFav_time());
-        map.put("refs",paper.getRefs());
+        map.put("fav_times", paper.getFav_time());
+        map.put("refs", paper.getRefs());
         customResponse.setData(map);
         return customResponse;
     }
@@ -75,19 +79,43 @@ public class PaperServiceImpl implements PaperService {
     // 高级检索
     @Override
     public CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order) {
-        String condStr = "";
+        Set<Paper> papers1 = new HashSet<>();
+        Set<Paper> papers2 = new HashSet<>();
+
         for (Map<String, String> condition : conditions) {
-            if (condition.get("logic").equals("0")) {
-                condStr = condStr + condition.get("condition") + "LIKE %" + condition.get("keyword") + "%";
-            } else if (condition.get("logic").equals("1")) {
-                condStr = condStr + " AND " + condition.get("condition") + "LIKE %" + condition.get("keyword") + "%";
-            } else if (condition.get("logic").equals("2")) {
-                condStr = condStr + " OR " + condition.get("condition") + "LIKE %" + condition.get("keyword") + "%";
-            } else if (condition.get("logic").equals("3")) {
-                condStr = condStr + condition.get("condition") + "NOT LIKE %" + condition.get("keyword") + "%";
+            // 对该查询条件进行模糊查询
+            try {
+                Query query;
+                if (condition.get("logic").equals("3")) { // NOT
+                    query = Query.of(q -> q.bool(b -> b.mustNot(mn -> mn.match(m -> m.field(condition.get("condition")).query(condition.get("keyword"))))));
+                } else {
+                    query = Query.of(q -> q.match(m -> m.field(condition.get("condition")).query(condition.get("keyword"))));
+                }
+                SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
+                SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
+                for (Hit<Paper> hit : searchResponse.hits().hits()) {
+                    if (hit.source() != null) {
+                        if (papers1.isEmpty()) {
+                            papers1.add(hit.source());
+                        } else {
+                            papers2.add(hit.source());
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                log.error("查询ES相关文献文档时出错了：" + e);
             }
+
+            // 进行集合运算
+            if (condition.get("logic").equals("1")) { // AND
+                papers1.retainAll(papers2);
+            } else if (condition.get("logic").equals("2")) { // OR
+                papers1.addAll(papers2);
+            }
+            papers2.clear();
         }
-        List<Paper> papers = paperMapper.getAdvancedSearchPapers(condStr);
+
+        List<Paper> papers = papers1.stream().toList();
         return getSearchResult(papers, sortType, order, size, offset);
     }
 
@@ -126,6 +154,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 获取筛选字段的选项
+     *
      * @param papers
      */
     Map<String, List<Map.Entry<String, Integer>>> getOptions(List<Paper> papers) {
@@ -203,6 +232,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 模糊查询
+     *
      * @param keyword 搜索内容
      * @return 文献信息
      */
@@ -226,9 +256,10 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 分页
-     * @param papers 搜索的结果
+     *
+     * @param papers  搜索的结果
      * @param pageNum 一页的条目数量
-     * @param offset 第几页
+     * @param offset  第几页
      * @return 文献信息
      */
     List<Paper> searchByPage(List<Paper> papers, Integer pageNum, Integer offset) {
@@ -261,9 +292,10 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 排序
-     * @param papers 搜索的结果
+     *
+     * @param papers   搜索的结果
      * @param sortType 根据这个来进行排序 // 1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
+     * @param order    0=降序，1=升序
      * @return 文献信息
      */
     List<Paper> searchByOrder(List<Paper> papers, Integer sortType, Integer order) {
@@ -304,6 +336,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 返回引用量
+     *
      * @param pid 文章 id
      * @return 引用量
      */
@@ -316,13 +349,14 @@ public class PaperServiceImpl implements PaperService {
         paper = paperMapper.getPaperByPid(pid);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("ref_times",paper.getRef_times());
+        map.put("ref_times", paper.getRef_times());
         customResponse.setData(map);
         return customResponse;
     }
 
     /**
      * 根据 pid 增加引用量
+     *
      * @param pid 文章 id
      */
     public CustomResponse addRefTimes(int pid) {
@@ -339,6 +373,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 增加收藏量
+     *
      * @param pid 文章 id
      */
     public CustomResponse addFavTimes(int pid) {
@@ -355,14 +390,16 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 根据 pid 上传新的文章
-     * @param paper 文章
+     *
+     * @param paper   文章
      * @param content 文章内容（文件）
      */
     public CustomResponse uploadPaper(Paper paper, MultipartFile content) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
-        String contentUrl = ossTool.uploadPaperContent(content, "content");
+//        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        String contentUrl = "";
         if (contentUrl == null) {
             log.warn("OSS URL 为空，合并操作终止");
             customResponse.setMessage("无法生成文章url！");
@@ -375,7 +412,7 @@ public class PaperServiceImpl implements PaperService {
 
         // 存入数据库
         paperMapper.insert(paper);
-        esTool.addPaper(paperMapper);
+//        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
         return customResponse;
@@ -383,46 +420,48 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 更新作者（已认证）
+     *
      * @param pid
      * @param aid
      * @return
      */
     public CustomResponse updateAuth(int pid, int aid) {
         CustomResponse customResponse = new CustomResponse();
-
-        if (getAuthorByAid() == null) { // 查找作者
-            customResponse.setMessage("该作者不存在");
-            return customResponse;
-        }
-
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("pid", pid);
-        paper = paperMapper.getPaperByPid(pid);
-
-        Map<String, Integer> auths = paper.getAuths();
-        String author = getAuthorByAid().getAuthor();
-        if (auths.containsValue(aid)) { // 存在此作者
-            // 存在此作者，删除
-            auths.remove(author);
-            paper.setAuths(auths);
-        } else { // 不存在此作者
-            // 将该作者加入pid的作者列表中
-            auths.put(author, aid);
-            paper.setAuths(auths);
-        }
-
-        // 更新数据库
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("auths = " + auths);
-        paperMapper.update(null, updateWrapper);
-
+//
+//        if (getAuthorByAid() == null) { // 查找作者
+//            customResponse.setMessage("该作者不存在");
+//            return customResponse;
+//        }
+//
+//        Paper paper = null;
+//        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("pid", pid);
+//        paper = paperMapper.getPaperByPid(pid);
+//
+//        Map<String, Integer> auths = paper.getAuths();
+//        String author = getAuthorByAid().getAuthor();
+//        if (auths.containsValue(aid)) { // 存在此作者
+//            // 存在此作者，删除
+//            auths.remove(author);
+//            paper.setAuths(auths);
+//        } else { // 不存在此作者
+//            // 将该作者加入pid的作者列表中
+//            auths.put(author, aid);
+//            paper.setAuths(auths);
+//        }
+//
+//        // 更新数据库
+//        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+//        updateWrapper.eq("pid", pid);
+//        updateWrapper.setSql("auths = " + auths);
+//        paperMapper.update(null, updateWrapper);
+//
         return customResponse;
     }
 
     /**
      * 更新作者（已认证）
+     *
      * @param pid
      * @param author
      * @return
@@ -457,6 +496,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 删除文章
+     *
      * @param pid
      * @return
      */
@@ -474,23 +514,25 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 修改文章信息
+     *
      * @param
      * @return
      */
     public CustomResponse updatePaper(int pid,
-                               String title,
-                               String essAbs,
-                               String keywords,
-                               MultipartFile content,
-                               String field,
-                               String type,
-                               String theme,
-                               Date publishDate,
-                               String derivation) {
+                                      String title,
+                                      String essAbs,
+                                      String keywords,
+                                      MultipartFile content,
+                                      String field,
+                                      String type,
+                                      String theme,
+                                      Date publishDate,
+                                      String derivation) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
-        String contentUrl = ossTool.uploadPaperContent(content, "content");
+//        String contentUrl = ossTool.uploadPaperContent(content, "content");
+        String contentUrl = "";
         if (contentUrl == null) {
             log.warn("OSS URL 为空，合并操作终止");
             customResponse.setMessage("无法生成文章url！");
@@ -507,14 +549,28 @@ public class PaperServiceImpl implements PaperService {
         customResponse.setMessage("文章更新成功！");
         return customResponse;
     }
-    /***
-     * 根据作者姓名返回包含该姓名的认领条目列表
-     * @param name 姓名
-     * **/
+
     @Override
-    public List<PaperAdo> getPaperAdoptionsByName(String name){
-
+    public CustomResponse updatePaperAdoptionStatus(String name,List<Integer> pidsForAdopt){
+        String key = "AdoptObject:"+name;
+        //可能需要更改的文章对象
+        Set<Object> papers = redisTool.getSetMembers(key);
+        if(papers == null){
+            for(Integer pid : pidsForAdopt){
+                QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("pid", pid);
+                Paper Adopaper = paperMapper.getPaperByPid(pid);
+                //修改Auths的相关值和属性
+                Adopaper.getAuths().put(name,userClientService.getCurrentUser().getUid());
+            }
+        }
+        else{
+            for(Object paperEntity : papers){
+                Paper p = (Paper) paperEntity;
+                if(pidsForAdopt.contains(p.getPid())) p.getAuths().put(name,userClientService.getCurrentUser().getUid());
+            }
+        }
+        CustomResponse customResponse = new CustomResponse(200,"Success to adopt",null);
+        return customResponse;
     }
-
-
 }

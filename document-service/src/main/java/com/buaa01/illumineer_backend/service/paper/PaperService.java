@@ -113,4 +113,11 @@ public interface PaperService {
      * **/
     List<PaperAdo> getPaperAdoptionsByName(String name);
 
+
+    /**
+     * 根据作者姓名更改认领条目表
+     * @param name 姓名
+     * @retun customResponse 我的
+     * **/
+    CustomResponse updatePaperAdoptionStatus(String name,List<Integer> pids);
 }

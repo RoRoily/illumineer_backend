@@ -37,4 +37,7 @@ public interface PaperServiceClient {
 
     @GetMapping("/document/propider/sentinel/test/{message}")
     public String propiderSentinelTest(@PathVariable("message") String message);
+
+    @PostMapping("/document/adoption")
+    CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name);
 }
