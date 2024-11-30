@@ -1,5 +1,7 @@
 package com.buaa01.illumineer_backend.service;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface StormService {
-    public String getStorm();
+    CompletableFuture<String> getStorm();
 }
