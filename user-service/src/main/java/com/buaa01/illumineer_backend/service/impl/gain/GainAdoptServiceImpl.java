@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.service.impl.gain;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.service.gain.GainAdoptService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -43,6 +45,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
      */
     @Override
     public CustomResponse updateAdoption(List<Integer> pids, Integer uid){
-
+        CustomResponse customResponse = new CustomResponse(200,"待修改",null);
+        return customResponse;
     }
 }

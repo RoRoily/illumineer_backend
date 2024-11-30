@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class FavoriteController {
+public class   FavoriteController {
     @Autowired
     private FavoriteService favoriteService;
 
