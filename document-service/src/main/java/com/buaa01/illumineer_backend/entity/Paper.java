@@ -12,7 +12,7 @@ import java.util.*;
 @NoArgsConstructor
 public class Paper {
     @TableId(type = IdType.AUTO)
-    private Integer pid;
+    private Long pid;
     // 文章的相关信息
     private String title; // 文章题目
     private String essAbs; // 文章摘要
@@ -26,6 +26,6 @@ public class Paper {
     private String derivation;// 来源
     private Integer ref_times; // 引用次数
     private Integer fav_time; // 收藏次数
-    private List<Integer> refs; // 引用文献
+    private List<Long> refs; // 引用文献
     private Integer stats; // 0 正常 1 已删除
 }

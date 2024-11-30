@@ -186,19 +186,19 @@ public class PaperController {
      * @param aid
      * @return
      */
-//    @PostMapping("/updateAuth")
-//    public CustomResponse updateAuth(@RequestParam("pid") int pid,
-//                                      @RequestParam("aid") int aid) {
-//        try {
-//            return paperService.updateAuth(pid, aid);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            CustomResponse customResponse = new CustomResponse();
-//            customResponse.setCode(500);
-//            customResponse.setMessage("作者关联失败！");
-//            return customResponse;
-//        }
-//    }
+    @PostMapping("/updateAuth")
+    public CustomResponse updateAuth(@RequestParam("pid") int pid,
+                                      @RequestParam("aid") int aid) {
+        try {
+            return paperService.updateAuth(pid, aid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("作者关联失败！");
+            return customResponse;
+        }
+    }
 
     /**
      * 更新作者（未认证）
@@ -206,19 +206,19 @@ public class PaperController {
      * @param author
      * @return
      */
-//    @PostMapping("/updateAuth")
-//    public CustomResponse updateAuth(@RequestParam("pid") int pid,
-//                                      @RequestParam("author") String author) {
-//        try {
-//            return paperService.updateAuth(pid, author);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            CustomResponse customResponse = new CustomResponse();
-//            customResponse.setCode(500);
-//            customResponse.setMessage("作者关联失败！");
-//            return customResponse;
-//        }
-//    }
+    @PostMapping("/updateAuth")
+    public CustomResponse updateAuth(@RequestParam("pid") int pid,
+                                      @RequestParam("author") String author) {
+        try {
+            return paperService.updateAuth(pid, author);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("作者关联失败！");
+            return customResponse;
+        }
+    }
 
     /**
      * 删除文章

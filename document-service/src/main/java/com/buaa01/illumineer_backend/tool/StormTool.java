@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.tool;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.service.CategoryService;
+import com.buaa01.illumineer_backend.service.paper.CategoryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
@@ -24,11 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 @Component
@@ -86,41 +90,41 @@ public class StormTool {
         prefs.put("safebrowsing.enabled", true);               // 禁用安全浏览器保护
         options.setExperimentalOption("prefs", prefs);
         // Initialize ChromeDriver
-//        WebDriver driver = new ChromeDriver(options);
+        WebDriver driver = new ChromeDriver(options);
         try {
-//            // Navigate to the URL
-//            driver.get("https://openalex.s3.amazonaws.com/browse.html#data/works/" + last_update);
-//            Thread.sleep(1000);
-//            // Maximize browser window
-//            driver.manage().window().maximize();
-//            Thread.sleep(1000);
-//            // Wait for the tbody to be present
-//            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-//            WebElement tbody2 = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//tbody[@id='tbody-s3objects']")));
-//            // Find the last row in the tbody and its first <td> element
-//            List<WebElement> rows = tbody2.findElements(By.tagName("tr"));
-//            WebElement lastRow = rows.get(rows.size() - 1);
-//            WebElement td2 = lastRow.findElements(By.tagName("td")).get(0);
-//            // Click on the link inside the <td>
-//            WebElement a = td2.findElement(By.tagName("a"));
-//            // Delete and recreate the download directory
-//            Path downloadPath = Paths.get(downloadDir);
-//            if (Files.exists(downloadPath)) {
-//                try (Stream<Path> paths = Files.walk(downloadPath)) {
-//                    paths.sorted(Comparator.reverseOrder())
-//                            .map(Path::toFile)
-//                            .forEach(File::delete);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            Files.createDirectories(downloadPath);
-//            // Click the download link
-//            a.click();
-//            String fileName = a.getText(); // Expected downloaded file name
-//            waitForDownloadToComplete(downloadDir, fileName);
-//            // Close the browser
-//            driver.quit();
+            // Navigate to the URL
+            driver.get("https://openalex.s3.amazonaws.com/browse.html#data/works/" + last_update);
+            Thread.sleep(1000);
+            // Maximize browser window
+            driver.manage().window().maximize();
+            Thread.sleep(1000);
+            // Wait for the tbody to be present
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement tbody2 = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//tbody[@id='tbody-s3objects']")));
+            // Find the last row in the tbody and its first <td> element
+            List<WebElement> rows = tbody2.findElements(By.tagName("tr"));
+            WebElement lastRow = rows.get(rows.size() - 1);
+            WebElement td2 = lastRow.findElements(By.tagName("td")).get(0);
+            // Click on the link inside the <td>
+            WebElement a = td2.findElement(By.tagName("a"));
+            // Delete and recreate the download directory
+            Path downloadPath = Paths.get(downloadDir);
+            if (Files.exists(downloadPath)) {
+                try (Stream<Path> paths = Files.walk(downloadPath)) {
+                    paths.sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(File::delete);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            Files.createDirectories(downloadPath);
+            // Click the download link
+            a.click();
+            String fileName = a.getText(); // Expected downloaded file name
+            waitForDownloadToComplete(downloadDir, fileName);
+            // Close the browser
+            driver.quit();
             // Find the .gz file in the download directory
             File[] gzFiles = new File(downloadDir).listFiles((dir, name) -> name.endsWith(".gz"));
             if (gzFiles == null || gzFiles.length == 0) {
@@ -252,7 +256,7 @@ public class StormTool {
         } else {
             article.setDerivation("");
         }
-        article.setRefTimes(jsonObject.get("cited_by_count").getAsInt());
+        article.setRef_times(jsonObject.get("cited_by_count").getAsInt());
         List<Long> referenceList = new ArrayList<>();
         JsonArray references = jsonObject.getAsJsonArray("related_works");
         for (JsonElement reference : references) {
@@ -263,7 +267,7 @@ public class StormTool {
             referenceList.add(id);
         }
         article.setRefs(referenceList);
-        article.setFavTimes(0);
+        article.setFav_time(0);
         article.setStats(0);
         JsonElement typeElement = jsonObject.get("type");
         if (typeElement != null && !typeElement.isJsonNull()) {

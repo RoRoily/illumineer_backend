@@ -1,4 +1,4 @@
-package com.buaa01.illumineer_backend.service.impl.user;
+package com.buaa01.illumineer_backend.service.impl.paper;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.mapper.CategoryMapper;
