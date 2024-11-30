@@ -47,15 +47,28 @@ public class UserAuthServiceImpl implements UserAuthService {
                 //收藏论文
                 else {
                     redisTool.addSetMember(fidKey, pid);
+                    //在文章的序列中添加作者
+                    String authKey = "paperBelonged:" + pid;
+                    if(!redisTool.isExist(authKey)){
+                        //FIXME: 这里可以通过这种方式创建key吗？
+                        System.out.println("不存在该论文 认领者的 集合");
+                        redisTool.addSetMember(authKey,currentUser.getUser().getUid());
+                    }else if(redisTool.isSetMember(authKey,currentUser.getUser().getUid())){
+                        customResponse.setCode(500);
+                        customResponse.setMessage("用户已存在于该文章的认领者集合中");
+                    }else{
+                        redisTool.addSetMember(authKey,currentUser.getUser().getUid());
+                    }
                 }
             }
         }else {
+            //删除操作
             for (Integer pid : pids) {
                 if (!redisTool.isExist(fidKey)) {
                     customResponse.setCode(500);
                     customResponse.setMessage("Redis中该用户实名下的论文集合未创建，可能未在实名过程中调用创建函数");
                 }
-                //fid下已经有该论文
+                //fid下没有有该论文
                 else if (!redisTool.isSetMember(fidKey, pid)) {
                     customResponse.setCode(500);
                     customResponse.setMessage("尝试删除本不存在于集合中的论文");
@@ -63,7 +76,19 @@ public class UserAuthServiceImpl implements UserAuthService {
                 //收藏论文
                 else {
                     //可以使用这个函数吗？
-                    redisTool.addSetMember(fidKey, pid);
+                    redisTool.deleteSetMember(fidKey, pid);
+                    //在文章的序列中删除作者
+                    String authKey = "paperBelonged:" + pid;
+                    if(!redisTool.isExist(authKey)){
+                        //FIXME: 这里可以通过这种方式创建key吗？
+                        System.out.println("不存在该论文 认领者的 集合");
+                        redisTool.addSetMember(authKey,currentUser.getUser().getUid());
+                    }else if(!redisTool.isSetMember(authKey,currentUser.getUser().getUid())){
+                        customResponse.setCode(500);
+                        customResponse.setMessage("尝试删除本不存在于改论文认领者集合中的用户");
+                    }else{
+                        redisTool.addSetMember(authKey,currentUser.getUser().getUid());
+                    }
                 }
             }
         }
