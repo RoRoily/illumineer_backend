@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class SearchResultPaper {
     private Integer pid;
     // 文章的相关信息
     private String title; // 文章题目
-//    private String essAbs; // 文章摘要
+    //    private String essAbs; // 文章摘要
     private List<String> keywords;
     private Map<String, Integer> auths; // 文章作者
     private List<String> category; // 相关领域
@@ -27,4 +28,21 @@ public class SearchResultPaper {
     private String derivation;// 来源
     private Integer ref_times; // 引用次数
     private Integer fav_time; // 收藏次数
+
+    public SearchResultPaper paperToSearchResultPaper(Paper paper) {
+        SearchResultPaper searchResultPaper = new SearchResultPaper(
+                paper.getPid(),
+                paper.getTitle(),
+                paper.getKeywords(),
+                paper.getAuths(),
+                paper.getCategory(),
+                paper.getType(),
+                paper.getTheme(),
+                paper.getPublishDate(),
+                paper.getDerivation(),
+                paper.getRef_times(),
+                paper.getFav_time());
+
+        return searchResultPaper;
+    }
 }

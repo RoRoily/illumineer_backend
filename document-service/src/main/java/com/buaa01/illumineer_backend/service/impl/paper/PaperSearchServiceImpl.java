@@ -192,19 +192,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         List<SearchResultPaper> searchResultPapers = new ArrayList<>();
 
         for (Paper paper : papers) {
-            SearchResultPaper searchResultPaper = new SearchResultPaper(
-                    paper.getPid(),
-                    paper.getTitle(),
-                    paper.getKeywords(),
-                    paper.getAuths(),
-                    paper.getCategory(),
-                    paper.getType(),
-                    paper.getTheme(),
-                    paper.getPublishDate(),
-                    paper.getDerivation(),
-                    paper.getRef_times(),
-                    paper.getFav_time()
-            );
+            SearchResultPaper searchResultPaper = new SearchResultPaper();
+            searchResultPaper = searchResultPaper.paperToSearchResultPaper(paper);
             searchResultPapers.add(searchResultPaper);
         }
 
