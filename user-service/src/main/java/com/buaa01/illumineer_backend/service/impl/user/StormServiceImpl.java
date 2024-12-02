@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class StormServiceImpl implements StormService {
@@ -17,7 +18,7 @@ public class StormServiceImpl implements StormService {
     private StormTool storm;
 
     @Override
-    public String getStorm() {
+    public CompletableFuture<String> getStorm() {
         ArrayList<Paper> articles;
         String last_update = "updated_date=2024-01-01/";
 //        String isNew = storm.check(last_update);
@@ -28,6 +29,6 @@ public class StormServiceImpl implements StormService {
 //        System.out.println(articles.size());
         for (Paper article : articles)
             stormMapper.insertPaper(article);
-        return Integer.toString(articles.size());
+        return CompletableFuture.completedFuture(Integer.toString(articles.size()));
     }
 }

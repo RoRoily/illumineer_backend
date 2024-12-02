@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.ScreenCondition;
+import com.buaa01.illumineer_backend.service.filter.FilterService;
+
 @RestController
 public class PaperFilterController {
 
@@ -20,7 +25,7 @@ public class PaperFilterController {
     /**
      * ES模糊搜索结果的进一步筛选
      * 模糊->限定
-     * 
+     *
      * @param Map<String,ArrayList<String>> 筛选条件
      * 
      * @return CustomResponse对象

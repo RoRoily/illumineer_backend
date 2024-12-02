@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.buaa01.illumineer_backend.entity.ElasticSearchScholar;
 import com.buaa01.illumineer_backend.entity.ElasticSearchWord;
+import com.buaa01.illumineer_backend.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,21 +39,120 @@ public class ElasticSearchTool {
     }
 
     /**
-     * 将名字为name的学者添加入es中
-     * @param name 名字
+     * 将user学者添加入es中
+     * @param user 名字
      */
-    public void addScholar(String name) {
+    public void addScholar(User user) {
         try{
-            ElasticSearchScholar scholar = new ElasticSearchScholar(name);
-            elasticsearchClient.index(i->i.index("scholars").document(scholar));
+            ElasticSearchScholar esScholar = new ElasticSearchScholar(
+                    user.getUid(), user.getUserName(),
+                    user.getStats(), user.getName(),
+                    user.getAuthId(), user.getGender(),
+                    user.getField(), user.getInstitution());
+            elasticsearchClient.index(i->i.index("scholars").id(esScholar.getUid().toString()).document(esScholar));
         }catch (IOException e){
             log.error("添加学者名至ElasticSearch出错：{}", e.getMessage());
         }
     }
 
     /**
-     * 获取名字匹配的学者list，模糊查询+前缀匹配
-     * @param name 名字
+     * 删除学者信息
+     * @param scholarId 学者的uid
+     */
+    public void deleteScholar(Integer scholarId) {
+        try{
+            elasticsearchClient.delete(i->i.index("scholars").id(scholarId.toString()));
+        }catch (IOException e){
+            log.error("es删除学者出错：{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 更新学者信息
+     * @param user 学者
+     */
+    public void updateScholar(User user) {
+        try{
+            ElasticSearchScholar esScholar = new ElasticSearchScholar(
+                    user.getUid(), user.getUserName(),
+                    user.getStats(), user.getName(),
+                    user.getAuthId(), user.getGender(),
+                    user.getField(), user.getInstitution());
+            elasticsearchClient.update(i->i.index("scholars").id(user.getUid().toString()).doc(esScholar),ElasticSearchScholar.class);
+        } catch (IOException e) {
+            log.error("es更新学者出错：{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 模糊匹配，分页查询
+     * @param keyword   查询关键词
+     * @param page  第几页 从1开始
+     * @param size  每页查多少条数据 一般30条
+     * @param onlyPass 是否只查询没有删除的论文
+     * @return 包含查到的数据id列表，按匹配分数排序
+     */
+    public List<Integer> searchScholarsIdByName(String keyword, Integer page, Integer size, boolean onlyPass) {
+        try {
+            List<Integer> list = new ArrayList<>();
+            Query query = Query.of(q -> q.multiMatch(m -> m.fields("name").query(keyword)));
+            Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(0)))));
+            Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
+            SearchRequest searchRequest;
+            if (onlyPass) {
+                searchRequest = new SearchRequest.Builder().index("scholar").query(bool).from((page - 1) * size).size(size).build();
+            } else {
+                searchRequest = new SearchRequest.Builder().index("scholar").query(query).from((page - 1) * size).size(size).build();
+            }
+            SearchResponse<ElasticSearchScholar> searchResponse = elasticsearchClient.search(searchRequest, ElasticSearchScholar.class);
+            for (Hit<ElasticSearchScholar> hit : searchResponse.hits().hits()) {
+                if (hit.source() != null) {
+                    list.add(hit.source().getUid());
+                }
+            }
+            return list;
+        } catch (IOException e) {
+            log.error("查询ES相关学者id时出错了：{}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 模糊匹配，分页查询
+     * @param keyword   查询关键词
+     * @param page  第几页 从1开始
+     * @param size  每页查多少条数据 一般30条
+     * @param onlyPass 是否只查询没有删除的论文
+     * @return 包含查到的学者列表，按匹配分数排序
+     */
+    public List<ElasticSearchScholar> searchScholarsByName(String keyword, Integer page, Integer size, boolean onlyPass) {
+        try {
+            List<ElasticSearchScholar> list = new ArrayList<>();
+            Query query = Query.of(q -> q.multiMatch(m -> m.fields("name","userName").query(keyword).fuzziness("AUTO")));
+            Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(0)))));
+            Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
+            SearchRequest searchRequest;
+            if (onlyPass) {
+                searchRequest = new SearchRequest.Builder().index("scholar").query(bool).from((page - 1) * size).size(size).build();
+            } else {
+                searchRequest = new SearchRequest.Builder().index("scholar").query(query).from((page - 1) * size).size(size).build();
+            }
+            SearchResponse<ElasticSearchScholar> searchResponse = elasticsearchClient.search(searchRequest, ElasticSearchScholar.class);
+            for (Hit<ElasticSearchScholar> hit : searchResponse.hits().hits()) {
+                if (hit.source() != null) {
+                    list.add(hit.source());
+                }
+            }
+            return list;
+        } catch (IOException e) {
+            log.error("查询ES相关学者时出错了：{}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 获取真实姓名匹配的学者list，模糊查询+前缀匹配
+     * @param name 真实名字
      * @return 学者姓名的list
      */
     public List<String> getMatchedScholar(String name) {

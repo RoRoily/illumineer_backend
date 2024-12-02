@@ -8,6 +8,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.List;
 
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
+
 public class PaperSortScorer {
     /* 引用次数权重 */
     final static double W_REF = 0.3;
@@ -33,7 +35,6 @@ public class PaperSortScorer {
     }
 
     /**
-     * 初步尝试归一化，但无法确定总引用量
      * 
      * @param value       分子
      * @param denominator 分母

@@ -69,9 +69,11 @@ public class UserAuthController {
      * 完成文章的认领
      * @param pidList 被认领的pid的List
      * @return CustomResponse对象
+     *
+     * 更新：该端口弃用，被ClientController调用的Auth端口完成功能
      * **/
     @PostMapping("user/auth/claim")
-    public CustomResponse claim(@RequestBody List<Integer> p=idList){
+    public CustomResponse claim(@RequestBody List<Integer> pidList){
         try {
             return userAuthService.claim(pidList);
         } catch (Exception e) {
