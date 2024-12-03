@@ -14,6 +14,7 @@ import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAccountService;
 import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.tool.ESTool;
 import com.buaa01.illumineer_backend.tool.JsonWebTokenTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
@@ -67,6 +68,8 @@ public class UserAccountServiceImpl implements UserAccountService {
     @Qualifier("taskExecutor")
     @Autowired
     private Executor taskExecutor;
+    @Autowired
+    private ESTool esTool;
 
     /**
      * 用户注册
