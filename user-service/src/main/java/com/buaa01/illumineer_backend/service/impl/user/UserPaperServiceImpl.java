@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.User2Paper;
 
