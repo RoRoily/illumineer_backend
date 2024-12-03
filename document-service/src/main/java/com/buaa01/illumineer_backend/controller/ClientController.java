@@ -38,7 +38,7 @@ public class ClientController {
     /***
      * 根据文章列表返回对应文章列表
      * 
-     * @param pidlist 文章id列表
+     * @param pids 文章id列表
      **/
     @PostMapping("/paper/subList")
     public CustomResponse getPaperAdoptionsByList(List<Long> pids) {
