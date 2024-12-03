@@ -31,7 +31,7 @@ public class User {
     private String name;
     private Integer authId;
     private Integer gender;
-    private Map<Category,Integer> field ;// 相关领域
+    private Map<Category, Integer> field ;// 相关领域
     private String institution;
     //需要在Redis中存储的信息
     //名下论文集合 papers

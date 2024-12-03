@@ -23,7 +23,7 @@ public class PaperAdo {
     private String title; // 文章题目
     @TableField(typeHandler = MapTypeHandler.class)
     private Map<String, Integer> auths; // 文章作者
-    private LocalDate publishDate; // 出版时间
+    private Date publishDate; // 出版时间
     private Integer stats; // 0 正常 1 已删除
     boolean hasBeenAdoptedByTheAuth; //已经被别人认领了！
 
