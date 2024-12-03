@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
@@ -11,5 +12,5 @@ import java.util.Map;
 public interface UserMapper extends BaseMapper<User> {
     // 更新category
     @Update("UPDATE user SET category = #{category} WHERE uid = #{uid}")
-    void updateCategory(Integer uid, Map<Integer, Integer> category);
+    void updateCategory(Integer uid, Map<Category, Integer> category);
 }

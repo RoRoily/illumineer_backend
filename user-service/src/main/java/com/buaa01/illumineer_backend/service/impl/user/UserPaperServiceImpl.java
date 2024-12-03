@@ -3,6 +3,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.Category;
+import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.User2Paper;
@@ -10,6 +11,7 @@ import com.buaa01.illumineer_backend.entity.User2Paper;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -108,9 +110,14 @@ public class UserPaperServiceImpl implements UserPaperService {
         User user = getUser(uid);
 
         // 获取最新的weight
-        Map<Integer, Integer> intention = user.getIntention();
-        Integer weight = intention.get(cid);
-        intention.put(cid, weight + addWeight);
+        Map<Category, Integer> intention = user.getIntention();
+        for (Category category : intention.keySet()) {
+            if (Objects.equals(category.getCid(), cid)) {
+                Integer weight = intention.get(category);
+                intention.put(category, weight + addWeight);
+                break;
+            }
+        }
 
         // 更新weight
         userMapper.updateCategory(uid, intention);
@@ -119,7 +126,7 @@ public class UserPaperServiceImpl implements UserPaperService {
     // 根据pid获得cid
     private int getCid(Integer pid) {
         // 根据pid找category
-        Papers paper = getPaper(pid);
+        Paper paper = getPaper(pid);
         String categoryName = paper.getCategory();
 
         // 根据category找cid
@@ -132,9 +139,9 @@ public class UserPaperServiceImpl implements UserPaperService {
         return cid;
     }
 
-    private Papers getPaper(Integer pid) {
-        Papers paper = null;
-        QueryWrapper<Papers> paperQueryWrapper = new QueryWrapper<>();
+    private Paper getPaper(Integer pid) {
+        Paper paper = null;
+        QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
         paperQueryWrapper.eq("pid", pid);
         paper = paperMapper.selectOne(paperQueryWrapper);
         return paper;
