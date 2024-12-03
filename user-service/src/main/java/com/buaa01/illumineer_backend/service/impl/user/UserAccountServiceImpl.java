@@ -7,6 +7,7 @@ import com.buaa01.illumineer_backend.entity.Favorite;
 import com.buaa01.illumineer_backend.entity.History;
 import com.buaa01.illumineer_backend.entity.singleton.FidnumSingleton;
 import com.buaa01.illumineer_backend.entity.User;
+import com.buaa01.illumineer_backend.im.IMServer;
 import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.mapper.HistoryMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
@@ -18,6 +19,7 @@ import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 import com.buaa01.illumineer_backend.service.UserService;
 
+import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 

@@ -4,10 +4,17 @@ package com.buaa01.illumineer_backend.controller;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
+import com.buaa01.illumineer_backend.entity.IMResponse;
 import com.buaa01.illumineer_backend.entity.User;
+import com.buaa01.illumineer_backend.im.IMServer;
+import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
+import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAuthService;
+import com.buaa01.illumineer_backend.service.user.UserService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.tool.RedisTool;
 import io.netty.channel.Channel;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
