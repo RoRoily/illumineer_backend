@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +26,7 @@ public class Project {
     /** 内容摘要 */
     private String essAbs;
     /** 发布时间 */
-    private LocalDate publishDate;
+    private Date publishDate;
     /** 收藏次数 */
     private Integer fav_time;
     /** 状态: 0 正常 1 已删除 2 审核中 */

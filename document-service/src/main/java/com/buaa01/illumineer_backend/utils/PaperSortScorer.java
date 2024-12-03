@@ -1,7 +1,5 @@
 package com.buaa01.illumineer_backend.utils;
 
-import com.buaa01.illumineer_backend.entity.Paper;
-
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
