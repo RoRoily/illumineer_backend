@@ -3,6 +3,7 @@ package com.buaa01.illumineer_backend.service.impl.user;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ public class UserServiceImpl implements UserService {
     private RedisTool redisTool;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private CurrentUser currentUser;
 
     /**
      * 根据用户ID获取用户信息

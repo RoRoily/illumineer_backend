@@ -1,19 +1,11 @@
 package com.buaa01.illumineer_backend.service.impl.user;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.User2Paper;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-
 import com.buaa01.illumineer_backend.mapper.CategoryMapper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
@@ -23,6 +15,12 @@ import com.buaa01.illumineer_backend.tool.RedisTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Service
 public class UserPaperServiceImpl implements UserPaperService {

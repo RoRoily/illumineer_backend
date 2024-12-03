@@ -1,3 +1,5 @@
+package com.buaa01.illumineer_backend.service.impl.email;
+
 import com.buaa01.illumineer_backend.service.email.EmailService;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -9,13 +11,17 @@ import javax.mail.internet.MimeMessage;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    private final JavaMailSender mailSender;
+    private JavaMailSender mailSender;
 
-    public EmailService(JavaMailSender mailSender) {
+    public void EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
-    @Overide
+    public EmailServiceImpl(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    @Override
     public void sendVerificationEmail(String to, String token, String verificationUrl) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
