@@ -6,7 +6,10 @@ import com.buaa01.illumineer_backend.aiUtil.dto.RequestDTO;
 import com.buaa01.illumineer_backend.aiUtil.session.Configuration;
 import com.buaa01.illumineer_backend.aiUtil.session.OpenAiSession;
 import com.buaa01.illumineer_backend.aiUtil.util.AuthUtil;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import okhttp3.sse.EventSource;
 
 /**
@@ -18,7 +21,6 @@ public class DefaultOpenAiSession implements OpenAiSession {
     private final Configuration configuration;
 
     private final EventSource.Factory factory;
-
 
     private final IOpenAiApi openAiApi;
 
@@ -42,12 +44,7 @@ public class DefaultOpenAiSession implements OpenAiSession {
         String apiKey = apiKeyByUser == null ? configuration.getApiKey() : apiKeyByUser;
         // 构建请求信息
         String key = AuthUtil.getKey(apiKey, configuration);
-        Request request = new Request.Builder()
-                // 这里的url需注意，需要提前处理好key，具体请前往讯飞开发平台查看开发文档
-                // 参考格式：wss://spark-api.xf-yun.com/v1.1/chat?
-                // authorization=YXBpX2tleT0iYWRkZDIyNzJiNmQ4YjdjOGFiZGQ3OTUzMTQyMGNhM2IiLCBhbGdvcml0aG09ImhtYWMtc2hhMjU2IiwgaGVhZGVycz0iaG9zdCBkYXRlIHJlcXVlc3QtbGluZSIsIHNpZ25hdHVyZT0iejVnSGR1M3B4VlY0QURNeWs0Njd3T1dEUTlxNkJRelIzbmZNVGpjL0RhUT0i&date=Fri%2C+05+May+2023+10%3A43%3A39+GMT&host=spark-api.xf-yun.com
-                .url(key)
-                .build();
+        Request request = new Request.Builder().url(key).build();
         // 建立 wss 连接
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
         WebSocket webSocket = okHttpClient.newWebSocket(request, listener);

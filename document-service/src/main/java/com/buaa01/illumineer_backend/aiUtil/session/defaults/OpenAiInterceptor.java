@@ -1,4 +1,4 @@
-package com.buaa01.illumineer_backend.aiUtil.interceptor;
+package com.buaa01.illumineer_backend.aiUtil.session.defaults;
 
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
@@ -30,11 +30,11 @@ import java.util.TimeZone;
 public class OpenAiInterceptor implements Interceptor {
 
     /** OpenAi apiKey 需要在官网申请 */
-    private String apiKeyBySystem;
+    private final String apiKeyBySystem;
     /** 访问授权接口的认证 Token */
 
 
-    private Configuration configuration;
+    private final Configuration configuration;
 
 
     public OpenAiInterceptor(String apiKeyBySystem, Configuration configuration) {
@@ -48,6 +48,8 @@ public class OpenAiInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         // 获得请求信息
         Request original = chain.request();
+        HttpUrl originalUrl = original.url();
+
         // 拿到请求头中用户传递的Key
         String apiKeyByUser = original.header("apiKey");
         String apiKey = Constants.NULL.equals(apiKeyByUser) ? apiKeyBySystem : apiKeyByUser;
@@ -60,7 +62,6 @@ public class OpenAiInterceptor implements Interceptor {
         // 拼接
         HttpUrl url = original.url();
         URL url1 = new URL(url.toString());
-
 
         String preStr = "host: " + original.url().host() + "\n" +
                 "date: " + date + "\n" +
@@ -80,7 +81,10 @@ public class OpenAiInterceptor implements Interceptor {
 
         System.out.println(encodeToString);
         // 构建request
-        Request request = new Request.Builder().url(original.url())
+        Request request = new Request.Builder()
+                .url(originalUrl.url())
+                // 终于改好了,这里用httpUrl只能访问internal变量,会报错
+                // 但是改成.url(),就没问题了,因为访问了open方法
                 .header(Header.AUTHORIZATION.getValue(), "authorization " + encodeToString)
                 .header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
                 .method(original.method(), original.body())
