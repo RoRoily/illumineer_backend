@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.service.impl.paper;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.mapper.CategoryMapper;
-import com.buaa01.illumineer_backend.service.paper.CategoryService;
+import com.buaa01.illumineer_backend.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

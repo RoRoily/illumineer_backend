@@ -249,8 +249,8 @@ public class StormTool {
             article.setField(rs.toJsonString());
         }
         String date = jsonObject.get("publication_date").getAsString();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate publishDate = LocalDate.parse(date, formatter);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date publishDate = formatter.parse(date);
         article.setPublishDate(publishDate);
         if (primaryLocationElement != null && primaryLocationElement.isJsonObject()) {
             JsonObject primaryLocation = primaryLocationElement.getAsJsonObject();
