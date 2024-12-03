@@ -1,5 +1,7 @@
 package com.buaa01.illumineer_backend.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,7 @@ public class Category {
     private String rcmTag;
 
 
-    public Category Category_initial(){
+    public Category Category_initial() {
         Category tempCategory = new Category();
         tempCategory.setMainClassId("0");
         tempCategory.setSubClassId("1");
@@ -25,5 +27,17 @@ public class Category {
         tempCategory.setSubClassName("unknown");
         tempCategory.setDescription("Category Not Defined");
         return tempCategory;
+    }
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    // 将 Category 对象转换为 JSON 字符串
+    public String toJsonString() throws JsonProcessingException {
+        return objectMapper.writeValueAsString(this);
+    }
+
+    // 将 JSON 字符串转换回 Category 对象
+    public static Category fromJsonString(String json) throws JsonProcessingException {
+        return objectMapper.readValue(json, Category.class);
     }
 }

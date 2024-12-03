@@ -2,7 +2,7 @@ package com.buaa01.illumineer_backend.tool;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.service.paper.CategoryService;
+import com.buaa01.illumineer_backend.service.CategoryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
@@ -31,7 +31,11 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
@@ -158,7 +162,7 @@ public class StormTool {
         return articles;
     }
 
-    private Paper handle(String line) throws ParseException, SQLException {
+    private Paper handle(String line) throws ParseException, SQLException, JsonProcessingException {
         JsonObject jsonObject = JsonParser.parseString(line).getAsJsonObject();
         Paper article = new Paper();
         String oid = jsonObject.get("id").getAsString();
@@ -221,22 +225,32 @@ public class StormTool {
         if (topicElement != null && !topicElement.isJsonNull()) {
             String theme = topicElement.getAsJsonObject().get("display_name").getAsString();
             article.setTheme(theme);
-            String filed = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("display_name").getAsString();
-            article.setField(filed);
-            Category rs = categoryService.getCategoryByName(filed);
+            String subfield = topicElement.getAsJsonObject().get("subfield").getAsJsonObject().get("display_name").getAsString();
+            String field = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("display_name").getAsString();
+            String subfieldId = topicElement.getAsJsonObject().get("subfield").getAsJsonObject().get("id").getAsString();
+            String fieldId = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("id").getAsString();
+            // 定义正则表达式：提取 URL 中最后的数字
+            Pattern pattern = Pattern.compile("(\\d+)$");
+            Matcher matcher = pattern.matcher(subfieldId.trim());
+            // 查找并提取匹配的数字
+            String subfieldNumber = "1";
+            if (matcher.find()) {
+                subfieldNumber = matcher.group(1);
+            }
+            matcher = pattern.matcher(fieldId.trim());
+            String  fieldNumber = "0";
+            if (matcher.find()) {
+                fieldNumber = matcher.group(1);
+            }
+            Category rs = categoryService.getCategoryByID(subfieldNumber, fieldNumber);
             if (rs == null) {
-                rs = categoryService.insertCategory(filed);
+                rs = categoryService.insertCategory(subfieldNumber, fieldNumber, subfield, field);
             }
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                String categoryJson = objectMapper.writeValueAsString(article.getField());
-                article.setField(categoryJson); // 存储 JSON 字符串
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Error serializing Category", e);
-            }
+            article.setField(rs.toJsonString());
         }
         String date = jsonObject.get("publication_date").getAsString();
-        Date publishDate = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate publishDate = LocalDate.parse(date, formatter);
         article.setPublishDate(publishDate);
         if (primaryLocationElement != null && primaryLocationElement.isJsonObject()) {
             JsonObject primaryLocation = primaryLocationElement.getAsJsonObject();
