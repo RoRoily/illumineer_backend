@@ -26,9 +26,6 @@ import java.util.*;
 @Service
 public class PaperServiceImpl implements PaperService {
 
-//    @Autowired
-    private ElasticsearchClient client;
-
     @Autowired
     private PaperMapper paperMapper;
     @Autowired
