@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Favorite;
 import com.buaa01.illumineer_backend.entity.History;
@@ -10,21 +11,26 @@ import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.mapper.HistoryMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAccountService;
+import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.tool.JsonWebTokenTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
+import com.buaa01.illumineer_backend.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -51,6 +57,8 @@ public class UserAccountServiceImpl implements UserAccountService {
     private RedisTool redisTool;
     @Autowired
     private FavoriteMapper favoriteMapper;
+    @Autowired
+    private JsonWebTokenTool jsonWebTokenTool;
 
 
     /**
@@ -183,13 +191,13 @@ public class UserAccountServiceImpl implements UserAccountService {
 
 
         //将uid封装成一个jwttoken，同时token也会被缓存到redis中
-        String token = jwtUtil.createToken(user.getUid().toString(), "user");
+        String token = jsonWebTokenTool.createToken(user.getUid().toString(), "user");
         try {
             // 把完整的用户信息存入redis，时间跟token一样，注意单位
             // 这里缓存的user信息建议只供读取uid用，其中的状态等非静态数据可能不准，所以 redis另外存值
             redisTool.setExObjectValue("securityUid:" + user.getUid(),user,60L*60*24*2, TimeUnit.SECONDS);
             // 将该用户放到redis中在线集合(需要吗)
-            redisUtil.addMember("login_member", user.getUid());
+            redisTool.addMember("login_member", user.getUid());
         } catch (Exception e) {
             log.error("存储redis数据失败");
             throw e;
@@ -200,7 +208,7 @@ public class UserAccountServiceImpl implements UserAccountService {
         UserDTO userDTO = new UserDTO();
         userDTO.setUid(user.getUid());
         userDTO.setAvatar(user.getAvatar());
-        userDTO.setEmail(user.getEmail());
+        userDTO.setEmail(user.getAccount());
         userDTO.setInstitution(user.getInstitution());
         userDTO.setStatus(user.getStatus());
         userDTO.setUsername(user.getUsername());
@@ -243,7 +251,7 @@ public class UserAccountServiceImpl implements UserAccountService {
             return customResponse;
         }
         //将uid封装成一个jwttoken，同时token也会被缓存到redis中
-        String token = jwtUtil.createToken(user.getUid().toString(), "admin");
+        String token = jsonWebTokenTool.createToken(user.getUid().toString(), "admin");
         try {
             redisTool.setExObjectValue("securityUid:" + user.getUid(),user,60L*60*24*2, TimeUnit.SECONDS);
         } catch (Exception e) {

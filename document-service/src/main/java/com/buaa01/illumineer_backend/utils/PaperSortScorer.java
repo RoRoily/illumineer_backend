@@ -1,8 +1,9 @@
 package com.buaa01.illumineer_backend.utils;
 
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 
-import java.sql.Date;
+import java.util.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
@@ -18,13 +19,13 @@ public class PaperSortScorer {
     /* 关键词匹配权重 */
     final static double W_KEYWORD = 0.4;
 
-    public static double calculateScore(Paper paper, List<String> userKeywords) {
+    public static double calculateScore(SearchResultPaper paper, List<String> userKeywords) {
         // 引用次数评分
         double refScore = normalize(paper.getRef_times(), 1000);
         // 收藏次数评分
         double favScore = normalize(paper.getFav_time(), 10000);
         // 时间评分
-        double timeScore = calculateTimeScore((Date) paper.getPublishDate());
+        double timeScore = calculateTimeScore(paper.getPublishDate());
         // 关键词匹配度评分
         double keywordScore = calculateKeywordScore(paper.getKeywords(), userKeywords);
 
@@ -33,7 +34,6 @@ public class PaperSortScorer {
     }
 
     /**
-     * 初步尝试归一化，但无法确定总引用量
      * 
      * @param value       分子
      * @param denominator 分母
@@ -50,7 +50,8 @@ public class PaperSortScorer {
      * @return score
      */
     private static double calculateTimeScore(Date publishDate) {
-        long yearsSincePublished = ChronoUnit.YEARS.between((Temporal) publishDate, LocalDate.now());
+        LocalDate now = LocalDate.now();
+        long yearsSincePublished = ChronoUnit.YEARS.between((Temporal) publishDate, now);
         double lambda = 0.1; // 时间衰减系数
         return Math.exp(-lambda * yearsSincePublished);
     }

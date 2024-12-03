@@ -1,7 +1,7 @@
 package com.buaa01.illumineer_backend.tool;
 
 import com.buaa01.illumineer_backend.entity.Category;
-import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.Papers;
 import com.buaa01.illumineer_backend.service.CategoryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,9 +71,9 @@ public class StormTool {
         }
     }
 
-    public ArrayList<Paper> getPapers(String last_update) {
-        Paper article;
-        ArrayList<Paper> articles = new ArrayList<>();
+    public ArrayList<Papers> getPapers(String last_update) {
+        Papers article;
+        ArrayList<Papers> articles = new ArrayList<>();
         String downloadDir = "D:\\java\\demo1\\src\\main\\java\\Tool\\data";
         WebDriverManager.chromedriver().driverVersion("129.0.6668.59").setup();
         ChromeOptions options = new ChromeOptions();
@@ -154,9 +154,9 @@ public class StormTool {
         return articles;
     }
 
-    private Paper handle(String line) throws ParseException, SQLException {
+    private Papers handle(String line) throws ParseException, SQLException {
         JsonObject jsonObject = JsonParser.parseString(line).getAsJsonObject();
-        Paper article = new Paper();
+        Papers article = new Papers();
         String oid = jsonObject.get("id").getAsString();
         int start = oid.indexOf('W') + 1;
         int end = oid.length();

@@ -58,7 +58,7 @@ INSERT INTO institutions (domain, name) VALUES
                                             ('fudan.edu.cn', '复旦大学'),
                                             ('sjtu.edu.cn', '上海交通大学'),
                                             ('whu.edu.cn', '武汉大学'),
-                                            ('zju.edu.cn', '浙江大学'),
+
                                             ('hust.edu.cn', '华中科技大学'),
                                             ('nankai.edu.cn', '南开大学'),
                                             ('nju.edu.cn', '南京大学'),
@@ -71,11 +71,10 @@ INSERT INTO institutions (domain, name) VALUES
                                             ('cumtb.edu.cn', '中国矿业大学（北京）'),
                                             ('xmu.edu.cn', '厦门大学'),
                                             ('whut.edu.cn', '武汉理工大学'),
-                                            ('tsinghua.edu.cn', '清华大学'),
                                             ('hhu.edu.cn', '河海大学'),
                                             ('zju.edu.cn', '浙江大学'),
                                             ('sdust.edu.cn', '山东科技大学'),
-                                            ('hnu.edu.cn', '湖南大学'),
+
                                             ('hnu.edu.cn', '华南农业大学'),
                                             ('nwu.edu.cn', '西北大学'),
                                             ('njut.edu.cn', '南京工业大学'),

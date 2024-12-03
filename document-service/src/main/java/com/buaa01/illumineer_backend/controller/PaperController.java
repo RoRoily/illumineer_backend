@@ -21,6 +21,7 @@ public class PaperController {
 
     /**
      * 根据 pid 返回引用量
+     * 
      * @param pid 文章 id
      * @return 引用量
      */
@@ -39,6 +40,7 @@ public class PaperController {
 
     /**
      * 根据 pid 增加引用量
+     * 
      * @param pid 文章 id
      * @return
      */
@@ -57,6 +59,7 @@ public class PaperController {
 
     /**
      * 根据 pid 增加收藏量
+     * 
      * @param pid 文章 id
      * @return
      */
@@ -75,6 +78,7 @@ public class PaperController {
 
     /**
      * 上传新的文章
+     * 
      * @param title
      * @param essAbs
      * @param keywords
@@ -88,21 +92,22 @@ public class PaperController {
      */
     @PostMapping("/upload")
     public CustomResponse uploadPaper(@RequestParam("title") String title,
-                                      @RequestParam("essAbs") String essAbs,
-                                      @RequestParam("keywords") List<String> keywords,
-                                      @RequestParam("content") MultipartFile content,
-                                      @RequestParam("auths") List<String> auths,
-                                      @RequestParam("field") List<String> field,
-                                      @RequestParam("type") String type,
-                                      @RequestParam("theme") String theme,
-                                      @RequestParam("publishDate") Date publishDate,
-                                      @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Integer> refs) {
+            @RequestParam("essAbs") String essAbs,
+            @RequestParam("keywords") List<String> keywords,
+            @RequestParam("content") MultipartFile content,
+            @RequestParam("auths") List<String> auths,
+            @RequestParam("field") List<String> field,
+            @RequestParam("type") String type,
+            @RequestParam("theme") String theme,
+            @RequestParam("publishDate") Date publishDate,
+            @RequestParam("derivation") String derivation,
+            @RequestParam("refs") List<Integer> refs) {
         Map<String, Integer> authsMap = new HashMap<>();
-        for (String auth: auths) {
+        for (String auth : auths) {
             authsMap.put(auth, -1);
         }
-        Paper paper = new Paper(null, title, essAbs, keywords, null, authsMap, field, type, theme, publishDate, derivation, 0, 0, refs, 0);
+        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, field,
+                0, 0, refs, null, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
@@ -116,6 +121,7 @@ public class PaperController {
 
     /**
      * 修改文章信息
+     * 
      * @param pid
      * @param essAbs
      * @param keywords
@@ -128,19 +134,20 @@ public class PaperController {
      * @return
      */
     @PostMapping("/update")
-    public CustomResponse updatePaper(@RequestParam("pid") int pid,@RequestParam("title") String title,
-                                      @RequestParam("essAbs") String essAbs,
-                                      @RequestParam("keywords") List<String> keywords,
-                                      @RequestParam("content") MultipartFile content,
-                                      @RequestParam("auths") Map<String, Integer> auths,
-                                      @RequestParam("field") List<String> field,
-                                      @RequestParam("type") String type,
-                                      @RequestParam("theme") String theme,
-                                      @RequestParam("publishDate") Date publishDate,
-                                      @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Integer> refs) {
+    public CustomResponse updatePaper(@RequestParam("pid") int pid, @RequestParam("title") String title,
+            @RequestParam("essAbs") String essAbs,
+            @RequestParam("keywords") List<String> keywords,
+            @RequestParam("content") MultipartFile content,
+            @RequestParam("auths") Map<String, Integer> auths,
+            @RequestParam("field") List<String> field,
+            @RequestParam("type") String type,
+            @RequestParam("theme") String theme,
+            @RequestParam("publishDate") Date publishDate,
+            @RequestParam("derivation") String derivation,
+            @RequestParam("refs") List<Integer> refs) {
         try {
-            return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme, publishDate, derivation, refs);
+            return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme,
+                    publishDate, derivation, refs);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

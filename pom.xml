@@ -176,6 +176,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!--邮箱验证-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+
         <!--JSON解析器-->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
@@ -198,6 +205,9 @@
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
         </dependency>
+
+        <!--邮箱验证-->
+
 
         <!--一些常用工具类的包装-->
         <dependency>
