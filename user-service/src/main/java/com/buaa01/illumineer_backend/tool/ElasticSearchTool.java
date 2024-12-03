@@ -45,9 +45,9 @@ public class ElasticSearchTool {
     public void addScholar(User user) {
         try{
             ElasticSearchScholar esScholar = new ElasticSearchScholar(
-                    user.getUid(), user.getUserName(),
+                    user.getUid(), user.getNickName(),
                     user.getStats(), user.getName(),
-                    user.getAuthId(), user.getGender(),
+                    user.getGender(),
                     user.getField(), user.getInstitution());
             elasticsearchClient.index(i->i.index("scholars").id(esScholar.getUid().toString()).document(esScholar));
         }catch (IOException e){
@@ -74,9 +74,9 @@ public class ElasticSearchTool {
     public void updateScholar(User user) {
         try{
             ElasticSearchScholar esScholar = new ElasticSearchScholar(
-                    user.getUid(), user.getUserName(),
+                    user.getUid(), user.getNickName(),
                     user.getStats(), user.getName(),
-                    user.getAuthId(), user.getGender(),
+                    user.getGender(),
                     user.getField(), user.getInstitution());
             elasticsearchClient.update(i->i.index("scholars").id(user.getUid().toString()).doc(esScholar),ElasticSearchScholar.class);
         } catch (IOException e) {

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -18,8 +19,7 @@ public class ElasticSearchScholar {
     private Integer stats; // 0 正常 1 封禁 2 已注销
     //实际个人的相关信息
     private String name;
-    private Integer authId;
     private Integer gender;
-    private Map<Category,Integer> field ;// 相关领域
+    private List<String> field ;// 相关领域
     private String institution;
 }
