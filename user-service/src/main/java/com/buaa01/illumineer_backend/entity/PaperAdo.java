@@ -1,13 +1,10 @@
 package com.buaa01.illumineer_backend.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.buaa01.illumineer_backend.handler.MapTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import retrofit2.http.HEAD;
 
 import java.util.Date;
 import java.util.Map;
@@ -21,7 +18,6 @@ public class PaperAdo {
     private Long pid;
     // 文章的相关信息
     private String title; // 文章题目
-    @TableField(typeHandler = MapTypeHandler.class)
     private Map<String, Integer> auths; // 文章作者
     private Date publishDate; // 出版时间
     private Integer stats; // 0 正常 1 已删除

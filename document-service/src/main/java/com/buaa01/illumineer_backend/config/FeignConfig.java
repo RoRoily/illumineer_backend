@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FeignConfig {
 
-    @Bean
+    @Bean(name = "feignBearerTokenRequestInterceptor")
     public RequestInterceptor bearerTokenRequestInterceptor() {
         return new BearerTokenRequestInterceptor();
     }
