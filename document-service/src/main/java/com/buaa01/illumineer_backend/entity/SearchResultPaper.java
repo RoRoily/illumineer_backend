@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class SearchResultPaper {
     /** 文章主题 */
     private String theme;
     /** 发布时间 */
-    private LocalDate publishDate;
+    private Date publishDate;
     /** 文章来源 */
     private String derivation;
     /** 被引用次数 */

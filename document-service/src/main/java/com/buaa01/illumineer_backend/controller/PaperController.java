@@ -1,11 +1,13 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
@@ -92,17 +94,26 @@ public class PaperController {
                                       @RequestParam("keywords") List<String> keywords,
                                       @RequestParam("content") MultipartFile content,
                                       @RequestParam("auths") List<String> auths,
-                                      @RequestParam("field") List<String> field,
+                                      @RequestParam("field") List<Map<String, String>> field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") Date publishDate,
                                       @RequestParam("derivation") String derivation,
                                       @RequestParam("refs") List<Integer> refs) {
+        // auths
         Map<String, Integer> authsMap = new HashMap<>();
         for (String auth: auths) {
             authsMap.put(auth, -1);
         }
-        Paper paper = new Paper(null, title, essAbs, keywords, null, authsMap, field, type, theme, publishDate, derivation, 0, 0, refs, 0);
+        // field
+        List<Category> fields = new ArrayList<>();
+        for (Map<String, String> f: field) {
+            Category category = new Category();
+            category.setMainClassId(f.get("mainClassId"));
+            category.setSubClassName(f.get("subClassName"));
+            fields.add(category);
+        }
+        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, fields, 0, 0, refs, null, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {

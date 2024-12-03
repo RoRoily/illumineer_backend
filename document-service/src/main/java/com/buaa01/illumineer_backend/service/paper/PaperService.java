@@ -14,35 +14,6 @@ import java.util.Map;
 
 public interface PaperService {
     /**
-     * 根据pid查询文献信息
-     * @param pid 文献ID
-     * @return Paper 文献实体类
-     */
-    CustomResponse getPaperByPid(Integer pid);
-
-    /**
-     * 一框式检索接口：搜索文献（分页、排序）
-     * @param condition 筛选条件（选择查找的字段）
-     * @param keyword 搜索内容
-     * @param size 一页多少条内容
-     * @param offset 第几页
-     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
-     * @return 文献信息
-     */
-    CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order);
-
-    /**
-     * 高级检索
-     * @param conditions 条件：logic(and/or/not), condition, keyword
-     * @param size 一页多少条内容
-     * @param offset 第几页
-     * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order 0=降序，1=升序
-     */
-    CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order);
-
-    /**
      * 根据 pid 返回引用量
      * @param pid 文章 id
      * @return 引用量
@@ -99,25 +70,15 @@ public interface PaperService {
     CustomResponse updatePaper(int pid,
                                String title,
                                String essAbs,
-                               String keywords,
+                               List<String> keywords,
                                MultipartFile content,
-                               String field,
+                               Map<String, Integer> auths,
+                               List<String> field,
                                String type,
                                String theme,
                                Date publishDate,
-                               String derivation);
+                               String derivation,
+                               List<Integer> refs);
 
-    /***
-     * 根据作者姓名返回包含该姓名的认领条目列表
-     * @param name 姓名
-     * **/
-    List<PaperAdo> getPaperAdoptionsByName(String name);
-
-
-    /**
-     * 根据作者姓名更改认领条目表
-     * @param name 姓名
-     * @retun customResponse 我的
-     * **/
-    CustomResponse updatePaperAdoptionStatus(String name,List<Integer> pids);
+    CustomResponse updatePaperAdoptionStatus(String name, List<Integer> pidsForAdopt);
 }

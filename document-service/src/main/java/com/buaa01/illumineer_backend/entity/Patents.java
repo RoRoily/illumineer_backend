@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -26,7 +29,7 @@ public class Patents{
     /** 内容摘要 */
     private String abstracts;
     /** 授权时间 */
-    private LocalDate grantDate;
+    private Date grantDate;
     /** 关键词 */
     private List<String> keywords;
     /** 发布时间 */

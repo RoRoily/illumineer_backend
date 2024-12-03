@@ -30,7 +30,7 @@ public class Paper {
     /** 文章类型 */
     private String type;
     /** 发布时间 */
-    private LocalDate publishDate;
+    private Date publishDate;
     /** 相关领域 */
     private List<Category> field;
     /** 收藏次数 */

@@ -2,11 +2,12 @@ package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
-import com.buaa01.illumineer_backend.service.paper.PaperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
 public class PaperAdoptionController {
 
     @Autowired
@@ -16,7 +17,7 @@ public class PaperAdoptionController {
      * 根据作者姓名返回包含该姓名的认领条目列表
      * @param name 姓名
      * **/
-    @GetMapping("/get/adoption")
+    @GetMapping("/ado/name")
     public CustomResponse getPaperAdoptionsByName(@RequestParam("name") String name){
         try {
             return paperAdoptionService.getPaperAdoptionsByName(name);

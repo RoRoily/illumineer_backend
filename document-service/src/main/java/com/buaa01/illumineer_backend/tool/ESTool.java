@@ -34,16 +34,16 @@ public class ESTool {
      * 添加文章文档
      * @param paper
      */
-    public void addPaper(Paper paper) throws IOException {
-        try {
-            ESPaper esPaper = new ESPaper(paper.getPid(), paper.getTitle(), paper.getKeywords(),
-                    paper.getAuths(), paper.category2String(paper),paper.getType(),paper.getTheme(),paper.getPublishDate(),paper.getDerivation(), paper.getRef_times(), paper.getFav_time());
-            client.index(i -> i.index("paper").id(esPaper.getPid().toString()).document(esPaper));
-        } catch (IOException e) {
-            log.error("添加视频文档到ElasticSearch时出错了：" + e);
-            throw e;
-        }
-    }
+//    public void addPaper(Paper paper) throws IOException {
+//        try {
+//            ESPaper esPaper = new ESPaper(paper.getPid(), paper.getTitle(), paper.getKeywords(),
+//                    paper.getAuths(), paper.category2String(paper),paper.getType(),paper.getTheme(),paper.getPublishDate(),paper.getDerivation(), paper.getRef_times(), paper.getFav_time());
+//            client.index(i -> i.index("paper").id(esPaper.getPid().toString()).document(esPaper));
+//        } catch (IOException e) {
+//            log.error("添加视频文档到ElasticSearch时出错了：" + e);
+//            throw e;
+//        }
+//    }
 
     /**
      * 删除文章文档
@@ -62,17 +62,17 @@ public class ESTool {
      * 更新视频文档
      * @param paper
      */
-    public void updatePaper(Paper paper) throws IOException {
-        try {
-            ESPaper esPaper = new ESPaper(paper.getPid(), paper.getTitle(), paper.getKeywords(),
-                    paper.getAuths(), paper.category2String(paper),paper.getType(),paper.getTheme(),
-                    paper.getPublishDate(),paper.getDerivation(), paper.getRef_times(), paper.getFav_time());
-            client.update(u -> u.index("paper").id(paper.getPid().toString()).doc(esPaper), ESPaper.class);
-        } catch (IOException e) {
-            log.error("更新ElasticSearch视频文档时出错了：" + e);
-            throw e;
-        }
-    }
+//    public void updatePaper(Paper paper) throws IOException {
+//        try {
+//            ESPaper esPaper = new ESPaper(paper.getPid(), paper.getTitle(), paper.getKeywords(),
+//                    paper.getAuths(), paper.category2String(paper),paper.getType(),paper.getTheme(),
+//                    paper.getPublishDate(),paper.getDerivation(), paper.getRef_times(), paper.getFav_time());
+//            client.update(u -> u.index("paper").id(paper.getPid().toString()).doc(esPaper), ESPaper.class);
+//        } catch (IOException e) {
+//            log.error("更新ElasticSearch视频文档时出错了：" + e);
+//            throw e;
+//        }
+//    }
 
     //-----------------更新到这里----------------//
 
@@ -138,7 +138,7 @@ public class ESTool {
      */
     public void addUser(User user) throws IOException {
         try {
-            ESUser esUser = new ESUser(user.getUid(), user.getNickName(), user.getInstitution(), user.getField());
+            ESUser esUser = new ESUser(user.getUid(), user.getName(), user.getInstitution(), user.getField());
             client.index(i -> i.index("user").id(esUser.getUid().toString()).document(esUser));
         } catch (IOException e) {
             log.error("添加用户文档到elasticsearch时出错了：" + e);
@@ -165,7 +165,7 @@ public class ESTool {
      */
     public void updateUser(User user) throws IOException {
         try {
-            ESUser esUser = new ESUser(user.getUid(), user.getNickName(), user.getInstitution(), user.getField());
+            ESUser esUser = new ESUser(user.getUid(), user.getName(), user.getInstitution(), user.getField());
             client.update(u -> u.index("user").id(user.getUid().toString()).doc(esUser), ESUser.class);
         } catch (IOException e) {
             log.error("更新ElasticSearch用户文档时出错了：" + e);
