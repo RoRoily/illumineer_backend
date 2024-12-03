@@ -94,13 +94,14 @@ public class PaperController {
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") Date publishDate,
                                       @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Long> refs) {
+                                      @RequestParam("refs") List<Long> refs,
+                                      @RequestParam("category_id") Integer categoryId) {
         // auths
         Map<String, Integer> authsMap = new HashMap<>();
         for (String auth: auths) {
             authsMap.put(auth, -1);
         }
-        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, field, 0, 0, refs, null, 0);
+        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, field, 0, 0, refs, null, 0, categoryId);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
