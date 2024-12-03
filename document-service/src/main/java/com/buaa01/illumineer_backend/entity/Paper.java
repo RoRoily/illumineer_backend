@@ -33,9 +33,9 @@ public class Paper {
     /** 相关领域 */
     private String field;
     /** 收藏次数 */
-    private Integer fav_time;
+    private Integer favTime;
     /** 被引用次数 */
-    private Integer ref_times;
+    private Integer refTimes;
     /** 引用文献 */
     private List<Long> refs;
     /** 文章链接 */

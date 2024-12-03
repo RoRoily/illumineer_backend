@@ -271,7 +271,7 @@ public class StormTool {
         } else {
             article.setDerivation("");
         }
-        article.setRef_times(jsonObject.get("cited_by_count").getAsInt());
+        article.setRefTimes(jsonObject.get("cited_by_count").getAsInt());
         List<Long> referenceList = new ArrayList<>();
         JsonArray references = jsonObject.getAsJsonArray("related_works");
         for (JsonElement reference : references) {
@@ -282,7 +282,7 @@ public class StormTool {
             referenceList.add(id);
         }
         article.setRefs(referenceList);
-        article.setFav_time(0);
+        article.setFavTime(0);
         article.setStats(0);
         JsonElement typeElement = jsonObject.get("type");
         if (typeElement != null && !typeElement.isJsonNull()) {

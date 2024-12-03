@@ -211,8 +211,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                     paper.getTheme(),
                     paper.getPublishDate(),
                     paper.getDerivation(),
-                    paper.getRef_times(),
-                    paper.getFav_time());
+                    paper.getRefTimes(),
+                    paper.getFavTime());
             searchResultPapers.add(searchResultPaper);
         }
 
@@ -403,9 +403,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 if (sortType == 1) {
                     return p2.getPublishDate().compareTo(p1.getPublishDate());
                 } else if (sortType == 2) {
-                    return p2.getRef_times() - p1.getRef_times();
+                    return p2.getRefTimes() - p1.getRefTimes();
                 } else if (sortType == 3) {
-                    return p2.getFav_time() - p1.getFav_time();
+                    return p2.getFavTime() - p1.getFavTime();
                 }
                 return 0;
             });
@@ -416,9 +416,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 if (sortType == 1) {
                     return p1.getPublishDate().compareTo(p2.getPublishDate());
                 } else if (sortType == 2) {
-                    return p1.getRef_times() - p2.getRef_times();
+                    return p1.getRefTimes() - p2.getRefTimes();
                 } else if (sortType == 3) {
-                    return p1.getFav_time() - p2.getFav_time();
+                    return p1.getFavTime() - p2.getFavTime();
                 }
                 return 0;
             });
