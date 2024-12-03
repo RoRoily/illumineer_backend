@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ public class HistoryServiceImpl implements HistoryService {
     public CustomResponse insertInHistory(Integer pid){
         CustomResponse customResponse = new CustomResponse();
 
-        return customResponse
+        return customResponse;
     }
 
     /**
