@@ -9,6 +9,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.List;
 
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
+
 public class PaperSortScorer {
     /* 引用次数权重 */
     final static double W_REF = 0.3;

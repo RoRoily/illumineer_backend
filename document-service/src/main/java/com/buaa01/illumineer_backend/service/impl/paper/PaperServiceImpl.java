@@ -9,10 +9,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.client.UserClientService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
+import com.buaa01.illumineer_backend.tool.OssTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +37,8 @@ public class PaperServiceImpl implements PaperService {
     private PaperMapper paperMapper;
     @Autowired
     private RedisTool redisTool;
+    @Autowired
+    private UserClientService userClientService;
     @Autowired
     private UserClientService userClientService;
 
@@ -433,35 +435,35 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse updateAuth(int pid, int aid) {
         CustomResponse customResponse = new CustomResponse();
-        //
-        // if (getAuthorByAid() == null) { // 查找作者
-        // customResponse.setMessage("该作者不存在");
-        // return customResponse;
-        // }
-        //
-        // Paper paper = null;
-        // QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        // queryWrapper.eq("pid", pid);
-        // paper = paperMapper.getPaperByPid(pid);
-        //
-        // Map<String, Integer> auths = paper.getAuths();
-        // String author = getAuthorByAid().getAuthor();
-        // if (auths.containsValue(aid)) { // 存在此作者
-        // // 存在此作者，删除
-        // auths.remove(author);
-        // paper.setAuths(auths);
-        // } else { // 不存在此作者
-        // // 将该作者加入pid的作者列表中
-        // auths.put(author, aid);
-        // paper.setAuths(auths);
-        // }
-        //
-        // // 更新数据库
-        // UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        // updateWrapper.eq("pid", pid);
-        // updateWrapper.setSql("auths = " + auths);
-        // paperMapper.update(null, updateWrapper);
-        //
+//
+//        if (getAuthorByAid() == null) { // 查找作者
+//            customResponse.setMessage("该作者不存在");
+//            return customResponse;
+//        }
+//
+//        Paper paper = null;
+//        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("pid", pid);
+//        paper = paperMapper.getPaperByPid(pid);
+//
+//        Map<String, Integer> auths = paper.getAuths();
+//        String author = getAuthorByAid().getAuthor();
+//        if (auths.containsValue(aid)) { // 存在此作者
+//            // 存在此作者，删除
+//            auths.remove(author);
+//            paper.setAuths(auths);
+//        } else { // 不存在此作者
+//            // 将该作者加入pid的作者列表中
+//            auths.put(author, aid);
+//            paper.setAuths(auths);
+//        }
+//
+//        // 更新数据库
+//        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+//        updateWrapper.eq("pid", pid);
+//        updateWrapper.setSql("auths = " + auths);
+//        paperMapper.update(null, updateWrapper);
+//
         return customResponse;
     }
 
@@ -558,26 +560,26 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
-    public CustomResponse updatePaperAdoptionStatus(String name, List<Integer> pidsForAdopt) {
-        String key = "AdoptObject:" + name;
-        // 可能需要更改的文章对象
+    public CustomResponse updatePaperAdoptionStatus(String name, List<Integer> pidsForAdopt){
+        String key = "AdoptObject:"+name;
+        //可能需要更改的文章对象
         Set<Object> papers = redisTool.getSetMembers(key);
-        if (papers == null) {
-            for (Integer pid : pidsForAdopt) {
+        if(papers == null){
+            for(Integer pid : pidsForAdopt){
                 QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("pid", pid);
                 Paper Adopaper = paperMapper.getPaperByPid(pid);
-                // 修改Auths的相关值和属性
-                Adopaper.getAuths().put(name, userClientService.getCurrentUser().getUid());
-            }
-        } else {
-            for (Object paperEntity : papers) {
-                Paper p = (Paper) paperEntity;
-                if (pidsForAdopt.contains(p.getPid()))
-                    p.getAuths().put(name, userClientService.getCurrentUser().getUid());
+                //修改Auths的相关值和属性
+                Adopaper.getAuths().put(name,userClientService.getCurrentUser().getUid());
             }
         }
-        CustomResponse customResponse = new CustomResponse(200, "Success to adopt", null);
+        else{
+            for(Object paperEntity : papers){
+                Paper p = (Paper) paperEntity;
+                if(pidsForAdopt.contains(p.getPid())) p.getAuths().put(name,userClientService.getCurrentUser().getUid());
+            }
+        }
+        CustomResponse customResponse = new CustomResponse(200,"Success to adopt",null);
         return customResponse;
     }
 }

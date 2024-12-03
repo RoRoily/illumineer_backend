@@ -25,7 +25,7 @@ public class PaperFilterController {
      * ES模糊搜索结果的进一步筛选
      * 模糊->限定
      *
-     * @param Map<String,ArrayList<String>> 筛选条件
+     * @param Map<String, ArrayList<String>> 筛选条件
      * 
      * @return CustomResponse对象
      */

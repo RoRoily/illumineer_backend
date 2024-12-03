@@ -5,15 +5,16 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.Date;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Patents {
+public class Patents{
     @TableId(type = IdType.AUTO)
     private Integer pid;
     /** 申请人 */
@@ -27,7 +28,7 @@ public class Patents {
     /** 内容摘要 */
     private String abstracts;
     /** 授权时间 */
-    private LocalDate grantDate;
+    private Date grantDate;
     /** 关键词 */
     private List<String> keywords;
     /** 发布时间 */
