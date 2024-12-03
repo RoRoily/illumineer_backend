@@ -1,4 +1,4 @@
-package com.buaa01.illumineer_backend.service.impl.user;
+package com.buaa01.illumineer_backend.service.impl.paper;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.mapper.CategoryMapper;
@@ -14,15 +14,15 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryMapper categoryMapper;
 
     @Override
-    public Category getCategoryByName(String name) throws SQLException {
-        return categoryMapper.getCategoryByName(name);
+    public Category getCategoryByID(String scid, String cid) {
+        return categoryMapper.getCategoryBy2ID(scid, cid);
     }
 
     @Override
-    public Category insertCategory(String name) throws SQLException {
-        categoryMapper.insertCategory(name);
+    public Category insertCategory(String scid, String cid, String sname, String name) {
+        categoryMapper.insertCategory(scid, cid, sname, name);
         Category category = new Category();
-        category = getCategoryByName(name);
+        category = getCategoryByID(scid, cid);
         return category;
     }
 }

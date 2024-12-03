@@ -14,7 +14,7 @@ import java.util.*;
 @NoArgsConstructor
 public class Paper {
     @TableId(type = IdType.AUTO)
-    private Integer pid;
+    private Long pid;
     /** 文章题目 */
     private String title;
     /** 文章主题 */
@@ -32,13 +32,13 @@ public class Paper {
     /** 发布时间 */
     private LocalDate publishDate;
     /** 相关领域 */
-    private List<Category> field;
+    private String field;
     /** 收藏次数 */
     private Integer fav_time;
     /** 被引用次数 */
     private Integer ref_times;
     /** 引用文献 */
-    private List<Integer> refs;
+    private List<Long> refs;
     /** 文章链接 */
     private String contentUrl;
     /** 状态: 0 正常 1 已删除 2 审核中 */
