@@ -89,26 +89,18 @@ public class PaperController {
                                       @RequestParam("keywords") List<String> keywords,
                                       @RequestParam("content") MultipartFile content,
                                       @RequestParam("auths") List<String> auths,
-                                      @RequestParam("field") List<Map<String, String>> field,
+                                      @RequestParam("field") String field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") Date publishDate,
                                       @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Integer> refs) {
+                                      @RequestParam("refs") List<Long> refs) {
         // auths
         Map<String, Integer> authsMap = new HashMap<>();
         for (String auth: auths) {
             authsMap.put(auth, -1);
         }
-        // field
-        List<Category> fields = new ArrayList<>();
-        for (Map<String, String> f: field) {
-            Category category = new Category();
-            category.setMainClassId(f.get("mainClassId"));
-            category.setSubClassName(f.get("subClassName"));
-            fields.add(category);
-        }
-        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, fields, 0, 0, refs, null, 0);
+        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, field, 0, 0, refs, null, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
