@@ -22,7 +22,7 @@ public class PaperSearchController {
      * @return Paper
      */
     @GetMapping("/get/id")
-    public CustomResponse getPaperByPid(@RequestParam("pid") Integer pid) {
+    public CustomResponse getPaperByPid(@RequestParam("pid") Long pid) {
         try {
             return paperSearchService.getPaperByPid(pid);
         } catch (Exception e) {

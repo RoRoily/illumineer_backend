@@ -53,7 +53,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @return Paper
      */
     @Override
-    public CustomResponse getPaperByPid(Integer pid) {
+    public CustomResponse getPaperByPid(Long pid) {
         CustomResponse customResponse = new CustomResponse();
         Paper paper = null;
         QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
