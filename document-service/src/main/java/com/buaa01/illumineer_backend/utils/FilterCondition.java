@@ -1,5 +1,7 @@
 package com.buaa01.illumineer_backend.utils;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -7,6 +9,7 @@ import java.util.Map;
  * 用以存储筛选条件，方便传递参数
  * 
  */
+@Getter
 public class FilterCondition {
     private ArrayList<String> year; // 年份
     private ArrayList<String> derivation; // 来源
@@ -34,19 +37,4 @@ public class FilterCondition {
         }
     }
 
-    public ArrayList<String> getYear() {
-        return this.year;
-    }
-
-    public ArrayList<String> getDerivation() {
-        return this.derivation;
-    }
-
-    public ArrayList<String> getType() {
-        return this.type;
-    }
-
-    public ArrayList<String> getTheme() {
-        return this.theme;
-    }
 }

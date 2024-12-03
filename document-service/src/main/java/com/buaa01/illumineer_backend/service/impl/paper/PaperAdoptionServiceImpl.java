@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
+import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,5 +66,24 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
 
         customResponse.setData(paperAdos);
         return customResponse;
+    }
+
+    /***
+     * 根据pids中的各个pid找到Paper，转换成PaperAdo并返回
+     * @param pids
+     * **/
+    @Override
+    public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids) {
+        List<PaperAdo> paperAdos = new ArrayList<>();
+        for (Long pid : pids) {
+            Paper paper = null;
+            QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("pid", pid);
+            paper = paperMapper.selectOne(queryWrapper);
+
+            PaperAdo paperAdo = new PaperAdo(pid, paper.getTitle(), paper.getAuths(), paper.getPublishDate(), paper.getStats(), false);
+            paperAdos.add(paperAdo);
+        }
+        return paperAdos;
     }
 }

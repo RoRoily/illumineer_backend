@@ -2,8 +2,7 @@ package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.service.AIAssistantService;
-import com.buaa01.illumineer_backend.service.impl.paper.PaperServiceImpl;
-import com.buaa01.illumineer_backend.service.paper.PaperService;
+import com.buaa01.illumineer_backend.service.impl.paper.PaperSearchServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,7 +60,7 @@ public class AIAssistantController {
 
             reqMapList.add(reqMap);
         }
-        Object data = new PaperServiceImpl().advancedSearchPapers(reqMapList, size, offset, sortType, order).getData();
+        Object data = new PaperSearchServiceImpl().advancedSearchPapers(reqMapList, size, offset, sortType, order).getData();
         Map<String, Object> result;
         if (isMapOfStringToObject(data)) {
             result = (Map<String, Object>) data;

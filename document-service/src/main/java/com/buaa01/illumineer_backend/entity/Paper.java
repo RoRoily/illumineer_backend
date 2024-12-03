@@ -42,4 +42,6 @@ public class Paper {
     private String contentUrl;
     /** 状态: 0 正常 1 已删除 2 审核中 */
     private Integer stats;
+    /** 类别的id*/
+    private Integer CategoryId;
 }

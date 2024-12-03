@@ -95,5 +95,15 @@ public class UserAuthServiceImpl implements UserAuthService {
         return customResponse;
     }
 
-
+    @Override
+    public CustomResponse authentation(String name,String Institution,Integer gender){
+        CustomResponse customResponse = new CustomResponse();
+        User user = currentUser.getUser();
+        user.setName(name);
+        user.setInstitution(Institution);
+        user.setGender(gender);
+        customResponse.setCode(200);
+        customResponse.setMessage("Authentication Update Success");
+        return customResponse;
+    }
 }

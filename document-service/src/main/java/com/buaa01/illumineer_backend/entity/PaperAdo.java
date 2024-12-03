@@ -28,7 +28,7 @@ public class PaperAdo {
 
     public PaperAdo setNewPaperAdo(Paper paper, String name){
         PaperAdo paperAdo = new PaperAdo();
-        paperAdo.pid = Long.valueOf(paper.getPid());
+        paperAdo.pid = paper.getPid();
         paperAdo.title = paper.getTitle();
         paperAdo.auths = paper.getAuths();
         paperAdo.publishDate = paper.getPublishDate();

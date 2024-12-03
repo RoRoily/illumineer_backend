@@ -12,11 +12,11 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ElasticSearchPaper {
-    private Integer pid;
+    private Long pid;
     // 文章的相关信息
     private String title; // 文章题目
     private Map<String, Integer> auths; // 文章作者
-    private List<Category> field; // 相关领域
+    private String field; // 相关领域
     private String Type; // 文章类型 (期刊、论文、会议、报纸) // sql add
     private String Theme; // 文章主题 // sql add
     private Date publishDate; // 出版时间

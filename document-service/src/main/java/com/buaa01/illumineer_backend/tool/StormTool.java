@@ -229,6 +229,7 @@ public class StormTool {
             String field = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("display_name").getAsString();
             String subfieldId = topicElement.getAsJsonObject().get("subfield").getAsJsonObject().get("id").getAsString();
             String fieldId = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("id").getAsString();
+            article.setCategoryId(Integer.parseInt(fieldId));
             // 定义正则表达式：提取 URL 中最后的数字
             Pattern pattern = Pattern.compile("(\\d+)$");
             Matcher matcher = pattern.matcher(subfieldId.trim());
@@ -249,8 +250,8 @@ public class StormTool {
             article.setField(rs.toJsonString());
         }
         String date = jsonObject.get("publication_date").getAsString();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate publishDate = LocalDate.parse(date, formatter);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date publishDate = formatter.parse(date);
         article.setPublishDate(publishDate);
         if (primaryLocationElement != null && primaryLocationElement.isJsonObject()) {
             JsonObject primaryLocation = primaryLocationElement.getAsJsonObject();

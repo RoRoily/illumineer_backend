@@ -1,7 +1,10 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.aliyuncs.endpoint.UserCustomizedEndpointResolver;
+import com.buaa01.illumineer_backend.entity.PaperAdo;
+import com.buaa01.illumineer_backend.service.gain.GainAdoptService;
 import com.buaa01.illumineer_backend.service.user.UserAuthService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +24,12 @@ public class UserAuthController {
     @Autowired
     private UserAuthService userAuthService;
 
+    @Autowired
+    private GainAdoptService gainAdoptService;
+
+    @Autowired
+    private CurrentUser currentUser;
+
     /**
      *  认证成功后，更新用户的实名信息
      *  可能需要根据corcode返回的json格式进行修改
@@ -28,11 +37,11 @@ public class UserAuthController {
      * @return CustomResponse实例
      */
     @PostMapping("/user/auth/authentation")
-        public CustomResponse authentation(@RequestBody Map<String,String> map){
-            String name = map.get("name");
-            String institution = map.get("institution");
-            String genderString = map.get("gender");
-            Integer gender = Integer.parseInt(genderString);
+    public CustomResponse authentation(@RequestBody Map<String,String> map){
+        String name = map.get("name");
+        String institution = map.get("institution");
+        String genderString = map.get("gender");
+        Integer gender = Integer.parseInt(genderString);
         try {
             return userAuthService.authentation(name,institution,gender);
         } catch (Exception e) {
@@ -41,8 +50,8 @@ public class UserAuthController {
             customResponse.setCode(500);
             customResponse.setMessage("实名认证出现错误");
             return customResponse;
-            }
         }
+    }
 
 
     /**
@@ -55,7 +64,12 @@ public class UserAuthController {
     @GetMapping("user/auth/getClaimList")
     public CustomResponse getClaimList(){
         try {
-            return userAuthService.getClaimList();
+            CustomResponse customResponse = new CustomResponse();
+            List<PaperAdo> paperAdoList = gainAdoptService.getAllGain(currentUser.getUser().getName());
+            customResponse.setCode(200);
+            customResponse.setMessage("成功获取待认领文献表");
+            customResponse.setData(paperAdoList);
+            return customResponse;
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
@@ -75,7 +89,7 @@ public class UserAuthController {
     @PostMapping("user/auth/claim")
     public CustomResponse claim(@RequestBody List<Integer> pidList){
         try {
-            return userAuthService.claim(pidList);
+            return gainAdoptService.updateAdoption(pidList,currentUser.getUserId());
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
