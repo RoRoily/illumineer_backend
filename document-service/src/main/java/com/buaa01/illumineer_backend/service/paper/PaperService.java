@@ -40,29 +40,6 @@ public interface PaperService {
     CustomResponse uploadPaper(Paper paper, MultipartFile content);
 
     /**
-     * 更新作者（已认证）
-     * @param pid
-     * @param aid
-     * @return
-     */
-    CustomResponse updateAuth(int pid, int aid);
-
-    /**
-     * 更新作者（已认证）
-     * @param pid
-     * @param author
-     * @return
-     */
-    CustomResponse updateAuth(int pid, String author);
-
-    /**
-     * 删除文章
-     * @param pid
-     * @return
-     */
-    CustomResponse deletePaper(int pid);
-
-    /**
      * 修改文章信息
      * @param
      * @return
@@ -70,14 +47,14 @@ public interface PaperService {
     CustomResponse updatePaper(int pid,
                                String title,
                                String essAbs,
-                               String keywords,
+                               List<String> keywords,
                                MultipartFile content,
-                               String field,
+                               Map<String, Integer> auths,
+                               List<String> field,
                                String type,
                                String theme,
                                Date publishDate,
                                String derivation,
                                List<Integer> refs);
 
-    CustomResponse updatePaperAdoptionStatus(String name, List<Integer> pidsForAdopt);
 }

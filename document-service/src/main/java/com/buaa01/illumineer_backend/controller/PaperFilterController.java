@@ -11,10 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.utils.FilterCondition;
-
 @RestController
 public class PaperFilterController {
 

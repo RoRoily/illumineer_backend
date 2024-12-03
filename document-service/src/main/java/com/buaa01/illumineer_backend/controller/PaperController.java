@@ -1,15 +1,10 @@
 package com.buaa01.illumineer_backend.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
-import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +18,6 @@ public class PaperController {
 
     /**
      * 根据 pid 返回引用量
-     * 
      * @param pid 文章 id
      * @return 引用量
      */
@@ -42,7 +36,6 @@ public class PaperController {
 
     /**
      * 根据 pid 增加引用量
-     * 
      * @param pid 文章 id
      * @return
      */
@@ -61,7 +54,6 @@ public class PaperController {
 
     /**
      * 根据 pid 增加收藏量
-     * 
      * @param pid 文章 id
      * @return
      */
@@ -80,7 +72,6 @@ public class PaperController {
 
     /**
      * 上传新的文章
-     * 
      * @param title
      * @param essAbs
      * @param keywords
@@ -106,7 +97,7 @@ public class PaperController {
                                       @RequestParam("refs") List<Integer> refs) {
         // auths
         Map<String, Integer> authsMap = new HashMap<>();
-        for (String auth : auths) {
+        for (String auth: auths) {
             authsMap.put(auth, -1);
         }
         // field
@@ -131,7 +122,6 @@ public class PaperController {
 
     /**
      * 修改文章信息
-     * 
      * @param pid
      * @param essAbs
      * @param keywords
@@ -144,20 +134,19 @@ public class PaperController {
      * @return
      */
     @PostMapping("/update")
-    public CustomResponse updatePaper(@RequestParam("pid") int pid, @RequestParam("title") String title,
-            @RequestParam("essAbs") String essAbs,
-            @RequestParam("keywords") List<String> keywords,
-            @RequestParam("content") MultipartFile content,
-            @RequestParam("auths") Map<String, Integer> auths,
-            @RequestParam("field") List<String> field,
-            @RequestParam("type") String type,
-            @RequestParam("theme") String theme,
-            @RequestParam("publishDate") Date publishDate,
-            @RequestParam("derivation") String derivation,
-            @RequestParam("refs") List<Integer> refs) {
+    public CustomResponse updatePaper(@RequestParam("pid") int pid,@RequestParam("title") String title,
+                                      @RequestParam("essAbs") String essAbs,
+                                      @RequestParam("keywords") List<String> keywords,
+                                      @RequestParam("content") MultipartFile content,
+                                      @RequestParam("auths") Map<String, Integer> auths,
+                                      @RequestParam("field") List<String> field,
+                                      @RequestParam("type") String type,
+                                      @RequestParam("theme") String theme,
+                                      @RequestParam("publishDate") Date publishDate,
+                                      @RequestParam("derivation") String derivation,
+                                      @RequestParam("refs") List<Integer> refs) {
         try {
-            return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme,
-                    publishDate, derivation, refs);
+            return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme, publishDate, derivation, refs);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
