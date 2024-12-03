@@ -128,100 +128,6 @@ public class PaperServiceImpl implements PaperService {
     }
 
     /**
-     * 更新作者（已认证）
-     *
-     * @param pid
-     * @param aid
-     * @return
-     */
-    public CustomResponse updateAuth(int pid, int aid) {
-        CustomResponse customResponse = new CustomResponse();
-//
-//        if (getAuthorByAid() == null) { // 查找作者
-//            customResponse.setMessage("该作者不存在");
-//            return customResponse;
-//        }
-//
-//        Paper paper = null;
-//        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("pid", pid);
-//        paper = paperMapper.getPaperByPid(pid);
-//
-//        Map<String, Integer> auths = paper.getAuths();
-//        String author = getAuthorByAid().getAuthor();
-//        if (auths.containsValue(aid)) { // 存在此作者
-//            // 存在此作者，删除
-//            auths.remove(author);
-//            paper.setAuths(auths);
-//        } else { // 不存在此作者
-//            // 将该作者加入pid的作者列表中
-//            auths.put(author, aid);
-//            paper.setAuths(auths);
-//        }
-//
-//        // 更新数据库
-//        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-//        updateWrapper.eq("pid", pid);
-//        updateWrapper.setSql("auths = " + auths);
-//        paperMapper.update(null, updateWrapper);
-//
-        return customResponse;
-    }
-
-    /**
-     * 更新作者（已认证）
-     *
-     * @param pid
-     * @param author
-     * @return
-     */
-    public CustomResponse updateAuth(int pid, String author) {
-        CustomResponse customResponse = new CustomResponse();
-
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("pid", pid);
-        paper = paperMapper.getPaperByPid(pid);
-
-        Map<String, Integer> auths = paper.getAuths();
-        if (auths.get(author) != null) { // 存在此作者
-            // 存在此作者，删除
-            auths.remove(author);
-            paper.setAuths(auths);
-        } else { // 不存在此作者
-            // 将该作者加入pid的作者列表中
-            auths.put(author, null);
-            paper.setAuths(auths);
-        }
-
-        // 更新数据库
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("auths = " + auths);
-        paperMapper.update(null, updateWrapper);
-
-        return customResponse;
-    }
-
-    /**
-     * 删除文章
-     *
-     * @param pid
-     * @return
-     */
-    public CustomResponse deletePaper(int pid) {
-        CustomResponse customResponse = new CustomResponse();
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("stats = 1");
-
-        paperMapper.update(null, updateWrapper);
-
-        customResponse.setMessage("文章删除成功！");
-        return customResponse;
-    }
-
-    /**
      * 修改文章信息
      * @param
      * @return
@@ -265,30 +171,6 @@ public class PaperServiceImpl implements PaperService {
         paperMapper.update(null, updateWrapper);
 
         customResponse.setMessage("文章更新成功！");
-        return customResponse;
-    }
-
-    @Override
-    public CustomResponse updatePaperAdoptionStatus(String name, List<Integer> pidsForAdopt){
-        String key = "AdoptObject:"+name;
-        //可能需要更改的文章对象
-        Set<Object> papers = redisTool.getSetMembers(key);
-        if(papers == null){
-            for(Integer pid : pidsForAdopt){
-                QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("pid", pid);
-                Paper Adopaper = paperMapper.getPaperByPid(pid);
-                //修改Auths的相关值和属性
-                Adopaper.getAuths().put(name,userClientService.getCurrentUser().getUid());
-            }
-        }
-        else{
-            for(Object paperEntity : papers){
-                Paper p = (Paper) paperEntity;
-                if(pidsForAdopt.contains(p.getPid())) p.getAuths().put(name,userClientService.getCurrentUser().getUid());
-            }
-        }
-        CustomResponse customResponse = new CustomResponse(200,"Success to adopt",null);
         return customResponse;
     }
 }
