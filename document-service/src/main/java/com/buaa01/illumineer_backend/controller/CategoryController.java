@@ -1,7 +1,7 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.Category;
-import com.buaa01.illumineer_backend.service.paper.CategoryService;
+import com.buaa01.illumineer_backend.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

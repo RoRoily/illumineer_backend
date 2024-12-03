@@ -1,7 +1,6 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
