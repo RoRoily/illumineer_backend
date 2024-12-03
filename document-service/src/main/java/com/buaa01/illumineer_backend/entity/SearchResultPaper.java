@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchResultPaper {
-    private Integer pid;
+    private Long pid;
     /** 文章题目 */
     private String title;
     /** 关键词 */
@@ -20,7 +20,7 @@ public class SearchResultPaper {
     /** 文章作者 */
     private Map<String, Integer> auths;
     /** 相关领域 */
-    private List<Category> field;
+    private String field;
     // private List<String> category;// 统一相关领域
     /** 文章类型 */
     private String type;

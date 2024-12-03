@@ -1,6 +1,6 @@
 package com.buaa01.illumineer_backend.controller;
 
-import com.buaa01.illumineer_backend.service.StormService;
+import com.buaa01.illumineer_backend.service.paper.StormService;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
