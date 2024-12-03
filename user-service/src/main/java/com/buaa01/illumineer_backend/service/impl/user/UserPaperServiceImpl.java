@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-
-import com.buaa01.illumineer_backend.mapper.CategoryMapper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.mapper.UserPaperMapper;

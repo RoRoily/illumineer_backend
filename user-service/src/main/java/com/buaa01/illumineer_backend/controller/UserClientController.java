@@ -4,11 +4,9 @@ package com.buaa01.illumineer_backend.controller;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
-import com.buaa01.illumineer_backend.entity.IMResponse;
 import com.buaa01.illumineer_backend.entity.User;
-import com.buaa01.illumineer_backend.im.IMServer;
 import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAuthService;
@@ -36,17 +34,11 @@ public class UserClientController {
     private SqlSessionFactory sqlSessionFactory;
 
     @Autowired
-    private FavoriteVideoMapper favoriteVideoMapper;
-    @Autowired
     private RedisTool redisTool;
-    @Autowired
-    private IMServer imServer;
-    @Autowired
-    private MessageUnreadService messageUnreadService;
+//    @Autowired
+//    private IMServer imServer;
     @Autowired
     private FavoriteMapper favoriteMapper;
-    @Autowired
-    private FavoriteVideoService favoriteVideoService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -56,11 +48,8 @@ public class UserClientController {
     //从userService中寻找提供的服务
     @GetMapping("/user/{uid}")
     @SentinelResource(value = "getUserById",blockHandler = "getUserByIdHandler")
-    public UserDTO getUserById(@PathVariable("uid") Integer uid){
+    public User getUserById(@PathVariable("uid") Integer uid){
         return userService.getUserByUId(uid);
-    }
-    public UserDTO getUserByIdHandler (@PathVariable("uid") Integer uid, BlockException exception){
-        return new UserDTO();
     }
 
     @PostMapping("/user/currentUser/getId")
@@ -78,44 +67,11 @@ public class UserClientController {
     }
     public Boolean getCurrentIsAdminHandler(BlockException exception){return false;}
 
-    @PostMapping("/user/updateFavoriteVideo")
-    @SentinelResource(value = "updateFavoriteVideo", blockHandler = "updateFavoriteVideoHandler")
-    public ResponseEntity<Void> updateFavoriteVideo(@RequestBody List<Map<String, Object>> result, @RequestParam("fid") Integer fid) {
-        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-            result.stream().parallel().forEach(map -> {
-                Video video = (Video) map.get("video");
-                QueryWrapper<FavoriteVideo> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("vid", video.getVid()).eq("fid", fid);
-                map.put("info", favoriteVideoMapper.selectOne(queryWrapper));
-            });
-            sqlSession.commit();
-        }
-        return ResponseEntity.ok().build();
-    }
+
     public ResponseEntity<Void> updateFavoriteVideoHandler(@RequestBody List<Map<String, Object>> result, @RequestParam("fid") Integer fid,BlockException exception) {
         return ResponseEntity.badRequest().build();
     }
 
-    @PostMapping("/user/handle_comment")
-    @SentinelResource(value = "handleComment",blockHandler = "handleCommentHandler")
-    public void handleComment(@RequestParam("uid") Integer uid,
-                              @RequestParam("toUid") Integer toUid,
-                              @RequestParam("id") Integer id){
-
-        if(!toUid.equals(uid)) {
-            //1注释Redis
-            redisTool.storeZSet("reply_zset:" + toUid, id);
-            messageUnreadService.addOneUnread(toUid, "reply");
-
-            // 通知未读消息
-            Map<String, Object> map = new HashMap<>();
-            map.put("type", "接收");
-            Set<Channel> commentChannel = IMServer.userChannel.get(toUid);
-            if (commentChannel != null) {
-                commentChannel.stream().parallel().forEach(channel -> channel.writeAndFlush(IMResponse.message("reply", map)));
-            }
-        }
-    }
     public void handleCommentHandler(@RequestParam("uid") Integer uid,
                                      @RequestParam("toUid") Integer toUid,
                                      @RequestParam("id") Integer id,
@@ -168,14 +124,6 @@ public class UserClientController {
         return user;
     }
 
-    @GetMapping("/user/getVidsByFid/{fid}")
-    List<Integer> getVidsByFid(@PathVariable("fid") Integer fid){
-        return favoriteVideoMapper.getVidByFid(fid);
-    }
 
-    @GetMapping("/user/getTimeByFid/{fid}")
-    List<Date> getTimeByFid(@PathVariable("fid") Integer fid){
-        return favoriteVideoMapper.getTimeByFid(fid);
-    }
 }
 
