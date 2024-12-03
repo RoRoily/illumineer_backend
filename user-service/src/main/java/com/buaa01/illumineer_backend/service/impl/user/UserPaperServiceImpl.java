@@ -1,24 +1,27 @@
 package com.buaa01.illumineer_backend.service.impl.user;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.User2Paper;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.mapper.UserPaperMapper;
+import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
+import com.buaa01.illumineer_backend.service.user.UserFavoriteService;
 import com.buaa01.illumineer_backend.service.user.UserPaperService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 @Service
 public class UserPaperServiceImpl implements UserPaperService {
@@ -27,10 +30,13 @@ public class UserPaperServiceImpl implements UserPaperService {
     private UserMapper userMapper;
 
     @Autowired
-    private CategoryMapper categoryMapper;
+    private PaperServiceClient paperServiceClient;
 
     @Autowired
     private UserPaperMapper userPaperMapper;
+
+    @Autowired
+    private UserFavoriteService userFavoriteService;
 
 //    @Autowired
 //    private DocumentServiceClient documentServiceClient;
@@ -43,8 +49,8 @@ public class UserPaperServiceImpl implements UserPaperService {
     private Executor taskExecutor;
 
     /**
-     * 更新访问次数以及最近播放时间，顺便返回记录信息，没有记录则创建新记录
-     * @param uid   文章ID
+     * 更新访问次数以及最近访问时间，顺便返回记录信息，没有记录则创建新记录
+     * @param uid   用户ID
      * @param pid   文章ID
      * @return 更新后的数据信息
      */
@@ -57,18 +63,17 @@ public class UserPaperServiceImpl implements UserPaperService {
             // 记录不存在，创建新记录
             userPaper = new User2Paper(null, uid, pid, 0, new Date());
             userPaperMapper.insert(userPaper);
+            //修改权重
             updateIntention(uid, pid, 1); // 浏览 +1
-        } else if (System.currentTimeMillis() - userPaper.getAcessDate().getTime() <= 30000) {
-            // 如果最近30秒内播放过则不更新记录，直接返回
-            return userPaper;
         } else {
             userPaper.setAcessDate(new Date());
             userPaperMapper.updateById(userPaper);
         }
+        String hisKey = "uForHis" + uid;
         // 异步线程更新video表和redis
         CompletableFuture.runAsync(() -> {
-            redisTool.sto("user_video_history:" + uid, vid);   // 添加到/更新观看历史记录
-            documentServiceClient.updateVideoStatus(vid, "play", true, 1);
+            redisTool.addSetMember(hisKey,pid);
+            paperServiceClient.updatePaperStatus(pid, "play", true, 1);
         }, taskExecutor);
         return userPaper;
     }
@@ -81,17 +86,20 @@ public class UserPaperServiceImpl implements UserPaperService {
      * @return  返回更新后的信息
      */
     @Override
-    public void collectOrCancel(Integer uid, Integer pid, boolean isCollect) {
+    public void collectOrCancel(Integer uid, Integer pid, boolean isCollect,Integer fid) {
         UpdateWrapper<User2Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("uid", uid).eq("pid", pid);
         if (isCollect) {
             updateWrapper.setSql("collect = 1");
             updateIntention(uid, pid, 3); // 收藏 +3
+            //进行收藏操作
+            userFavoriteService.updateFav(fid,pid);
         } else {
             updateWrapper.setSql("collect = 0");
+            //取消收藏
         }
         CompletableFuture.runAsync(() -> {
-            videoServiceClient.updateVideoStatus(pid, "collect", isCollect, 1);
+            paperServiceClient.updatePaperStatus(pid, "collect", isCollect, 1);
         }, taskExecutor);
         userPaperMapper.update(null, updateWrapper);
     }
@@ -119,24 +127,16 @@ public class UserPaperServiceImpl implements UserPaperService {
     private int getCid(Integer pid) {
         // 根据pid找category
         Paper paper = getPaper(pid);
-        String categoryName = paper.getCategory();
 
-        // 根据category找cid
-        Category category = null;
-        QueryWrapper<Category> categoryQueryWrapper = new QueryWrapper<>();
-        categoryQueryWrapper.eq("name", categoryName);
-        category = categoryMapper.selectOne(categoryQueryWrapper);
-        Integer cid = category.getCid();
-
-        return cid;
+        return paper.getCategoryId();
     }
 
     private Paper getPaper(Integer pid) {
-        Paper paper = null;
-        QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
-        paperQueryWrapper.eq("pid", pid);
-        paper = paperMapper.selectOne(paperQueryWrapper);
-        return paper;
+        // Paper paper = null;
+        // QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
+        // paperQueryWrapper.eq("pid", pid);
+        //paper = paperMapper.selectOne(paperQueryWrapper);
+        return paperServiceClient.getPaperById(pid);
     }
 
     private User getUser(Integer uid) {

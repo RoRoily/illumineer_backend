@@ -229,6 +229,7 @@ public class StormTool {
             String field = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("display_name").getAsString();
             String subfieldId = topicElement.getAsJsonObject().get("subfield").getAsJsonObject().get("id").getAsString();
             String fieldId = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("id").getAsString();
+            article.setCategoryId(Integer.parseInt(fieldId));
             // 定义正则表达式：提取 URL 中最后的数字
             Pattern pattern = Pattern.compile("(\\d+)$");
             Matcher matcher = pattern.matcher(subfieldId.trim());

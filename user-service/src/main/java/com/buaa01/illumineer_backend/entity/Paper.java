@@ -31,4 +31,6 @@ public class Paper {
     private List<Long> refs; // 引用文献
     private Integer stats; // 0 正常 1 已删除
     private String essAbs; // 文章摘要
+    /** 类别的id*/
+    private Integer CategoryId;
 }
