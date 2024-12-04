@@ -44,17 +44,17 @@ public interface PaperService {
      * @param
      * @return
      */
-    CustomResponse updatePaper(int pid,
+    CustomResponse updatePaper(Long pid,
                                String title,
                                String essAbs,
                                List<String> keywords,
                                MultipartFile content,
                                Map<String, Integer> auths,
-                               List<String> field,
+                               String field,
                                String type,
                                String theme,
                                Date publishDate,
                                String derivation,
-                               List<Integer> refs);
+                               List<Long> refs);
 
 }
