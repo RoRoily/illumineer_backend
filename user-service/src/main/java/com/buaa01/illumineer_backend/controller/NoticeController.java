@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +46,16 @@ public class NoticeController {
             customResponse.setMessage("没有找到该用户的消息");
             return customResponse;
         }
+        List<Map<String, Object>> noticeMapList = new ArrayList<>();
+        for(Notice notice : noticeList) {
+            Map<String, Object> noticeMap = new HashMap<>();
+            noticeMap.put("user_id", user_id);
+            noticeMap.put("title", notice.getTitle());
+            noticeMap.put("content", notice.getContent());
+            noticeMapList.add(noticeMap);
+        }
         customResponse.setCode(200);
-        customResponse.setData(noticeList);
+        customResponse.setData(noticeMapList);
         return customResponse;
     }
 }
