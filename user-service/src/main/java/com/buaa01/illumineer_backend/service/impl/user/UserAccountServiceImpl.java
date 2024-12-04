@@ -7,18 +7,22 @@ import com.buaa01.illumineer_backend.entity.Favorite;
 import com.buaa01.illumineer_backend.entity.History;
 import com.buaa01.illumineer_backend.entity.singleton.FidnumSingleton;
 import com.buaa01.illumineer_backend.entity.User;
+import com.buaa01.illumineer_backend.im.IMServer;
 import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.mapper.HistoryMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserAccountService;
 import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.tool.ESTool;
 import com.buaa01.illumineer_backend.tool.JsonWebTokenTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
-import com.buaa01.illumineer_backend.service.UserService;
+import com.buaa01.illumineer_backend.service.user.UserService;
 
+import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +35,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -59,7 +65,11 @@ public class UserAccountServiceImpl implements UserAccountService {
     private FavoriteMapper favoriteMapper;
     @Autowired
     private JsonWebTokenTool jsonWebTokenTool;
-
+    @Qualifier("taskExecutor")
+    @Autowired
+    private Executor taskExecutor;
+    @Autowired
+    private ESTool esTool;
 
     /**
      * 用户注册
@@ -197,7 +207,7 @@ public class UserAccountServiceImpl implements UserAccountService {
             // 这里缓存的user信息建议只供读取uid用，其中的状态等非静态数据可能不准，所以 redis另外存值
             redisTool.setExObjectValue("securityUid:" + user.getUid(),user,60L*60*24*2, TimeUnit.SECONDS);
             // 将该用户放到redis中在线集合(需要吗)
-            redisTool.addMember("login_member", user.getUid());
+            redisTool.addSetMember("login_member", user.getUid());
         } catch (Exception e) {
             log.error("存储redis数据失败");
             throw e;
@@ -208,10 +218,10 @@ public class UserAccountServiceImpl implements UserAccountService {
         UserDTO userDTO = new UserDTO();
         userDTO.setUid(user.getUid());
         userDTO.setAvatar(user.getAvatar());
-        userDTO.setEmail(user.getAccount());
+        userDTO.setEmail(user.getEmail());
         userDTO.setInstitution(user.getInstitution());
         userDTO.setStatus(user.getStatus());
-        userDTO.setUsername(user.getUsername());
+        userDTO.setUsername(user.getNickName());
         userDTO.setIsVerify(user.getIsVerify());
         userDTO.setStats(user.getStats());
 
@@ -265,7 +275,7 @@ public class UserAccountServiceImpl implements UserAccountService {
         userDTO.setEmail(user.getEmail());
         userDTO.setInstitution(user.getInstitution());
         userDTO.setStatus(user.getStatus());
-        userDTO.setUsername(user.getUsername());
+        userDTO.setUsername(user.getNickName());
         userDTO.setIsVerify(user.getIsVerify());
         userDTO.setStats(user.getStats());
 
@@ -286,7 +296,7 @@ public class UserAccountServiceImpl implements UserAccountService {
     @Override
     public CustomResponse personalInfo() {
         Integer loginUserId = currentUser.getUserId();
-        UserDTO userDTO = userService.getUserById(loginUserId);
+        User userDTO = userService.getUserByUId(loginUserId);
 
         // 从redis中获取最新数据
         User user = redisTool.getObjectByClass("user" + loginUserId,User.class);
@@ -326,10 +336,10 @@ public class UserAccountServiceImpl implements UserAccountService {
         Integer LoginUserId = currentUser.getUserId();
 
         // 从redis中获取最新数据
-        User user = redisTool.getObjectByClass("user" + loginUserId,User.class);
+        User user = redisTool.getObjectByClass("user" + LoginUserId,User.class);
         // 如果redis中没有user数据，就从mysql中获取并更新到redis
         if (user == null) {
-            user = userMapper.selectById(loginUserId);
+            user = userMapper.selectById(LoginUserId);
             User finalUser = user;
             CompletableFuture.runAsync(() -> {
                 redisTool.setExObjectValue("user:" + finalUser.getUid(), finalUser);  // 默认存活1小时
@@ -361,7 +371,7 @@ public class UserAccountServiceImpl implements UserAccountService {
         userDTO.setEmail(user.getEmail());
         userDTO.setInstitution(user.getInstitution());
         userDTO.setStatus(user.getStatus());
-        userDTO.setUsername(user.getUsername());
+        userDTO.setUsername(user.getNickName());
         userDTO.setIsVerify(user.getIsVerify());
         userDTO.setStats(user.getStats());
 
@@ -432,7 +442,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 
         // 验证旧密码
         UsernamePasswordAuthenticationToken authenticationToken2 =
-                new UsernamePasswordAuthenticationToken(user.getUsername(), pw);
+                new UsernamePasswordAuthenticationToken(user.getNickName(), pw);
         try {
             authenticationProvider.authenticate(authenticationToken2);
         } catch (Exception e) {

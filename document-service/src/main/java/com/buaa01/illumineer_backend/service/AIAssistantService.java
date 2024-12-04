@@ -74,7 +74,7 @@ public class AIAssistantService {
      */
 
     public String StartChat(String content) throws Exception {
-        RequestDTO chatCompletion = createRequest(content); // 例如："帮我找一下人工智能相关领域，100字以内回答，请仅提取关键词并用逗号分割，不要输出其余信息。"
+        RequestDTO chatCompletion = createRequest(content); // 例如："帮我找一下“人工智能”相关领域，100字以内回答，请仅提取关键词并用逗号分割，不要输出其余信息。"
 
         AtomicReference<String> allResponse = new AtomicReference<>("");
 

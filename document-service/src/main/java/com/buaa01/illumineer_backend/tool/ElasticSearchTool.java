@@ -53,8 +53,8 @@ public class ElasticSearchTool {
                     paper.getTheme(),
                     paper.getPublishDate(),
                     paper.getDerivation(),
-                    paper.getRef_times(),
-                    paper.getFav_time(),
+                    paper.getRefTimes(),
+                    paper.getFavTime(),
                     paper.getStats());
             elasticsearchClient.index(
                     i -> i.index("paper").id(esPaper.getPid().toString()).document(esPaper));
@@ -86,8 +86,8 @@ public class ElasticSearchTool {
                     paper.getTheme(),
                     paper.getPublishDate(),
                     paper.getDerivation(),
-                    paper.getRef_times(),
-                    paper.getFav_time(),
+                    paper.getRefTimes(),
+                    paper.getFavTime(),
                     paper.getStats());
             elasticsearchClient.update(i->i.index("paper").id(paper.getPid().toString()).doc(esPaper),ElasticSearchPaper.class);
         }catch (IOException e){
@@ -103,9 +103,9 @@ public class ElasticSearchTool {
      * @param onlyPass 是否只查询没有删除的论文
      * @return 包含查到的数据id列表，按匹配分数排序
      */
-    public List<Integer> searchPapersIdByTitle(String keyword, Integer page, Integer size, boolean onlyPass) {
+    public List<Long> searchPapersIdByTitle(String keyword, Integer page, Integer size, boolean onlyPass) {
         try {
-            List<Integer> list = new ArrayList<>();
+            List<Long> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields("title").query(keyword).fuzziness("AUTO")));
             return getPaperIds(page, size, onlyPass, list, query);
         } catch (IOException e) {
@@ -122,9 +122,9 @@ public class ElasticSearchTool {
      * @param onlyPass 是否只查询没有删除的论文
      * @return 包含查到的数据id列表，按匹配分数排序
      */
-    public List<Integer> searchPapersIdByAuths(String keyword, Integer page, Integer size, boolean onlyPass) {
+    public List<Long> searchPapersIdByAuths(String keyword, Integer page, Integer size, boolean onlyPass) {
         try {
-            List<Integer> list = new ArrayList<>();
+            List<Long> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields("auths").query(keyword).fuzziness("AUTO")));
             return getPaperIds(page, size, onlyPass, list, query);
         } catch (IOException e) {
@@ -134,7 +134,7 @@ public class ElasticSearchTool {
     }
 
     // 将query与状态查询结合起来
-    private List<Integer> getPaperIds(Integer page, Integer size, boolean onlyPass, List<Integer> list, Query query) throws IOException {
+    private List<Long> getPaperIds(Integer page, Integer size, boolean onlyPass, List<Long> list, Query query) throws IOException {
         Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(0)))));
         Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
         SearchRequest searchRequest;

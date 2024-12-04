@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchResultPaper {
-    private Integer pid;
+    private Long pid;
     /** 文章题目 */
     private String title;
     /** 关键词 */
@@ -20,8 +20,7 @@ public class SearchResultPaper {
     /** 文章作者 */
     private Map<String, Integer> auths;
     /** 相关领域 */
-    private List<Category> field;
-    // private List<String> category;// 统一相关领域
+    private String field;
     /** 文章类型 */
     private String type;
     /** 文章主题 */
@@ -31,9 +30,9 @@ public class SearchResultPaper {
     /** 文章来源 */
     private String derivation;
     /** 被引用次数 */
-    private Integer ref_times;
+    private Integer refTimes;
     /** 收藏次数 */
-    private Integer fav_time;
+    private Integer favTime;
 
     // ————————以下字段不需要缓存—————————————
     /** 内容摘要 */

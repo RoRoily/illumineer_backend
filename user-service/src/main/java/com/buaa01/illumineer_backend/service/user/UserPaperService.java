@@ -17,5 +17,5 @@ public interface UserPaperService {
      * @param vid   视频ID
      * @param isCollect 是否收藏 true收藏 false取消
      */
-    void collectOrCancel(Integer uid, Integer vid, boolean isCollect);
+    void collectOrCancel(Integer uid, Integer vid, boolean isCollect, Integer fid);
 }

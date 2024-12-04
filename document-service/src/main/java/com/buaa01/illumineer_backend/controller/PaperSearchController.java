@@ -1,7 +1,6 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,7 @@ public class PaperSearchController {
      * @return Paper
      */
     @GetMapping("/get/id")
-    public CustomResponse getPaperByPid(@RequestParam("pid") Integer pid) {
+    public CustomResponse getPaperByPid(@RequestParam("pid") Long pid) {
         try {
             return paperSearchService.getPaperByPid(pid);
         } catch (Exception e) {

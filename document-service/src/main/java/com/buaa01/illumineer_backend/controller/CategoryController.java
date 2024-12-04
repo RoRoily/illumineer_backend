@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
-    @GetMapping("/c/get")
-    public Category getCategoryByName(@RequestParam String name) throws Exception{
-        return categoryService.getCategoryByName(name);
+
+    @GetMapping("/category/get")
+    public Category getCategoryByName(@RequestParam String id, String sub_id) throws Exception {
+        return categoryService.getCategoryByID(sub_id, id);
     }
 }

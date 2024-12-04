@@ -20,9 +20,9 @@ public class PaperSortScorer {
 
     public static double calculateScore(SearchResultPaper paper, List<String> userKeywords) {
         // 引用次数评分
-        double refScore = normalize(paper.getRef_times(), 1000);
+        double refScore = normalize(paper.getRefTimes(), 1000);
         // 收藏次数评分
-        double favScore = normalize(paper.getFav_time(), 10000);
+        double favScore = normalize(paper.getFavTime(), 10000);
         // 时间评分
         double timeScore = calculateTimeScore((Date) paper.getPublishDate());
         // 关键词匹配度评分

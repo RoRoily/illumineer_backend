@@ -13,4 +13,10 @@ public interface CategoryMapper extends BaseMapper<Category> {
 
     @Insert("insert into category(name) values(#{name})")
     void insertCategory(String name);
+
+    @Select("select * from category where scid = #{scid} and cid = #{cid}")
+    Category getCategoryBy2ID(String  scid, String cid);
+
+    @Insert("insert into category(scid, cid, sname, name) values(#{scid}, #{cid}, #{sname}, #{name})")
+    void insertCategory(String scid, String cid, String sname, String name);
 }

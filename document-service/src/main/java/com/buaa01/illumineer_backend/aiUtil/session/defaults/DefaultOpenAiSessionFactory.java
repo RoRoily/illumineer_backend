@@ -1,7 +1,6 @@
 package com.buaa01.illumineer_backend.aiUtil.session.defaults;
 
 import com.buaa01.illumineer_backend.aiUtil.IOpenAiApi;
-import com.buaa01.illumineer_backend.aiUtil.interceptor.OpenAiInterceptor;
 import com.buaa01.illumineer_backend.aiUtil.session.Configuration;
 import com.buaa01.illumineer_backend.aiUtil.session.OpenAiSession;
 import com.buaa01.illumineer_backend.aiUtil.session.OpenAiSessionFactory;

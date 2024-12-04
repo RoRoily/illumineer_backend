@@ -9,7 +9,7 @@ public interface HistoryService {
     /**
      * 分页返回历史记录中的条目
      */
-    public List<Map<String, Object>> getHistoryByPage(Integer uid, Integer quantity, Integer offset);
+    public CustomResponse getHistoryByPage(Integer uid, Integer quantity, Integer offset);
 
     /**
      *  在历史记录中新增条目

@@ -50,7 +50,7 @@ public class PaperServiceImpl implements PaperService {
         paper = paperMapper.getPaperByPid(pid);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("ref_times", paper.getRef_times());
+        map.put("ref_times", paper.getRefTimes());
         customResponse.setData(map);
         return customResponse;
     }
