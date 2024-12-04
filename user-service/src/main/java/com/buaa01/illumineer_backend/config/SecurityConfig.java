@@ -1,7 +1,6 @@
 package com.buaa01.illumineer_backend.config;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,19 +25,8 @@ import java.util.Objects;
 @EnableWebSecurity
 public class SecurityConfig  extends WebSecurityConfigurerAdapter{
 
-
-    private final AuthenticationProvider authenticationProvider;
     @Autowired
     private UserDetailsService userDetailsService;
-
-    public SecurityConfig(AuthenticationProvider authenticationProvider) {
-        this.authenticationProvider = authenticationProvider;
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider); // 使用自定义的 AuthenticationProvider
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -58,6 +46,7 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter{
      * @return Authentication对象
      */
     @Bean
+    @Lazy
     public AuthenticationProvider authenticationProvider() {
         return new AuthenticationProvider() {
             @Override
