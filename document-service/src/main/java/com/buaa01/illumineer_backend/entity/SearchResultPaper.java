@@ -30,9 +30,9 @@ public class SearchResultPaper {
     /** 文章来源 */
     private String derivation;
     /** 被引用次数 */
-    private Integer ref_times;
+    private Integer refTimes;
     /** 收藏次数 */
-    private Integer fav_time;
+    private Integer favTime;
 
     // ————————以下字段不需要缓存—————————————
     /** 内容摘要 */
