@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,6 +22,8 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private CurrentUser currentUser;
+    @Autowired
+    private Executor taskExecutor;
 
     /**
      * 根据用户ID获取用户信息
@@ -30,7 +33,17 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User getUserByUId(Integer uid) {
-        return userMapper.selectById(uid);
+        // 从redis中获取最新数据
+        User user = redisTool.getObjectByClass("user" + uid, User.class);
+        // 如果redis中没有user数据，就从mysql中获取并更新到redis
+        if (user == null) {
+            user = userMapper.selectById(uid);
+            User finalUser = user;
+            CompletableFuture.runAsync(() -> {
+                redisTool.setExObjectValue("user:" + finalUser.getUid(), finalUser);  // 默认存活1小时
+            }, taskExecutor);
+        }
+        return user;
     }
 
     /**

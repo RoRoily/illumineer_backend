@@ -1,7 +1,9 @@
 package com.buaa01.illumineer_backend.entity.DTO;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.buaa01.illumineer_backend.entity.Category;
+import com.buaa01.illumineer_backend.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +28,15 @@ public class UserDTO {
     private Boolean isVerify; //是否已实名认证
     private String institution; //所在机构
     private Integer stats;
+    
+    public UserDTO(User user) {
+        this.uid = user.getUid();
+        this.avatar = user.getAvatar();
+        this.email = user.getEmail();
+        this.Username = user.getNickName();
+        this.status = user.getStatus();
+        this.isVerify = user.getIsVerify();
+        this.institution = user.getInstitution();
+        this.stats = user.getStats();
+    }
 }
