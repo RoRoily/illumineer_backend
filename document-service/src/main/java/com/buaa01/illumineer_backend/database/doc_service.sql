@@ -1,6 +1,28 @@
-CREATE DATABASE docService;
+CREATE DATABASE docservice;
 
-USE docService;
+USE docservice;
+
+DROP TABLE IF EXISTS `paper`;
+
+CREATE TABLE `paper` (
+                        `pid` INT(100) NOT NULL AUTO_INCREMENT COMMENT '文章ID',
+                        `title` VARCHAR(100) NOT NULL COMMENT '文章题目',
+                        `theme` VARCHAR(100) NOT NULL COMMENT '文章主题',
+                        `essAbs` VARCHAR(255) NOT NULL COMMENT '内容摘要',
+                        `keywords` JSON NOT NULL COMMENT '关键词',
+                        `auths` JSON NOT NULL COMMENT '文章作者',
+                        `derivation` VARCHAR(255) NOT NULL COMMENT '文章来源',
+                        `type` VARCHAR(100) NOT NULL COMMENT '文章类型',
+                        `publish_date` DATETIME NOT NULL COMMENT '发布时间',
+                        `field` VARCHAR(100) NOT NULL COMMENT '相关领域',
+                        `fav_time` INT(11) DEFAULT 0 COMMENT '收藏次数',
+                        `ref_times` INT(11) DEFAULT 0 COMMENT '被引用次数',
+                        `refs` JSON NOT NULL COMMENT '引用文献',
+                        `content_url` VARCHAR(255) DEFAULT NULL COMMENT '文章链接',
+                        `stats` TINYINT(4) DEFAULT 0 COMMENT '状态: 0 正常 1 已删除 2 审核中',
+                        `category_id` INT(11) NOT NULL COMMENT '类别的id',
+                        PRIMARY KEY (`pid`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='文章表';
 
 DROP TABLE IF EXISTS `category`;
 
