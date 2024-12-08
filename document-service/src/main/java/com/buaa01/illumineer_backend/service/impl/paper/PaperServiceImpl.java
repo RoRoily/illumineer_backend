@@ -132,18 +132,18 @@ public class PaperServiceImpl implements PaperService {
      * @param
      * @return
      */
-    public CustomResponse updatePaper(int pid,
+    public CustomResponse updatePaper(Long pid,
                                       String title,
                                       String essAbs,
                                       List<String> keywords,
                                       MultipartFile content,
                                       Map<String, Integer> auths,
-                                      List<String> field,
+                                      String field,
                                       String type,
                                       String theme,
                                       Date publishDate,
                                       String derivation,
-                                      List<Integer> refs) {
+                                      List<Long> refs) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL

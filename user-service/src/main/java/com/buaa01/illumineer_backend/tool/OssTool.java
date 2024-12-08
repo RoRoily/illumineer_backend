@@ -32,9 +32,6 @@ public class OssTool {
     @Value("${oss.bucketUrl}")
     private String OSS_BUCKET_URL;
 
-    @Value("${directory.chunk}")
-    private String CHUNK_DIRECTORY;   // 分片存储目录
-
     @Autowired
     private OSS ossClient;
 

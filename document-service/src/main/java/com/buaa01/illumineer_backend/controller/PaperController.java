@@ -127,17 +127,17 @@ public class PaperController {
      * @return
      */
     @PostMapping("/update")
-    public CustomResponse updatePaper(@RequestParam("pid") int pid,@RequestParam("title") String title,
+    public CustomResponse updatePaper(@RequestParam("pid") Long pid,@RequestParam("title") String title,
                                       @RequestParam("essAbs") String essAbs,
                                       @RequestParam("keywords") List<String> keywords,
                                       @RequestParam("content") MultipartFile content,
                                       @RequestParam("auths") Map<String, Integer> auths,
-                                      @RequestParam("field") List<String> field,
+                                      @RequestParam("field") String field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") Date publishDate,
                                       @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Integer> refs) {
+                                      @RequestParam("refs") List<Long> refs) {
         try {
             return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme, publishDate, derivation, refs);
         } catch (Exception e) {

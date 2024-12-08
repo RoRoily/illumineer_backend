@@ -14,23 +14,17 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class ORCIDController {
 
-        @Value("${orcid.client-id}")
         private String clientId;
 
-        @Value("${orcid.client-secret}")
         private String clientSecret;
 
 
-        @Value("${orcid.redirect-uri}")
         private String redirectUri;
 
-        @Value("${orcid.authorize-url}")
         private String authorizeUrl;
 
-        @Value("${orcid.token-url}")
         private String tokenUrl;
 
-        @Value("${orcid.user-info-url}")
         private String userInfoUrl;
 
         /**
