@@ -15,9 +15,6 @@ public class Category {
     private String subClassId; //细分领域
     private String mainClassName;
     private String subClassName;
-    private String description;
-    private String rcmTag;
-
 
     public Category Category_initial() {
         Category tempCategory = new Category();
@@ -25,7 +22,6 @@ public class Category {
         tempCategory.setSubClassId("1");
         tempCategory.setMainClassName("unknown");
         tempCategory.setSubClassName("unknown");
-        tempCategory.setDescription("Category Not Defined");
         return tempCategory;
     }
 

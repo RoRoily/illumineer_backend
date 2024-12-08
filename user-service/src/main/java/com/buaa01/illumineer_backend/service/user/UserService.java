@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.user;
 
+import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 import com.buaa01.illumineer_backend.entity.User;
 
 import java.util.Map;
@@ -20,7 +21,7 @@ public interface UserService {
      * @return 用户展示信息
      */
 
-    Map<String, String> getUserHomeInfo(Integer uid);
+    UserDTO getUserHomeInfo(Integer uid);
 
     /**
      * 获取用户简历信息

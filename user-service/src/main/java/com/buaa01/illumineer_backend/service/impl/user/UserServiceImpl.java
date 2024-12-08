@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
+import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.user.UserService;
@@ -54,21 +55,14 @@ public class UserServiceImpl implements UserService {
      */
 
     @Override
-    public Map<String, String> getUserHomeInfo(Integer uid) {
+    public UserDTO getUserHomeInfo(Integer uid) {
         User user = redisTool.getObjectByClass("user:" + uid, User.class);
         if (user == null) {
             user = userMapper.selectById(uid);
             User finalUser = user;
             CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
         }
-        Map<String, String> userHomeInfo = new HashMap<>();
-        userHomeInfo.put("avatar", user.getAvatar());
-        userHomeInfo.put("nickName", user.getNickName());
-        userHomeInfo.put("name", user.getName());
-        userHomeInfo.put("gender", user.getGender() == 1 ? "男" : "女");
-        userHomeInfo.put("background", user.getBackground());
-        userHomeInfo.put("stats", user.getStats().toString());
-        return userHomeInfo;
+        return new UserDTO(user);
     }
 
     /**
