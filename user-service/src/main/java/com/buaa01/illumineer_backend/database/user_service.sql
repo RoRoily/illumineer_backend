@@ -1,4 +1,4 @@
-create DATABASE  userservice;
+create DATABASE userservice;
 
 USE userservice;
 
@@ -6,15 +6,15 @@ DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
                         `uid` INT(11) NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-                        `avatar` VARCHAR(500) DEFAULT 'https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png' COMMENT '用户头像URL',
+                        `avatar` VARCHAR(255) DEFAULT 'https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png' COMMENT '用户头像URL',
                         `email` VARCHAR(100) NOT NULL COMMENT '用户邮箱',
                         `password` VARCHAR(255) NOT NULL COMMENT '用户密码（加密后）',
                         `nick_name` VARCHAR(32) NOT NULL COMMENT '用户昵称',
                         `description` VARCHAR(100) DEFAULT NULL COMMENT '个性签名',
-                        `background` VARCHAR(500) DEFAULT 'https://tinypic.host/images/2023/11/15/69PB2Q5W9D2U7L.png' COMMENT '主页背景图URL',
-                        `status` TINYINT(4) NOT NULL DEFAULT 1 COMMENT '账号权限状态，0为管理员，1~9为普通用户权限',
+                        `background` VARCHAR(255) DEFAULT 'https://tinypic.host/images/2023/11/15/69PB2Q5W9D2U7L.png' COMMENT '主页背景图URL',
+                        `stats` TINYINT(4) NOT NULL DEFAULT 1 COMMENT '账号权限状态，0为管理员，1~9为普通用户权限',
+                        `intention` JSON DEFAULT NULL COMMENT '用户和领域的关系（JSON格式存储）',
                         `is_verify` BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否已实名认证',
-                        `stats` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '账号状态，0正常 1封禁 2注销',
                         `name` VARCHAR(50) DEFAULT NULL COMMENT '用户真实姓名',
                         `auth_id` INT(11) DEFAULT NULL COMMENT '认证ID',
                         `gender` TINYINT(4) DEFAULT NULL COMMENT '性别，0女 1男 2未知',
@@ -27,7 +27,7 @@ CREATE TABLE `user` (
                         UNIQUE KEY `nick_name` (`nick_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
-
+INSERT INTO user(email, `password`, nick_name, create_date) VALUES ('yeestiew@gmail.com', '1012', 'yees', '2024-12-8');
 
 DROP TABLE IF EXISTS `favorite`;
 
@@ -43,7 +43,7 @@ CREATE TABLE `favorite` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='收藏夹';
 
 
-DROP TABLE IF EXISTS 'institutions';
+DROP TABLE IF EXISTS `institutions`;
 
 CREATE TABLE institutions (
                               id BIGINT PRIMARY KEY AUTO_INCREMENT,
