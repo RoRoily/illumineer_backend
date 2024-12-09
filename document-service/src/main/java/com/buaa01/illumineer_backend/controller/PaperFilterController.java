@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.service.paper.PaperFilterService;
 import com.buaa01.illumineer_backend.utils.FilterCondition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,11 +30,11 @@ public class PaperFilterController {
      * @param sortType    根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @param order       0=降序，1=升序
      * 
-     * @return CustomResponse对象
+     * @return List<SearchResultPaper>对象
      */
 
     @PostMapping("get/filter")
-    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition,
+    public List<SearchResultPaper> ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition,
             @RequestParam("size") Integer size,
             @RequestParam("offset") Integer offset,
             @RequestParam("type") Integer sortType,
@@ -40,15 +42,12 @@ public class PaperFilterController {
 
         FilterCondition sc = new FilterCondition(filtercondition);
 
-        CustomResponse customResponse = new CustomResponse();
         try {
-            customResponse.setData(filterService.filterSearchResult(sc, size, offset, sortType, order));
-            return customResponse;
+            return filterService.filterSearchResult(sc, size, offset, sortType, order);
         } catch (Exception e) {
             e.printStackTrace();
-            customResponse.setCode(500);
-            customResponse.setMessage("筛选过程出现错误！");
-            return customResponse;
+            System.err.println("筛选过程出现错误！");
+            return null;
         }
     }
 }

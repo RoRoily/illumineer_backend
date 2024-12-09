@@ -2,7 +2,6 @@ package com.buaa01.illumineer_backend.service.paper;
 
 import java.util.List;
 
-import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.utils.FilterCondition;
 
