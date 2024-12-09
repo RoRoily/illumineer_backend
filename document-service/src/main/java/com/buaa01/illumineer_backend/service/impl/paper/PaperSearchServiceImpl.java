@@ -32,6 +32,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -281,11 +282,19 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
         for (SearchResultPaper paper : papers) {
             System.out.println(paper.getPublishDate());
-            // year
-            if (years.get(paper.getPublishDate().getYear() + "") == null) {
-                years.put(paper.getPublishDate().getYear() + "", 1);
+            String year;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+            if (paper.getPublishDate().toString().contains(" ")) {
+                year = ZonedDateTime.parse(paper.getPublishDate().toString(), formatter).getYear() + "";
             } else {
-                years.put(paper.getPublishDate().getYear() + "", years.get(paper.getPublishDate().getYear() + "") + 1);
+                year = years.get(paper.getPublishDate().getYear()).toString();
+            }
+            // year
+            System.out.println(year);
+            if (years.get(year) == null) {
+                years.put(year, 1);
+            } else {
+                years.put(year, years.get(year) + 1);
             }
             // derivations
             if (derivations.get(paper.getDerivation()) == null) {

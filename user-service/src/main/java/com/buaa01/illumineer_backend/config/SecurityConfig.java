@@ -31,18 +31,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeRequests()
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin();
-        http.csrf().disable() // 禁用 CSRF 保护
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 无状态
-                .and()
+        http
                 .authorizeRequests()
-                .anyRequest().permitAll() // 放开所有权限
+                .anyRequest().authenticated()
                 .and()
-                .logout().permitAll(); // 允许登出
+                .formLogin();
+//        http.csrf().disable() // 禁用 CSRF 保护
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 无状态
+//                .and()
+//                .authorizeRequests()
+//                .anyRequest().permitAll() // 放开所有权限
+//                .and()
+//                .logout().permitAll(); // 允许登出
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
