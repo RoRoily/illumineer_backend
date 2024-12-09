@@ -2,10 +2,7 @@ package com.buaa01.illumineer_backend.service.impl.paper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.buaa01.illumineer_backend.entity.CustomResponse;
-import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
-import com.buaa01.illumineer_backend.entity.SearchResultPaper;
+import com.buaa01.illumineer_backend.entity.*;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
@@ -84,6 +81,27 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
             PaperAdo paperAdo = new PaperAdo(pid, paper.getTitle(), paper.getAuths(), paper.getPublishDate(), paper.getStats(), false);
             paperAdos.add(paperAdo);
         }
+        return paperAdos;
+    }
+
+    /***
+     * 根据category返回该category的认领条目列表
+     * @param category
+     * @param total 总数
+     * **/
+    public List<PaperAdo> getPaperAdoptionsByCategory(Category category, Integer total) {
+        List<PaperAdo> paperAdos = new ArrayList<>();
+        List<Paper> papers = null;
+        List<Long> pids = new ArrayList<>();
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("category_id", category.getMainClassId());
+        papers = paperMapper.selectList(queryWrapper);
+        for (Paper paper: papers) {
+            pids.add(paper.getPid());
+        }
+        paperAdos = getPaperAdoptionsByList(pids);
+        paperAdos = paperAdos.subList(0, total);
+
         return paperAdos;
     }
 }

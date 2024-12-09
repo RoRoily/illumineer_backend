@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.controller;
 
+import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
@@ -11,10 +12,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 来自document-service模块，向user-service提供被需求服务
@@ -40,11 +38,29 @@ public class ClientController {
      * 
      * @param pids 文章id列表
      **/
-    @PostMapping("/paper/subList")
+    @PostMapping("/ado/subList")
     public CustomResponse getPaperAdoptionsByList(List<Long> pids) {
         CustomResponse customResponse = new CustomResponse();
         try {
             customResponse.setData(paperAdoptionService.getPaperAdoptionsByList(pids));
+        } catch (Exception e) {
+            e.printStackTrace();
+            customResponse.setCode(500);
+            customResponse.setMessage("无法获取认领条目列表！");
+        }
+        return customResponse;
+    }
+
+    /***
+     * 根据category返回该category的认领条目列表
+     * @param category
+     * @param total 总数
+     * **/
+    @GetMapping("/ado/category")
+    public CustomResponse getPaperAdoptionsByName(@RequestParam("category") Category category, @RequestParam("total") Integer total){
+        CustomResponse customResponse = new CustomResponse();
+        try {
+            customResponse.setData(paperAdoptionService.getPaperAdoptionsByCategory(category, total));
         } catch (Exception e) {
             e.printStackTrace();
             customResponse.setCode(500);

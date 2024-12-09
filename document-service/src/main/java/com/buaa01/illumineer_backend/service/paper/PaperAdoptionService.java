@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.paper;
 
+import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 
@@ -18,4 +19,11 @@ public interface PaperAdoptionService {
      * @param pids
      * **/
     List<PaperAdo> getPaperAdoptionsByList(List<Long> pids);
+
+    /***
+     * 根据category返回该category的认领条目列表
+     * @param category
+     * @param total 总数
+     * **/
+    List<PaperAdo> getPaperAdoptionsByCategory(Category category, Integer total);
 }

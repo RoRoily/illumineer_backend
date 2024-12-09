@@ -1,5 +1,7 @@
 package com.buaa01.illumineer_backend.entity;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +18,9 @@ public class SearchResultPaper {
     /** 文章题目 */
     private String title;
     /** 关键词 */
-    private List<String> keywords;
+    private String keywords;
     /** 文章作者 */
-    private Map<String, Integer> auths;
+    private String auths;
     /** 相关领域 */
     private String field;
     /** 文章类型 */
@@ -43,4 +45,26 @@ public class SearchResultPaper {
     // private String contentUrl;
     /** 状态: 0 正常 1 已删除 2 审核中 */
     // private Integer stats;
+
+    public List<String> getKeywords() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<String> keywords = null;
+        try {
+            keywords = objectMapper.readValue(this.keywords, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return keywords;
+    }
+
+    public Map<String, Integer> getAuths() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Integer> auths = null;
+        try {
+            auths = objectMapper.readValue(this.auths, new TypeReference<Map<String, Integer>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return auths;
+    }
 }

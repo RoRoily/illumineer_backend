@@ -29,7 +29,7 @@ public class StormServiceImpl implements StormService {
             articles = storm.getPapers(last_update);
         }
         for (Paper article : articles)
-            stormMapper.insertPaper(article.getPid(), article.getTitle(), article.getEssAbs(), article.getKeywords(), article.getContentUrl(), article.getAuths(), article.getField(), article.getType(), article.getTheme(), article.getPublishDate(), article.getDerivation(), article.getRefs(), article.getRefTimes(), article.getRefTimes(), article.getStats());
+            stormMapper.insertPaper(article.getPid(), article.getTitle(), article.getEssabs(), article.getKeywords(), article.getContentUrl(), article.getAuths(), article.getField(), article.getType(), article.getTheme(), article.getPublishDate(), article.getDerivation(), article.getRefs(), article.getRefTimes(), article.getRefTimes(), article.getStats());
         return CompletableFuture.completedFuture(Integer.toString(articles.size()));
     }
 }

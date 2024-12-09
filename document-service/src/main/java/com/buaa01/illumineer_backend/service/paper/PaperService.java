@@ -18,19 +18,19 @@ public interface PaperService {
      * @param pid 文章 id
      * @return 引用量
      */
-    CustomResponse getRefTimes(int pid);
+    CustomResponse getRefTimes(Long pid);
 
     /**
      * 根据 pid 增加引用量
      * @param pid 文章 id
      */
-    CustomResponse addRefTimes(int pid);
+    CustomResponse addRefTimes(Long pid);
 
     /**
      * 根据 pid 增加收藏量
      * @param pid 文章 id
      */
-    CustomResponse addFavTimes(int pid);
+    CustomResponse addFavTimes(Long pid);
 
     /**
      * 根据 pid 上传新的文章
@@ -53,8 +53,9 @@ public interface PaperService {
                                String field,
                                String type,
                                String theme,
-                               Date publishDate,
+                               String publishDate,
                                String derivation,
-                               List<Long> refs);
+                               List<Long> refs,
+                               Integer categoryId);
 
 }

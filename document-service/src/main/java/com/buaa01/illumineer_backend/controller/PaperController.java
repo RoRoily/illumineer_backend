@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -22,7 +25,7 @@ public class PaperController {
      * @return 引用量
      */
     @GetMapping("/get/refTimes")
-    public CustomResponse getRefTimes(@RequestParam("pid") int pid) {
+    public CustomResponse getRefTimes(@RequestParam("pid") Long pid) {
         try {
             return paperService.getRefTimes(pid);
         } catch (Exception e) {
@@ -40,7 +43,7 @@ public class PaperController {
      * @return
      */
     @PostMapping("/add/refTimes")
-    public CustomResponse addRefTimes(@RequestParam("pid") int pid) {
+    public CustomResponse addRefTimes(@RequestParam("pid") Long pid) {
         try {
             return paperService.addRefTimes(pid);
         } catch (Exception e) {
@@ -58,7 +61,7 @@ public class PaperController {
      * @return
      */
     @PostMapping("/add/favTimes")
-    public CustomResponse addFavTimes(@RequestParam("pid") int pid) {
+    public CustomResponse addFavTimes(@RequestParam("pid") Long pid) {
         try {
             return paperService.addFavTimes(pid);
         } catch (Exception e) {
@@ -76,11 +79,14 @@ public class PaperController {
      * @param essAbs
      * @param keywords
      * @param content
+     * @param auths
      * @param field
      * @param type
      * @param theme
      * @param publishDate
      * @param derivation
+     * @param refs
+     * @param categoryId
      * @return
      */
     @PostMapping("/upload")
@@ -92,16 +98,24 @@ public class PaperController {
                                       @RequestParam("field") String field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
-                                      @RequestParam("publishDate") Date publishDate,
+                                      @RequestParam("publishDate") String publishDate,
                                       @RequestParam("derivation") String derivation,
                                       @RequestParam("refs") List<Long> refs,
-                                      @RequestParam("category_id") Integer categoryId) {
+                                      @RequestParam("categoryId") Integer categoryId) {
         // auths
         Map<String, Integer> authsMap = new HashMap<>();
         for (String auth: auths) {
-            authsMap.put(auth, -1);
+            String authString = "\"" + auth + "\"";
+            authsMap.put(authString, 0);
         }
-        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, publishDate, field, 0, 0, refs, null, 0, categoryId);
+        // keywords
+        int size = keywords.size();
+        for (int i=0; i<size; i++) {
+            String keyword = "\"" + keywords.get(i) + "\"";
+            keywords.set(i, keyword);
+        }
+        Date date = Date.from(LocalDateTime.parse(publishDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault()).toInstant());
+        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, date, field, 0, 0, refs, null, 0, categoryId);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
@@ -127,19 +141,34 @@ public class PaperController {
      * @return
      */
     @PostMapping("/update")
-    public CustomResponse updatePaper(@RequestParam("pid") Long pid,@RequestParam("title") String title,
+    public CustomResponse updatePaper(@RequestParam("pid") Long pid,
+                                      @RequestParam("title") String title,
                                       @RequestParam("essAbs") String essAbs,
                                       @RequestParam("keywords") List<String> keywords,
                                       @RequestParam("content") MultipartFile content,
-                                      @RequestParam("auths") Map<String, Integer> auths,
+                                      @RequestParam("auths") List<String> auths,
                                       @RequestParam("field") String field,
                                       @RequestParam("type") String type,
                                       @RequestParam("theme") String theme,
-                                      @RequestParam("publishDate") Date publishDate,
+                                      @RequestParam("publishDate") String publishDate,
                                       @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Long> refs) {
+                                      @RequestParam("refs") List<Long> refs,
+                                      @RequestParam("categoryId") Integer categoryId) {
+        // auths
+        Map<String, Integer> authsMap = new HashMap<>();
+        for (String auth: auths) {
+            String authString = "\"" + auth + "\"";
+            authsMap.put(authString, 0);
+        }
+        // keywords
+        int size = keywords.size();
+        for (int i=0; i<size; i++) {
+            String keyword = "\"" + keywords.get(i) + "\"";
+            keywords.set(i, keyword);
+        }
+
         try {
-            return paperService.updatePaper(pid, title, essAbs, keywords, content, auths, field, type, theme, publishDate, derivation, refs);
+            return paperService.updatePaper(pid, title, essAbs, keywords, content, authsMap, field, type, theme, publishDate, derivation, refs, categoryId);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

@@ -4,7 +4,6 @@ import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.service.CategoryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -31,8 +30,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -177,9 +174,9 @@ public class StormTool {
             article.setTitle("");
         JsonElement abstractIndex = jsonObject.get("abstract_inverted_index");
         if (abstractIndex != null && abstractIndex.isJsonObject()) {
-            article.setEssAbs(montage(abstractIndex.toString()));
+            article.setEssabs(montage(abstractIndex.toString()));
         } else {
-            article.setEssAbs(""); // 或者设为某个默认值
+            article.setEssabs(""); // 或者设为某个默认值
         }
         JsonElement keywordsElement = jsonObject.get("keywords");
         List<String> keywordList = new ArrayList<>();

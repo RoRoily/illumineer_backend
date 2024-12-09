@@ -1,11 +1,5 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
@@ -41,17 +35,14 @@ public class PaperServiceImpl implements PaperService {
      * @param pid 文章 id
      * @return 引用量
      */
-    public CustomResponse getRefTimes(int pid) {
+    public CustomResponse getRefTimes(Long pid) {
         CustomResponse customResponse = new CustomResponse();
-        Paper paper = null;
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("pid", pid);
-//        paper = paperMapper.selectOne(queryWrapper);
-        paper = paperMapper.getPaperByPid(pid);
+        Map<String, Object> paper = paperMapper.getPaperByPid(pid);
+        System.out.println(paper);
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("ref_times", paper.getRefTimes());
-        customResponse.setData(map);
+        Map<String, Integer> result = new HashMap<>();
+        result.put("ref_times", Integer.parseInt(paper.get("ref_times").toString()));
+        customResponse.setData(result);
         return customResponse;
     }
 
@@ -60,7 +51,7 @@ public class PaperServiceImpl implements PaperService {
      *
      * @param pid 文章 id
      */
-    public CustomResponse addRefTimes(int pid) {
+    public CustomResponse addRefTimes(Long pid) {
         CustomResponse customResponse = new CustomResponse();
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
@@ -77,11 +68,11 @@ public class PaperServiceImpl implements PaperService {
      *
      * @param pid 文章 id
      */
-    public CustomResponse addFavTimes(int pid) {
+    public CustomResponse addFavTimes(Long pid) {
         CustomResponse customResponse = new CustomResponse();
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("fav_times = fav_times + 1");
+        updateWrapper.setSql("fav_time = fav_time + 1");
 
         paperMapper.update(null, updateWrapper);
 
@@ -120,7 +111,7 @@ public class PaperServiceImpl implements PaperService {
         paper.setContentUrl(contentUrl);
 
         // 存入数据库
-        paperMapper.insert(paper);
+        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssabs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString(), paper.getField(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTime(), paper.getRefTimes(), paper.getStats(), paper.getCategoryId());
 //        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
@@ -134,16 +125,17 @@ public class PaperServiceImpl implements PaperService {
      */
     public CustomResponse updatePaper(Long pid,
                                       String title,
-                                      String essAbs,
+                                      String essabs,
                                       List<String> keywords,
                                       MultipartFile content,
                                       Map<String, Integer> auths,
                                       String field,
                                       String type,
                                       String theme,
-                                      Date publishDate,
+                                      String publishDate,
                                       String derivation,
-                                      List<Long> refs) {
+                                      List<Long> refs,
+                                      Integer categoryId) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -166,7 +158,7 @@ public class PaperServiceImpl implements PaperService {
 
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = " + title + ", essAbs = " + essAbs + ", keywords = " + keywords + ", contentUrl = " + contentUrl + ", auths = " + auths + ", field = " + field + ", type = " + type + ", theme = " + theme + ", publishDate = " + publishDate + ", derivation = " + derivation + ", refs = " + refs);
+        updateWrapper.setSql("title = '" + title + "', essabs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', field = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "', category_id = '" + categoryId + "'");
 
         paperMapper.update(null, updateWrapper);
 

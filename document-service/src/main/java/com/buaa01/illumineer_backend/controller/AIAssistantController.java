@@ -51,16 +51,14 @@ public class AIAssistantController {
         String keywords = aiAssistantService.StartChat("我想调查“" + query + "”领域的论文资料，请帮我推荐相关的关键词，尽量简短，只用空格隔开。");
         String[] keywordSplit = keywords.split("[ 、。，,.]+");// 我不清楚AI会写出什么分割符（一般是、），所以使用正则表达式来识别
         List<String> keywordList = Arrays.stream(keywordSplit).toList();
-        List<Map<String, String>> reqMapList = new ArrayList<>();
+        List<Integer> logicList = new ArrayList<>();
+        List<String> conditionList = new ArrayList<>();
         for (int i = 0; i < keywordList.size(); i++) {
-            Map<String, String> reqMap = new HashMap<>();
-            if (i == 0) reqMap.put("logic", "0");
-            else reqMap.put("logic", "1");
-            reqMap.put("keyword", keywordList.get(i));
-
-            reqMapList.add(reqMap);
+            if (i == 0) logicList.add(0);
+            else logicList.add(1);
+            conditionList.add("keywords");
         }
-        Object data = new PaperSearchServiceImpl().advancedSearchPapers(reqMapList, size, offset, sortType, order).getData();
+        Object data = new PaperSearchServiceImpl().advancedSearchPapers(logicList, conditionList, keywordList, size, offset, sortType, order).getData();
         Map<String, Object> result;
         if (isMapOfStringToObject(data)) {
             result = (Map<String, Object>) data;

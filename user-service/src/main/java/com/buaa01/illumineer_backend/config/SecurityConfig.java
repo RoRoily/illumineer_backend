@@ -3,6 +3,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,18 +24,25 @@ import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig  extends WebSecurityConfigurerAdapter{
+public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired
     private UserDetailsService userDetailsService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .anyRequest().authenticated()
+//        http
+//                .authorizeRequests()
+//                .anyRequest().authenticated()
+//                .and()
+//                .formLogin();
+        http.csrf().disable() // 禁用 CSRF 保护
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 无状态
                 .and()
-                .formLogin();
+                .authorizeRequests()
+                .anyRequest().permitAll() // 放开所有权限
+                .and()
+                .logout().permitAll(); // 允许登出
     }
     @Bean
     public PasswordEncoder passwordEncoder() {

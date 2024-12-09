@@ -28,7 +28,7 @@ public class PaperStatsServiceImpl implements PaperStatsService {
      * @return: 是否成功更新文章状态
      **/
     @Override
-    public CustomResponse updateStats(Integer pid, Integer stats) {
+    public CustomResponse updateStats(Long pid, Integer stats) {
         CustomResponse customResponse = new CustomResponse();
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);

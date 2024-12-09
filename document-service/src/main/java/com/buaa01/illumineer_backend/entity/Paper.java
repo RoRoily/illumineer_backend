@@ -19,7 +19,7 @@ public class Paper {
     /** 文章主题 */
     private String theme;
     /** 内容摘要 */
-    private String essAbs;
+    private String essabs;
     /** 关键词 */
     private List<String> keywords;
     /** 文章作者 */

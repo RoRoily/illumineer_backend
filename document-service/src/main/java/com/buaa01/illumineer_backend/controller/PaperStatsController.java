@@ -5,7 +5,10 @@ import com.buaa01.illumineer_backend.service.paper.PaperStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 public class PaperStatsController {
@@ -22,7 +25,7 @@ public class PaperStatsController {
     * @return: 是否成功更新文章状态
     **/
     @PostMapping("/updateStats")
-    public CustomResponse updateStats(@RequestBody Integer pid, @RequestBody Integer stats) {
+    public CustomResponse updateStats(@RequestParam("pid") Long pid, @RequestParam("stats") Integer stats) {
         try {
             return paperStatsService.updateStats(pid, stats);
         } catch (Exception e) {

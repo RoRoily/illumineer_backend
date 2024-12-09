@@ -2,11 +2,15 @@ package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +49,7 @@ public class PaperSearchController {
     public CustomResponse getPaperByStats(@RequestParam("stats") Integer stats,
                                           @RequestParam("size") Integer size,
                                           @RequestParam("offset") Integer offset,
-                                          @RequestParam("type") Integer sortType,
+                                          @RequestParam("sortType") Integer sortType,
                                           @RequestParam("order") Integer order) {
         try {
             return paperSearchService.getPaperByStats(stats, size, offset, sortType, order);
@@ -53,7 +57,7 @@ public class PaperSearchController {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
             customResponse.setCode(500);
-            customResponse.setMessage("无法更新文章状态");
+            customResponse.setMessage("无法根据文章状态获取paper");
             return customResponse;
         }
     }
@@ -73,7 +77,7 @@ public class PaperSearchController {
                                        @RequestParam("keyword") String keyword,
                                        @RequestParam("size") Integer size,
                                        @RequestParam("offset") Integer offset,
-                                       @RequestParam("type") Integer sortType,
+                                       @RequestParam("sortType") Integer sortType,
                                        @RequestParam("order") Integer order) {
         try {
             return paperSearchService.searchPapers(condition, keyword, size, offset, sortType, order);
@@ -88,7 +92,9 @@ public class PaperSearchController {
 
     /**
      * 高级检索
-     * @param conditions 条件：logic(none=0/and=1/or=2/not=3), condition, keyword（传 name 或者 %name%）
+     * @param logic none=0/and=1/or=2/not=3
+     * @param condition
+     * @param keyword（传 name 或者 %name%）
      * @param size 一页多少条内容
      * @param offset 第几页
      * @param sortType 根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
@@ -96,13 +102,15 @@ public class PaperSearchController {
      * @return SearchResultPaper
      */
     @GetMapping("get/advanced")
-    public CustomResponse advancedSearchPapers(@RequestParam("conditions") List<Map<String, String>> conditions,
+    public CustomResponse advancedSearchPapers(@RequestParam("logic") List<Integer> logic,
+                                               @RequestParam("condition") List<String> condition,
+                                               @RequestParam("keyword") List<String> keyword,
                                                @RequestParam("size") Integer size,
                                                @RequestParam("offset") Integer offset,
-                                               @RequestParam("type") Integer sortType,
+                                               @RequestParam("sortType") Integer sortType,
                                                @RequestParam("order") Integer order) {
         try {
-            return paperSearchService.advancedSearchPapers(conditions, size, offset, sortType, order);
+            return paperSearchService.advancedSearchPapers(logic, condition, keyword, size, offset, sortType, order);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

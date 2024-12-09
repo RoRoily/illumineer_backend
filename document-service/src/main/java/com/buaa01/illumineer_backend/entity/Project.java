@@ -24,7 +24,7 @@ public class Project {
     /** 关键词 */
     private List<String> keywords;
     /** 内容摘要 */
-    private String essAbs;
+    private String essabs;
     /** 发布时间 */
     private Date publishDate;
     /** 收藏次数 */

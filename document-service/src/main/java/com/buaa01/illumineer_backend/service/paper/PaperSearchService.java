@@ -13,5 +13,5 @@ public interface PaperSearchService {
 
     CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType, Integer order);
 
-    CustomResponse advancedSearchPapers(List<Map<String, String>> conditions, Integer size, Integer offset, Integer sortType, Integer order);
+    CustomResponse advancedSearchPapers(List<Integer> logic, List<String> condition, List<String> keyword, Integer size, Integer offset, Integer sortType, Integer order);
 }
