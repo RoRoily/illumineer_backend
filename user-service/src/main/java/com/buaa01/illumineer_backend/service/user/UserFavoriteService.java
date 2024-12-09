@@ -6,7 +6,7 @@ public interface UserFavoriteService {
     /**
      * 新建一个收藏夹
      */
-    public CustomResponse createFav();
+    public CustomResponse createFav(String favName);
 
     /**
      * 将文章收藏至收藏夹

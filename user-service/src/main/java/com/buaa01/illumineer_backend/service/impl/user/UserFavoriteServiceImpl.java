@@ -34,14 +34,17 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * 创建一个收藏夹
      */
     @Override
-    public CustomResponse createFav() {
+    public CustomResponse createFav(String favName) {
         CustomResponse customResponse = new CustomResponse();
         Integer userID = currentUser.getUserId();
         Integer fID = fidnumInstance.addFidnum();
         String favKey = "uForFav:" + userID;
+        if (favName == null) {
+            favName = "收藏夹" + fID;
+        }
 
         redisTool.storeZSetByTime(favKey, fID);
-        favoriteMapper.insert(new Favorite(fID, userID, 1, "默认收藏夹", 0, 0));
+        favoriteMapper.insert(new Favorite(fID, userID, 1, favName, 0, 0));
 
         customResponse.setCode(200);
         customResponse.setMessage("新建收藏夹成功");
