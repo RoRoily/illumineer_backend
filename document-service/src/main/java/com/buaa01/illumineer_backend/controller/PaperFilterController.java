@@ -6,6 +6,7 @@ import com.buaa01.illumineer_backend.utils.FilterCondition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -22,19 +23,29 @@ public class PaperFilterController {
      * 模糊->限定
      *
      * @param Map<String, ArrayList<String>> 筛选条件
+     * @param size        一页的条数
+     * @param offset      第几页
+     * @param sortType    根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order       0=降序，1=升序
      * 
      * @return CustomResponse对象
      */
 
     @PostMapping("get/filter")
-    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition) {
+    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition,
+            @RequestParam("size") Integer size,
+            @RequestParam("offset") Integer offset,
+            @RequestParam("type") Integer sortType,
+            @RequestParam("order") Integer order) {
 
         FilterCondition sc = new FilterCondition(filtercondition);
+
+        CustomResponse customResponse = new CustomResponse();
         try {
-            return filterService.filterSearchResult(sc);
+            customResponse.setData(filterService.filterSearchResult(sc, size, offset, sortType, order));
+            return customResponse;
         } catch (Exception e) {
             e.printStackTrace();
-            CustomResponse customResponse = new CustomResponse();
             customResponse.setCode(500);
             customResponse.setMessage("筛选过程出现错误！");
             return customResponse;

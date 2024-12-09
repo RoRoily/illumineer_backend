@@ -7,7 +7,9 @@ import com.buaa01.illumineer_backend.utils.FilterCondition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,8 +19,10 @@ public class PaperFilterServiceImpl implements PaperFilterService {
     private PaperSearchServiceImpl paperSearchServiceImpl;
 
     @Override
-    public CustomResponse filterSearchResult(FilterCondition sc) {
-        List<SearchResultPaper> papers = paperSearchServiceImpl.getFromRedis();
+    public List<SearchResultPaper> filterSearchResult(FilterCondition sc, Integer size, Integer offset, Integer sortType,
+            Integer order) {
+        List<SearchResultPaper> papers = paperSearchServiceImpl.searchByOrder(paperSearchServiceImpl.getFromRedis(),
+                sortType, order);
 
         List<SearchResultPaper> filteredPapers = papers.stream()
                 .filter(paper -> (sc.getYear().isEmpty()
@@ -27,8 +31,8 @@ public class PaperFilterServiceImpl implements PaperFilterService {
                         (sc.getTheme().isEmpty() || sc.getTheme().contains(paper.getTheme())))
                 .collect(Collectors.toList());
 
-        CustomResponse customResponse = new CustomResponse();
-        customResponse.setData(filteredPapers);
-        return customResponse;
+        List<SearchResultPaper> sortedPapers = paperSearchServiceImpl.searchByPage(filteredPapers, size, offset);
+
+        return sortedPapers;
     }
 }
