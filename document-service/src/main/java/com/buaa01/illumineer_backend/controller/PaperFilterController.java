@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,24 +31,31 @@ public class PaperFilterController {
      * @param sortType    根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
      * @param order       0=降序，1=升序
      * 
-     * @return List<SearchResultPaper>对象
+     * @return Map<String, Object> 筛选结果,其中resultPapers为文章，total为筛选结果的总数
      */
 
     @PostMapping("get/filter")
-    public List<SearchResultPaper> ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition,
+    public CustomResponse ResultFilter(@RequestBody Map<String, ArrayList<String>> filtercondition,
             @RequestParam("size") Integer size,
             @RequestParam("offset") Integer offset,
             @RequestParam("type") Integer sortType,
             @RequestParam("order") Integer order) {
-
+        CustomResponse customResponse = new CustomResponse();
+        Map<String, Object> returnValues = new HashMap<>();
         FilterCondition sc = new FilterCondition(filtercondition);
 
         try {
-            return filterService.filterSearchResult(sc, size, offset, sortType, order);
+            List<SearchResultPaper> resultPapers = filterService.filterSearchResult(sc, size, offset, sortType,
+                    order);
+            returnValues.put("resultPapers", resultPapers);
+            returnValues.put("total", resultPapers.size());
+            customResponse.setData(returnValues);
+            return customResponse;
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("筛选过程出现错误！");
-            return null;
+            customResponse.setCode(500);
+            customResponse.setMessage("筛选过程出现错误！");
+            return customResponse;
         }
     }
 }
