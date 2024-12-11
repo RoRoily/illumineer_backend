@@ -8,11 +8,6 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface CategoryMapper extends BaseMapper<Category> {
-    @Select("select * from category where name = #{name}")
-    Category getCategoryByName(String name);
-
-    @Insert("insert into category(name) values(#{name})")
-    void insertCategory(String name);
 
     @Select("select * from category where sub_class_id = #{scid} and main_class_id = #{cid}")
     Category getCategoryBy2ID(String scid, String cid);

@@ -28,14 +28,14 @@ import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter{
+public class SecurityConfig{
 
     @Autowired
     private UserDetailsService userDetailsService;
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-    @Override
+    /*@Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
@@ -49,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //                .anyRequest().permitAll() // 放开所有权限
 //                .and()
 //                .logout().permitAll(); // 允许登出
-    }
+    }*/
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
