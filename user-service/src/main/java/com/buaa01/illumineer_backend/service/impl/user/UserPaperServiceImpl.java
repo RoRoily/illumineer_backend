@@ -96,7 +96,7 @@ public class UserPaperServiceImpl implements UserPaperService {
             updateWrapper.setSql("collect = 1");
             updateIntention(uid, pid, 3); // 收藏 +3
             // 进行收藏操作
-            userFavoriteService.addPapertoFav(fid, pid);
+            // userFavoriteService.addPapertoFav(fid, pid);
         } else {
             updateWrapper.setSql("collect = 0");
             // 取消收藏

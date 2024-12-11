@@ -32,9 +32,9 @@ public class UserFavoriteController {
      * 删除收藏夹
      * 
      * @param
-     * @return CustomResponse List<Integer> 收藏夹fid的set,不是list!
+     * @return CustomResponse
      **/
-    @GetMapping("/user/fav/deleteFav")
+    @PostMapping("/user/fav/deleteFav")
     public CustomResponse deleteFav(@RequestParam("fid") Integer fid) {
         return userFavoriteService.deleteFav(fid);
     }
@@ -45,7 +45,7 @@ public class UserFavoriteController {
      * @param fid 收藏夹id newName 新的收藏夹名称
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/changeName")
+    @PutMapping("/user/fav/changeName")
     public CustomResponse changeFavName(@RequestParam("fid") Integer fid, @RequestParam("name") String name) {
         return userFavoriteService.changeFavName(fid, name);
     }
@@ -57,8 +57,8 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
     @PostMapping("/user/fav/add")
-    public CustomResponse addPapertoFav(@RequestParam("pid") Integer pid, @RequestParam("fid") Integer fid) {
-        return userFavoriteService.addPapertoFav(pid, fid);
+    public CustomResponse addPapertoFav(@RequestParam("pid") Long pid, @RequestParam("fid") Integer fid) {
+        return userFavoriteService.addPapertoFav(fid, pid);
     }
 
     /**
@@ -68,8 +68,8 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
     @PostMapping("/user/fav/remove")
-    public CustomResponse removePaperfromFav(@RequestParam("pid") Integer pid, @RequestParam("fid") Integer fid) {
-        return userFavoriteService.removePaperfromFav(pid, fid);
+    public CustomResponse removePaperfromFav(@RequestParam("pid") Long pid, @RequestParam("fid") Integer fid) {
+        return userFavoriteService.removePaperfromFav(fid, pid);
     }
 
     /**
@@ -90,7 +90,7 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
     @PostMapping("/user/fav/Batch")
-    public CustomResponse ProcessFavBatch(@RequestParam("pid") Integer pid, @RequestParam("fids") List<Integer> fids) {
+    public CustomResponse ProcessFavBatch(@RequestParam("pid") Long pid, @RequestParam("fids") List<Integer> fids) {
         return userFavoriteService.ProcessFavBatch(pid, fids);
     }
 }

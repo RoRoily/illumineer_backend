@@ -32,23 +32,32 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     private FavoriteMapper favoriteMapper;
 
     /**
-     * 创建一个收藏夹
+     * 创建一收藏夹
+     * 
+     * @return 返回一新的收藏夹id
      */
     @Override
     public CustomResponse createFav(String favName) {
         CustomResponse customResponse = new CustomResponse();
-        Integer userID = currentUser.getUserId();
-        Integer fID = fidnumInstance.addFidnum();
-        String favKey = "uForFav:" + userID;
-        if (favName == null) {
-            favName = "收藏夹" + fID;
+
+        try {
+            Integer userID = currentUser.getUserId();
+            Integer fID = fidnumInstance.addFidnum();
+            String favKey = "uForFav:" + userID;
+            if (favName == null) {
+                favName = "收藏夹" + fID;
+            }
+
+            redisTool.storeZSetByTime(favKey, fID);
+            favoriteMapper.insert(new Favorite(fID, userID, 1, favName, 0, 0));
+            customResponse.setMessage("新建收藏夹成功");
+            customResponse.setData(fID);
+        } catch (Exception e) {
+            e.printStackTrace();
+            customResponse.setCode(500);
+            customResponse.setMessage("新建收藏夹失败");
         }
 
-        redisTool.storeZSetByTime(favKey, fID);
-        favoriteMapper.insert(new Favorite(fID, userID, 1, favName, 0, 0));
-
-        customResponse.setCode(200);
-        customResponse.setMessage("新建收藏夹成功");
         return customResponse;
     }
 
@@ -95,7 +104,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * @param fid 收藏夹id
      */
     @Override
-    public CustomResponse addPapertoFav(Integer pid, Integer fid) {
+    public CustomResponse addPapertoFav(Integer fid, Long pid) {
         CustomResponse customResponse = new CustomResponse();
         // fid不存在
         String fidKey = "fid:" + fid;
@@ -122,7 +131,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * 在收藏夹中移除文章
      **/
     @Override
-    public CustomResponse removePaperfromFav(Integer pid, Integer fid) {
+    public CustomResponse removePaperfromFav(Integer fid, Long pid) {
         CustomResponse customResponse = new CustomResponse();
         // fid不存在
         String fidKey = "fid:" + fid;
@@ -193,7 +202,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     }
 
     @Override
-    public CustomResponse ProcessFavBatch(Integer pid, List<Integer> fids) {
+    public CustomResponse ProcessFavBatch(Long pid, List<Integer> fids) {
         CustomResponse customResponse = new CustomResponse();
 
         try {
@@ -202,11 +211,11 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
             needDelete.removeAll(fids);
 
             for (Integer fid : needDelete) { // remove
-                removePaperfromFav(pid, fid);
+                removePaperfromFav(fid, pid);
             }
 
             for (Integer fid : fids) { // add
-                addPapertoFav(pid, fid);
+                addPapertoFav(fid, pid);
             }
             customResponse.setMessage("对单文献批量操作收藏夹成功");
         } catch (Exception e) {

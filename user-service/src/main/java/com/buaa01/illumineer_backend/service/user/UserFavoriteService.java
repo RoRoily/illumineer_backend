@@ -37,7 +37,7 @@ public interface UserFavoriteService {
      * @param pid
      * @return
      */
-    public CustomResponse addPapertoFav(Integer fid, Integer pid);
+    public CustomResponse addPapertoFav(Integer fid, Long pid);
 
     /**
      * 在收藏夹中移除文章
@@ -46,7 +46,7 @@ public interface UserFavoriteService {
      * @param fid
      * @return
      */
-    public CustomResponse removePaperfromFav(Integer pid, Integer fid);
+    public CustomResponse removePaperfromFav(Integer fid, Long pid);
 
     /**
      * 查找用户的所有收藏夹,返回所有收藏夹名、收藏夹id、收藏夹内文件夹数量于
@@ -61,5 +61,5 @@ public interface UserFavoriteService {
      * @param fids bilibili式框选，若选中则返回对应收藏夹id，若未选中则不返回
      * @return
      */
-    public CustomResponse ProcessFavBatch(Integer pid, List<Integer> fids);
+    public CustomResponse ProcessFavBatch(Long pid, List<Integer> fids);
 }
