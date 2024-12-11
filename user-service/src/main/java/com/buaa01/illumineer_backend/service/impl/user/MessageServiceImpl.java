@@ -1,31 +1,24 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
-import com.buaa01.illumineer_backend.mapper.MessageMapper;
 import com.buaa01.illumineer_backend.entity.Message;
+import com.buaa01.illumineer_backend.mapper.MessageMapper;
 import com.buaa01.illumineer_backend.service.MessageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
-
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.stereotype.Service;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
 public class MessageServiceImpl implements MessageService {

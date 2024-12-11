@@ -8,13 +8,13 @@ services:
       - 'MYSQL_USER=myuser'
     ports:
       - '3306'
-  rabbitmq:
-    image: 'rabbitmq:latest'
-    environment:
-      - 'RABBITMQ_DEFAULT_PASS=secret'
-      - 'RABBITMQ_DEFAULT_USER=myuser'
-    ports:
-      - '5672'
+  #rabbitmq:
+    #image: 'rabbitmq:latest'
+    #environment:
+      #- 'RABBITMQ_DEFAULT_PASS=secret'
+      #- 'RABBITMQ_DEFAULT_USER=myuser'
+    #ports:
+      #- '5672'
   redis:
     image: 'redis:latest'
     ports:
