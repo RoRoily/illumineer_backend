@@ -24,4 +24,4 @@ spring:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG  # 调试级别日志输出
+    org.springframework.cloud.gateway: INFO  # 调试级别日志输出
