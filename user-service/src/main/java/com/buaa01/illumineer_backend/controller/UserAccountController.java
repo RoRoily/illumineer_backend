@@ -20,8 +20,9 @@ public class UserAccountController {
      * @return CustomResponse对象
      */
 
-    @PostMapping("user/account/register")
+    @PostMapping("/user/account/register")
     public CustomResponse register(@RequestBody Map<String,String> map){
+        System.out.println("进入registerController");
         String email = map.get("email");
         String username = map.get("username");
         String password = map.get("password");

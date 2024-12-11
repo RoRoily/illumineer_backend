@@ -1,17 +1,17 @@
 spring:
+  host: 115.120.239.233
   application:
     name: gateway-service
   cloud:
     nacos:
-      username: nacos
-      password: nacos
       config:
-        server-addr: http://localhost:8848 #nacos中心地址
+        server-addr: http://${spring.host}:8848 #nacos中心地址
         file-extension: yaml # 配置文件格式
         namespace: public
+        group: DEFAULT_GROUP
       discovery:
-        ip: 127.0.0.1
-        server-addr: 127.0.0.1:8848  # Nacos 服务器地址
+        ip: ${spring.host}
+        server-addr: ${spring.host}:8848  # Nacos 服务器地址
     gateway:
       discovery:
         locator:
