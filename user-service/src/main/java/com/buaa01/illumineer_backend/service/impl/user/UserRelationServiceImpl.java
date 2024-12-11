@@ -35,7 +35,10 @@ public class UserRelationServiceImpl implements UserRelationService {
     @Override
     public CustomResponse updateRelationByUid(Integer uid){
         QueryWrapper<UserRelation> wrapper = new QueryWrapper<>();
-        UserRelation userRelation = userRelationMapper.selectOne(wrapper.eq("uid", uid));
+        UserRelation userRelation = redisTool.getObjectByClass("user_relation:"+uid, UserRelation.class);
+        if(userRelation == null){
+            userRelation = userRelationMapper.selectOne(wrapper.eq("uid", uid));
+        }
         CustomResponse customResponse = new CustomResponse();
         Map<Integer,Integer> relationNet = new HashMap<>();
         User user = userService.getUserByUId(uid);
@@ -64,6 +67,8 @@ public class UserRelationServiceImpl implements UserRelationService {
                 }
             }
         }
+        userRelationMapper.updateById(userRelation);
+        redisTool.setObjectValue("user_relation:" + uid,userRelation);
         customResponse.setMessage("更新该用户的关系网络成功！");
 
         return customResponse;
