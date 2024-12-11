@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class UserFavoriteController {
@@ -28,25 +29,68 @@ public class UserFavoriteController {
     }
 
     /**
-     * 更新用户的收藏夹
+     * 删除收藏夹
+     * 
+     * @param
+     * @return CustomResponse List<Integer> 收藏夹fid的set,不是list!
+     **/
+    @GetMapping("/user/fav/deleteFav")
+    public CustomResponse deleteFav(@RequestParam("fid") Integer fid) {
+        return userFavoriteService.deleteFav(fid);
+    }
+
+    /**
+     * 修改收藏夹名称
+     *
+     * @param fid 收藏夹id newName 新的收藏夹名称
+     * @return CustomResponse
+     **/
+    @PostMapping("/user/fav/changeName")
+    public CustomResponse changeFavName(@RequestParam("fid") Integer fid, @RequestParam("name") String name) {
+        return userFavoriteService.changeFavName(fid, name);
+    }
+
+    /**
+     * 更新用户的收藏夹（新增收藏）
      * 
      * @param pid 文章的id fid 收藏夹的id
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/update")
-    public CustomResponse updateFav(@RequestParam("pid") Integer pid, @RequestParam("fid") Integer fid) {
-        return userFavoriteService.updateFav(pid, fid);
+    @PostMapping("/user/fav/add")
+    public CustomResponse addPapertoFav(@RequestParam("pid") Integer pid, @RequestParam("fid") Integer fid) {
+        return userFavoriteService.addPapertoFav(pid, fid);
+    }
+
+    /**
+     * 更新用户的收藏夹（移除收藏）
+     * 
+     * @param pid 文章的id fid 收藏夹的id
+     * @return CustomResponse
+     **/
+    @PostMapping("/user/fav/remove")
+    public CustomResponse removePaperfromFav(@RequestParam("pid") Integer pid, @RequestParam("fid") Integer fid) {
+        return userFavoriteService.removePaperfromFav(pid, fid);
     }
 
     /**
      * 查找用户的所有收藏夹
      * 
      * @param
-     * @return CustomResponse List<Integer> 收藏夹fid的set,不是list!
+     * @return CustomResponse
      **/
     @GetMapping("/user/fav/searchAll")
     public CustomResponse searchAll() {
         return userFavoriteService.searchAll();
     }
 
+    /**
+     * 批量操作收藏夹
+     *
+     * @param pid 文章id fids 收藏夹id的集合
+     * @return CustomResponse
+     **/
+    @PostMapping("/user/fav/Batch")
+    public CustomResponse ProcessFavBatch(@RequestParam("pid") Integer pid, @RequestParam("fids") List<Integer> fids) {
+        return userFavoriteService.ProcessFavBatch(pid, fids);
+    }
 }

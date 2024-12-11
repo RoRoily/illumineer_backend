@@ -1,27 +1,65 @@
 package com.buaa01.illumineer_backend.service.user;
 
+import java.util.List;
+
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 
 public interface UserFavoriteService {
     /**
-     * 新建一个收藏夹
+     * 创建一个收藏夹
+     * 
+     * @param favName
+     * @return
      */
     public CustomResponse createFav(String favName);
 
     /**
-     * 将文章收藏至收藏夹
-     **/
-    public CustomResponse updateFav(Integer fid, Integer pid);
+     * 删除对应收藏夹
+     * 
+     * @param fid
+     * @return
+     */
+    public CustomResponse deleteFav(Integer fid);
+
+    /**
+     * 修改收藏夹名称
+     * 
+     * @param fid
+     * @param newName
+     * @return
+     */
+    public CustomResponse changeFavName(Integer fid, String newName);
+
+    /**
+     * 在收藏夹中添加文章
+     * 
+     * @param fid
+     * @param pid
+     * @return
+     */
+    public CustomResponse addPapertoFav(Integer fid, Integer pid);
 
     /**
      * 在收藏夹中移除文章
-     *
-     **/
-    public CustomResponse updateFav_Remove(Integer pid, Integer fid);
+     * 
+     * @param pid
+     * @param fid
+     * @return
+     */
+    public CustomResponse removePaperfromFav(Integer pid, Integer fid);
 
     /**
-     * 查找用户的所有文件夹
+     * 查找用户的所有收藏夹,返回所有收藏夹名、收藏夹id、收藏夹内文件夹数量于
      *
      **/
     public CustomResponse searchAll();
+
+    /**
+     * 用以在文献页面直接对该文献进行批量收藏取消收藏操作
+     * 
+     * @param pid  文献id
+     * @param fids bilibili式框选，若选中则返回对应收藏夹id，若未选中则不返回
+     * @return
+     */
+    public CustomResponse ProcessFavBatch(Integer pid, List<Integer> fids);
 }

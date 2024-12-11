@@ -1,4 +1,5 @@
 package com.buaa01.illumineer_backend.service.impl.user;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -38,8 +39,8 @@ public class UserPaperServiceImpl implements UserPaperService {
     @Autowired
     private UserFavoriteService userFavoriteService;
 
-//    @Autowired
-//    private DocumentServiceClient documentServiceClient;
+    // @Autowired
+    // private DocumentServiceClient documentServiceClient;
 
     @Autowired
     private RedisTool redisTool;
@@ -50,8 +51,9 @@ public class UserPaperServiceImpl implements UserPaperService {
 
     /**
      * 更新访问次数以及最近访问时间，顺便返回记录信息，没有记录则创建新记录
-     * @param uid   用户ID
-     * @param pid   文章ID
+     * 
+     * @param uid 用户ID
+     * @param pid 文章ID
      * @return 更新后的数据信息
      */
     @Override
@@ -63,7 +65,7 @@ public class UserPaperServiceImpl implements UserPaperService {
             // 记录不存在，创建新记录
             userPaper = new User2Paper(null, uid, pid, 0, new Date());
             userPaperMapper.insert(userPaper);
-            //修改权重
+            // 修改权重
             updateIntention(uid, pid, 1); // 浏览 +1
         } else {
             userPaper.setAcessDate(new Date());
@@ -72,7 +74,7 @@ public class UserPaperServiceImpl implements UserPaperService {
         String hisKey = "uForHis" + uid;
         // 异步线程更新video表和redis
         CompletableFuture.runAsync(() -> {
-            redisTool.addSetMember(hisKey,pid);
+            redisTool.addSetMember(hisKey, pid);
             paperServiceClient.updatePaperStatus(pid, "play", true, 1);
         }, taskExecutor);
         return userPaper;
@@ -80,23 +82,24 @@ public class UserPaperServiceImpl implements UserPaperService {
 
     /**
      * 收藏或取消收藏
-     * @param uid   用户ID
-     * @param pid   文章ID
+     * 
+     * @param uid       用户ID
+     * @param pid       文章ID
      * @param isCollect 是否收藏 true收藏 false取消
-     * @return  返回更新后的信息
+     * @return 返回更新后的信息
      */
     @Override
-    public void collectOrCancel(Integer uid, Integer pid, boolean isCollect,Integer fid) {
+    public void collectOrCancel(Integer uid, Integer pid, boolean isCollect, Integer fid) {
         UpdateWrapper<User2Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("uid", uid).eq("pid", pid);
         if (isCollect) {
             updateWrapper.setSql("collect = 1");
             updateIntention(uid, pid, 3); // 收藏 +3
-            //进行收藏操作
-            userFavoriteService.updateFav(fid,pid);
+            // 进行收藏操作
+            userFavoriteService.addPapertoFav(fid, pid);
         } else {
             updateWrapper.setSql("collect = 0");
-            //取消收藏
+            // 取消收藏
         }
         CompletableFuture.runAsync(() -> {
             paperServiceClient.updatePaperStatus(pid, "collect", isCollect, 1);
@@ -135,7 +138,7 @@ public class UserPaperServiceImpl implements UserPaperService {
         // Paper paper = null;
         // QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
         // paperQueryWrapper.eq("pid", pid);
-        //paper = paperMapper.selectOne(paperQueryWrapper);
+        // paper = paperMapper.selectOne(paperQueryWrapper);
         return paperServiceClient.getPaperById(pid);
     }
 
