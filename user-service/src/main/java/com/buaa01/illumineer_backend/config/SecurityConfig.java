@@ -1,6 +1,8 @@
 package com.buaa01.illumineer_backend.config;
+import com.buaa01.illumineer_backend.config.filter.JwtAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +20,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Objects;
 
@@ -28,6 +32,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired
     private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -78,5 +84,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                 return authentication.equals(UsernamePasswordAuthenticationToken.class);
             }
         };
+    }
+
+    /**
+     * 请求接口过滤器，验证是否开放接口，如果不是开放接口请求头又没带 Authorization 属性会被直接拦截
+     * @param http
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                // 基于 token，不需要 csrf
+                .csrf().disable()
+                // 基于 token，不需要 session
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                // 下面开始设置权限
+                .authorizeRequests(authorize -> authorize
+                        // 请求放开接口
+                        .antMatchers("/druid/**","/favicon.ico",
+                                "/**"
+                        ).permitAll()
+                        // 允许HTTP OPTIONS请求
+                        .antMatchers(HttpMethod.OPTIONS).permitAll()
+                        // 其他地址的访问均需验证权限
+                        .anyRequest().authenticated()
+                )
+                // 添加 JWT 过滤器，JWT 过滤器在用户名密码认证过滤器之前
+                .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 }
