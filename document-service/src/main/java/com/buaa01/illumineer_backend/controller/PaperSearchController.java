@@ -102,9 +102,9 @@ public class PaperSearchController {
      * @return SearchResultPaper
      */
     @GetMapping("get/advanced")
-    public CustomResponse advancedSearchPapers(@RequestParam("logic") List<Integer> logic,
-                                               @RequestParam("condition") List<String> condition,
-                                               @RequestParam("keyword") List<String> keyword,
+    public CustomResponse advancedSearchPapers(@RequestParam("logic") String logic,
+                                               @RequestParam("condition") String condition,
+                                               @RequestParam("keyword") String keyword,
                                                @RequestParam("size") Integer size,
                                                @RequestParam("offset") Integer offset,
                                                @RequestParam("sortType") Integer sortType,
