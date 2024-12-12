@@ -118,8 +118,8 @@ public class UserAccountServiceImpl implements UserAccountService {
         }
         //判断账号是否已存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        queryWrapper.ne("state", 2);
+        queryWrapper.eq("nick_name", username);
+        queryWrapper.ne("stats", 2);
         User user = userMapper.selectOne(queryWrapper);   //查询数据库里值等于username并且没有注销的数据
         if (user != null) {
             customResponse.setCode(403);

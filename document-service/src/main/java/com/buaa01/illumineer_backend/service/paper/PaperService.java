@@ -15,6 +15,7 @@ import java.util.Map;
 public interface PaperService {
     /**
      * 根据 pid 返回引用量
+     *
      * @param pid 文章 id
      * @return 引用量
      */
@@ -22,25 +23,29 @@ public interface PaperService {
 
     /**
      * 根据 pid 增加引用量
+     *
      * @param pid 文章 id
      */
     CustomResponse addRefTimes(Long pid);
 
     /**
      * 根据 pid 增加收藏量
+     *
      * @param pid 文章 id
      */
     CustomResponse addFavTimes(Long pid);
 
     /**
      * 根据 pid 上传新的文章
-     * @param paper 文章
+     *
+     * @param paper   文章
      * @param content 文章内容（文件）
      */
     CustomResponse uploadPaper(Paper paper, MultipartFile content);
 
     /**
      * 修改文章信息
+     *
      * @param
      * @return
      */
@@ -57,5 +62,14 @@ public interface PaperService {
                                String derivation,
                                List<Long> refs,
                                Integer categoryId);
+
+    /**
+     * 查找用户收藏夹内所有文献
+     *
+     * @param fid 收藏夹id
+     * @return CustomResponse
+     */
+
+    CustomResponse getPaperByFid(Integer fid);
 
 }

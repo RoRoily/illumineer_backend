@@ -120,6 +120,7 @@ public class PaperServiceImpl implements PaperService {
 
     /**
      * 修改文章信息
+     *
      * @param
      * @return
      */
@@ -163,6 +164,33 @@ public class PaperServiceImpl implements PaperService {
         paperMapper.update(null, updateWrapper);
 
         customResponse.setMessage("文章更新成功！");
+        return customResponse;
+    }
+    /**
+     * 查找用户收藏夹内所有文献
+     *
+     * @param fid 收藏夹id
+     * @return CustomResponse
+     */
+
+    public CustomResponse getPaperByFid(Integer fid) {
+        CustomResponse customResponse = new CustomResponse();
+        String fidKey = "fid:" + fid;
+        List<Map<String, Object>> papers = new ArrayList<>();
+        Map<String, Object> paper;
+        if (!redisTool.isExist(fidKey)) {
+            customResponse.setCode(500);
+            customResponse.setMessage("该收藏夹不存在");
+        } else {
+            Set<Object> paperSet = redisTool.zRange(fidKey, 0, -1);
+            for (Object paperId : paperSet) {
+                paper = paperMapper.getPaperByPid(Long.valueOf(paperId.toString()));
+                papers.add(paper);
+            }
+            customResponse.setCode(200);
+            customResponse.setMessage("获取成功");
+            customResponse.setData(papers);
+        }
         return customResponse;
     }
 }

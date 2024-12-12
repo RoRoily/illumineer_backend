@@ -30,7 +30,7 @@ public class UserFavoriteController {
 
     /**
      * 删除收藏夹
-     * 
+     *
      * @param
      * @return CustomResponse
      **/
@@ -52,7 +52,7 @@ public class UserFavoriteController {
 
     /**
      * 更新用户的收藏夹（新增收藏）
-     * 
+     *
      * @param pid 文章的id fid 收藏夹的id
      * @return CustomResponse
      **/
@@ -63,7 +63,7 @@ public class UserFavoriteController {
 
     /**
      * 更新用户的收藏夹（移除收藏）
-     * 
+     *
      * @param pid 文章的id fid 收藏夹的id
      * @return CustomResponse
      **/
@@ -74,7 +74,7 @@ public class UserFavoriteController {
 
     /**
      * 查找用户的所有收藏夹
-     * 
+     *
      * @param
      * @return CustomResponse
      **/
@@ -92,5 +92,17 @@ public class UserFavoriteController {
     @PostMapping("/user/fav/Batch")
     public CustomResponse ProcessFavBatch(@RequestParam("pid") Long pid, @RequestParam("fids") List<Integer> fids) {
         return userFavoriteService.ProcessFavBatch(pid, fids);
+    }
+
+    /**
+     * 查找收藏夹中的文章
+     *
+     * @param fid 收藏夹id
+     * @return CustomResponse
+     **/
+
+    @PostMapping("/user/fav/papers")
+    public CustomResponse getPapersByFid(@RequestParam("fid") Integer fid) {
+        return userFavoriteService.getPapersByFid(fid);
     }
 }

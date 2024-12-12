@@ -30,9 +30,9 @@ public interface PaperServiceClient {
 
     @PostMapping("/paper/updateStatus")
     CustomResponse updatePaperStatus(@RequestParam("pid") Integer pid,
-                                                                          @RequestParam("statusType") String statusType,
-                                                                          @RequestParam("increment") Boolean increment,
-                                                                          @RequestParam("count") Integer count);
+                                     @RequestParam("statusType") String statusType,
+                                     @RequestParam("increment") Boolean increment,
+                                     @RequestParam("count") Integer count);
 
     @GetMapping("/paper/subList")
     List<PaperAdo> getPaperAdoByList(List subList);
@@ -42,4 +42,7 @@ public interface PaperServiceClient {
 
     @GetMapping("/paper/propider/sentinel/test/{message}")
     public String propiderSentinelTest(@PathVariable("message") String message);
+
+    @GetMapping("/paper/getByFid/{fid}")
+    CustomResponse getPaperByFid(@PathVariable("fid") Integer fid);
 }

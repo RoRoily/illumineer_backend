@@ -2,6 +2,7 @@ package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
@@ -9,6 +10,7 @@ import com.buaa01.illumineer_backend.service.paper.PaperService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 来自document-service模块，向user-service提供被需求服务
- *
- *
  **/
 @Service
 @RestController
@@ -35,7 +35,7 @@ public class ClientController {
 
     /***
      * 根据文章列表返回对应文章列表
-     * 
+     *
      * @param pids 文章id列表
      **/
     @PostMapping("/ado/subList")
@@ -57,7 +57,7 @@ public class ClientController {
      * @param total 总数
      * **/
     @GetMapping("/ado/category")
-    public CustomResponse getPaperAdoptionsByName(@RequestParam("category") Category category, @RequestParam("total") Integer total){
+    public CustomResponse getPaperAdoptionsByName(@RequestParam("category") Category category, @RequestParam("total") Integer total) {
         CustomResponse customResponse = new CustomResponse();
         try {
             customResponse.setData(paperAdoptionService.getPaperAdoptionsByCategory(category, total));
@@ -67,6 +67,18 @@ public class ClientController {
             customResponse.setMessage("无法获取认领条目列表！");
         }
         return customResponse;
+    }
+
+    /**
+     * 查找用户收藏夹内所有文献
+     *
+     * @param fid 收藏夹id
+     * @return CustomResponse
+     */
+
+    @GetMapping("/paper/getByFid/{fid}")
+    public CustomResponse getPaperByFid(@PathVariable("fid") Integer fid) {
+        return paperService.getPaperByFid(fid);
     }
 
     // @PostMapping("/document/adoption")

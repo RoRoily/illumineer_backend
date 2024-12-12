@@ -4,6 +4,7 @@ import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Favorite;
 import com.buaa01.illumineer_backend.entity.singleton.FidnumSingleton;
 import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
+import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 import com.buaa01.illumineer_backend.service.user.UserFavoriteService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
@@ -31,9 +32,12 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     @Autowired
     private FavoriteMapper favoriteMapper;
 
+    @Autowired
+    private PaperServiceClient paperServiceClient;
+
     /**
      * 创建一收藏夹
-     * 
+     *
      * @return 返回一新的收藏夹id
      */
     @Override
@@ -99,7 +103,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 
     /**
      * 收藏一篇文章
-     * 
+     *
      * @param pid 文章id
      * @param fid 收藏夹id
      */
@@ -158,7 +162,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     /**
      * 查找用户的所有文件夹
      * 默认为登录的用户
-     * 
+     *
      * @return 返回对应用户所有收藏夹的title，count字段以及其中pid的集合(set<Object>)
      **/
     @Override
@@ -229,7 +233,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 
     /**
      * 获取用户所有收藏夹fid
-     * 
+     *
      * @return 返回List<Integer>方便操作
      * @throws Exception
      */
@@ -241,6 +245,17 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 .map(obj -> (Integer) obj)
                 .collect(Collectors.toCollection(ArrayList::new));
         return fids_List;
+    }
+
+    /**
+     * 查找用户收藏夹内所有文献
+     *
+     * @param fid 收藏夹id
+     * @return CustomResponse
+     */
+
+    public CustomResponse getPapersByFid(Integer fid) {
+        return paperServiceClient.getPaperByFid(fid);
     }
 
 }
