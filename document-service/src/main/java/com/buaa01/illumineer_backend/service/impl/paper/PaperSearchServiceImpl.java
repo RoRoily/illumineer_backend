@@ -241,7 +241,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                     date,
                     paper.get("derivation").toString(),
                     Integer.parseInt(paper.get("ref_times").toString()),
-                    Integer.parseInt(paper.get("fav_time").toString()));
+                    Integer.parseInt(paper.get("fav_time").toString()),
+                    paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
 
