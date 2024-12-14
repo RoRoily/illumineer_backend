@@ -150,9 +150,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     /**
      * 高级检索
      * 
-     * @param logic none=0/and=1/or=2/not=3
-     * @param condition
-     * @param keyword（传 name 或者 %name%）
+     * @param logic_str none=0/and=1/or=2/not=3
+     * @param condition_str
+     * @param keyword_str（传 name 或者 %name%）
      * @param size       一页多少条内容
      * @param offset     第几页
      * @param sortType   根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
@@ -160,21 +160,25 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @return SearchResultPaper
      */
     @Override
-    public CustomResponse advancedSearchPapers(List<Integer> logic, List<String> condition, List<String> keyword, Integer size, Integer offset,
+    public CustomResponse advancedSearchPapers(String logic_str, String condition_str, String keyword_str, Integer size, Integer offset,
             Integer sortType, Integer order) {
         Set<Long> paper1 = new HashSet<>();
         Set<Long> paper2 = new HashSet<>();
 
-        int n = condition.size();
+        String[] condition = condition_str.split(",");
+        String[] logic = logic_str.split(",");
+        String[] keyword = keyword_str.split(",");
+
+        int n = condition.length;
         for (int i=0; i<n; i++) {
             // 对该查询条件进行查询
             QueryWrapper<Paper> queryWrapper = Wrappers.query();
-            if (logic.get(i) == 3 || logic.get(i) < 0) { // NOT
+            if (Integer.parseInt(logic[i].strip()) == 3 || Integer.parseInt(logic[i].strip()) < 0) { // NOT
                 queryWrapper.eq("stats", 0);
-                queryWrapper.notLike(condition.get(i), keyword.get(i));
+                queryWrapper.notLike(condition[i].strip(), keyword[i].strip());
             } else {
                 queryWrapper.eq("stats", 0);
-                queryWrapper.like(condition.get(i), keyword.get(i));
+                queryWrapper.like(condition[i].strip(), keyword[i].strip());
             }
             List<Paper> papers = paperMapper.selectList(queryWrapper);
             if (paper1.isEmpty()) {
@@ -191,9 +195,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             }
 
             // 进行集合运算
-            if (logic.get(i) == 1) { // AND
+            if (Integer.parseInt(logic[i].strip()) == 1) { // AND
                 paper1.retainAll(paper2);
-            } else if (logic.get(i) == 2) { // OR
+            } else if (Integer.parseInt(logic[i].strip()) == 2) { // OR
                 paper1.addAll(paper2);
             }
             paper2.clear();
@@ -241,7 +245,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                     date,
                     paper.get("derivation").toString(),
                     Integer.parseInt(paper.get("ref_times").toString()),
-                    Integer.parseInt(paper.get("fav_time").toString()));
+                    Integer.parseInt(paper.get("fav_time").toString()),
+                    paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
 

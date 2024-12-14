@@ -35,14 +35,14 @@ public class SearchResultPaper {
     private Integer refTimes;
     /** 收藏次数 */
     private Integer favTime;
+    /** 文章链接 */
+     private String contentUrl;
 
     // ————————以下字段不需要缓存—————————————
     /** 内容摘要 */
     // private String essAbs;
     /** 引用文献 */
     // private List<Integer> refs;
-    /** 文章链接 */
-    // private String contentUrl;
     /** 状态: 0 正常 1 已删除 2 审核中 */
     // private Integer stats;
 
