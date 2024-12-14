@@ -1,4 +1,5 @@
 package com.buaa01.illumineer_backend.config;
+
 import com.buaa01.illumineer_backend.config.filter.JwtAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -28,7 +29,7 @@ import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig{
+public class SecurityConfig {
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -57,6 +58,7 @@ public class SecurityConfig{
 
     /**
      * 用户名和密码验证
+     *
      * @return Authentication对象
      */
     @Bean
@@ -88,6 +90,7 @@ public class SecurityConfig{
 
     /**
      * 请求接口过滤器，验证是否开放接口，如果不是开放接口请求头又没带 Authorization 属性会被直接拦截
+     *
      * @param http
      * @return
      * @throws Exception
@@ -102,7 +105,7 @@ public class SecurityConfig{
                 // 下面开始设置权限
                 .authorizeRequests(authorize -> authorize
                         // 请求放开接口
-                        .antMatchers("/druid/**","/favicon.ico",
+                        .antMatchers("/druid/**", "/favicon.ico",
                                 "/**"
                         ).permitAll()
                         // 允许HTTP OPTIONS请求

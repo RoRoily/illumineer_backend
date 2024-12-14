@@ -22,7 +22,6 @@ public class UserAccountController {
 
     @PostMapping("/user/account/register")
     public CustomResponse register(@RequestBody Map<String,String> map){
-        System.out.println("进入registerController");
         String email = map.get("email");
         String username = map.get("username");
         String password = map.get("password");
@@ -46,7 +45,7 @@ public class UserAccountController {
      * */
     @PostMapping("/user/account/login")
     public CustomResponse login(@RequestBody Map<String,String> map){
-        String email = map.get("email");
+        String email = map.get("username");
         String password = map.get("password");
         return userAccountService.login(email,password);
     }
