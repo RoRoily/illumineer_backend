@@ -111,7 +111,7 @@ public class PaperServiceImpl implements PaperService {
         paper.setContentUrl(contentUrl);
 
         // 存入数据库
-        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), "{ \"keywords\": " + paper.getKeywords().toString() + "}", paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
+        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
 //        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
@@ -158,7 +158,7 @@ public class PaperServiceImpl implements PaperService {
 
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '{\"keywords\":" + keywords.toString() + "}', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
+        updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
 
         paperMapper.update(null, updateWrapper);
 
