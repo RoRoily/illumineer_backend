@@ -205,6 +205,13 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         return customResponse;
     }
 
+    /**
+     * 对单文献进行批量收藏
+     * 
+     * @param pid  文献id
+     * @param fids 收藏夹id 选中的是需要进行收藏的
+     * 
+     */
     @Override
     public CustomResponse ProcessFavBatch(Long pid, List<Integer> fids) {
         CustomResponse customResponse = new CustomResponse();
@@ -226,6 +233,38 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
             e.printStackTrace();
             customResponse.setCode(500);
             customResponse.setMessage("对单文献批量操作收藏夹时出现错误！");
+        }
+
+        return customResponse;
+    }
+
+    /**
+     * 查看单文献在所有收藏夹的fid
+     * 
+     * @param pid
+     * @return
+     */
+    @Override
+    public CustomResponse ReturnPidinAllUserFavs(Long pid) {
+        CustomResponse customResponse = new CustomResponse();
+
+        try {
+            List<Integer> userFids = getUserFids();
+            List<Integer> retFids = new ArrayList<>();
+
+            for (Integer fid : userFids) {
+                String fidKey = "fid:" + fid;
+                if (!redisTool.isExistInZSet(fidKey, pid)) {
+                    retFids.add(fid);
+                }
+            }
+
+            customResponse.setData(retFids);
+            customResponse.setMessage("获取单文献在所有收藏夹的fid成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            customResponse.setCode(500);
+            customResponse.setMessage("获取单文献在所有收藏夹的fid失败");
         }
 
         return customResponse;
