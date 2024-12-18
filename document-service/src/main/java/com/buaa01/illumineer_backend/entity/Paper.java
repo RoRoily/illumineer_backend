@@ -19,7 +19,7 @@ public class Paper {
     /** 文章主题 */
     private String theme;
     /** 内容摘要 */
-    private String essabs;
+    private String essAbs;
     /** 关键词 */
     private List<String> keywords;
     /** 文章作者 */
@@ -31,9 +31,9 @@ public class Paper {
     /** 发布时间 */
     private Date publishDate;
     /** 相关领域 */
-    private String field;
+    private String category;
     /** 收藏次数 */
-    private Integer favTime;
+    private Integer favTimes;
     /** 被引用次数 */
     private Integer refTimes;
     /** 引用文献 */
@@ -42,6 +42,4 @@ public class Paper {
     private String contentUrl;
     /** 状态: 0 正常 1 已删除 2 审核中 */
     private Integer stats;
-    /** 类别的id*/
-    private Integer CategoryId;
 }

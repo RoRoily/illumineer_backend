@@ -63,6 +63,14 @@ public interface UserFavoriteService {
     public CustomResponse ProcessFavBatch(Long pid, List<Integer> fids);
 
     /**
+     * 查看单文献在所有收藏夹的fid
+     *
+     * @param pid
+     * @return CustomResponse
+     **/
+    public CustomResponse ReturnPidsinAllUserFavs(Long pid);
+
+    /**
      * 查找用户收藏夹内所有文献
      *
      * @param fid 收藏夹id
