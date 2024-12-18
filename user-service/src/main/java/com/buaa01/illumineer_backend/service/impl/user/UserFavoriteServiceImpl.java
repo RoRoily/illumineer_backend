@@ -249,19 +249,30 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         CustomResponse customResponse = new CustomResponse();
 
         try {
+            Map<String, Object> data = new HashMap<>();
+
+            // 用户所有收藏夹fid
             List<Integer> userFids = getUserFids();
+
+            // 收藏夹信息
+            Map<String, Object> favsInfos = new HashMap<>();
             List<Integer> retFids = new ArrayList<>();
-            Map<String, List<Integer>> data = new HashMap<>();
+            List<String> favNames = new ArrayList<>();
 
             for (Integer fid : userFids) {
                 String fidKey = "fid:" + fid;
                 if (!redisTool.isExistInZSet(fidKey, pid)) {
                     retFids.add(fid);
                 }
+                favNames.add(favoriteMapper.selectById(fid).getTitle());
             }
 
-            data.put("All favs user have", userFids);
+            favsInfos.put("All fids", userFids);
+            favsInfos.put("All fav name", favNames);
+
+            data.put("All favs user have", favsInfos);
             data.put("All favs which have pid in user's favs", retFids);
+
             customResponse.setData(data);
             customResponse.setMessage("获取单文献在所有收藏夹的fid成功");
         } catch (Exception e) {
