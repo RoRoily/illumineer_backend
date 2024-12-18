@@ -33,6 +33,8 @@ spring:
             - Path=/document/**
           filters:
             - StripPrefix=1
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Vary, RETAIN_UNIQUE
       # 处理跨域请求
       globalcors:
         corsConfigurations:
