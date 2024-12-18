@@ -111,7 +111,7 @@ public class PaperServiceImpl implements PaperService {
         paper.setContentUrl(contentUrl);
 
         // 存入数据库
-        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssabs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString(), paper.getField(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTime(), paper.getRefTimes(), paper.getStats(), paper.getCategoryId());
+        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString(), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
 //        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
