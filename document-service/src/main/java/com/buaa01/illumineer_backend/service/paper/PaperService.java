@@ -60,8 +60,7 @@ public interface PaperService {
                                String theme,
                                String publishDate,
                                String derivation,
-                               List<Long> refs,
-                               Integer categoryId);
+                               List<Long> refs);
 
     /**
      * 查找用户收藏夹内所有文献

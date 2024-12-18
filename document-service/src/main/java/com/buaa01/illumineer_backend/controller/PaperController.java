@@ -150,8 +150,7 @@ public class PaperController {
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") String publishDate,
                                       @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Long> refs,
-                                      @RequestParam("categoryId") Integer categoryId) {
+                                      @RequestParam("refs") List<Long> refs) {
         // auths
         Map<String, Integer> authsMap = new HashMap<>();
         for (String auth: auths) {
@@ -166,7 +165,7 @@ public class PaperController {
         }
 
         try {
-            return paperService.updatePaper(pid, title, essAbs, keywords, content, authsMap, field, type, theme, publishDate, derivation, refs, categoryId);
+            return paperService.updatePaper(pid, title, essAbs, keywords, content, authsMap, field, type, theme, publishDate, derivation, refs);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();
