@@ -251,6 +251,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         try {
             List<Integer> userFids = getUserFids();
             List<Integer> retFids = new ArrayList<>();
+            Map<String, List<Integer>> data = new HashMap<>();
 
             for (Integer fid : userFids) {
                 String fidKey = "fid:" + fid;
@@ -259,7 +260,9 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 }
             }
 
-            customResponse.setData(retFids);
+            data.put("All favs user have", userFids);
+            data.put("All favs which have pid in user's favs", retFids);
+            customResponse.setData(data);
             customResponse.setMessage("获取单文献在所有收藏夹的fid成功");
         } catch (Exception e) {
             e.printStackTrace();
