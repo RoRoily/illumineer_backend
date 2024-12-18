@@ -86,7 +86,6 @@ public class PaperController {
      * @param publishDate
      * @param derivation
      * @param refs
-     * @param categoryId
      * @return
      */
     @PostMapping("/upload")
@@ -100,8 +99,7 @@ public class PaperController {
                                       @RequestParam("theme") String theme,
                                       @RequestParam("publishDate") String publishDate,
                                       @RequestParam("derivation") String derivation,
-                                      @RequestParam("refs") List<Long> refs,
-                                      @RequestParam("categoryId") Integer categoryId) {
+                                      @RequestParam("refs") List<Long> refs) {
         // auths
         Map<String, Integer> authsMap = new HashMap<>();
         for (String auth: auths) {
@@ -115,7 +113,7 @@ public class PaperController {
             keywords.set(i, keyword);
         }
         Date date = Date.from(LocalDateTime.parse(publishDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault()).toInstant());
-        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, date, field, 0, 0, refs, null, 0, categoryId);
+        Paper paper = new Paper(null, title, theme, essAbs, keywords, authsMap, derivation, type, date, field, 0, 0, refs, null, 0);
         try {
             return paperService.uploadPaper(paper, content);
         } catch (Exception e) {
