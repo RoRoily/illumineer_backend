@@ -245,7 +245,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * @return
      */
     @Override
-    public CustomResponse ReturnPidinAllUserFavs(Long pid) {
+    public CustomResponse ReturnPidsinAllUserFavs(Long pid) {
         CustomResponse customResponse = new CustomResponse();
 
         try {

@@ -68,7 +68,7 @@ public interface UserFavoriteService {
      * @param pid
      * @return CustomResponse
      **/
-    public CustomResponse ReturnPidinAllUserFavs(Long pid);
+    public CustomResponse ReturnPidsinAllUserFavs(Long pid);
 
     /**
      * 查找用户收藏夹内所有文献

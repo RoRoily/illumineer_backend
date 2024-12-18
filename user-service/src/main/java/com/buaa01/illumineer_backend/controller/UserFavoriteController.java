@@ -100,9 +100,9 @@ public class UserFavoriteController {
      * @param pid
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/Batch")
-    public CustomResponse ReturnPidinAllUserFavs(@RequestParam("pid") Long pid) {
-        return userFavoriteService.ReturnPidinAllUserFavs(pid);
+    @GetMapping("/user/fav/pidinUserFav")
+    public CustomResponse ReturnPidsinAllUserFavs(@RequestParam("pid") Long pid) {
+        return userFavoriteService.ReturnPidsinAllUserFavs(pid);
     }
 
     /**
