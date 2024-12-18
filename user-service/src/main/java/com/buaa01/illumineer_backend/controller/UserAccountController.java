@@ -20,7 +20,7 @@ public class UserAccountController {
      * @return CustomResponse对象
      */
 
-    @PostMapping("/user/account/register")
+    @PostMapping("/account/register")
     public CustomResponse register(@RequestBody Map<String,String> map){
         String email = map.get("email");
         String username = map.get("username");
@@ -43,7 +43,7 @@ public class UserAccountController {
      * @param map 包含email password  的map
      * @return CustomResponse对象
      * */
-    @PostMapping("/user/account/login")
+    @PostMapping("/account/login")
     public CustomResponse login(@RequestBody Map<String,String> map){
         String email = map.get("username");
         String password = map.get("password");

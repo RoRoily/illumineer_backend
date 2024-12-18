@@ -19,18 +19,33 @@ spring:
           lower-case-service-id: true
       routes:
         - id: user-service
-          uri: lb://user-service  # 使用负载均衡的服务发现机制
+          #uri: lb://user-service  # 使用负载均衡的服务发现机制
+          uri: http://localhost:8091
           predicates:
             - Path=/user/**      # 匹配以 /users 开头的请求路径
           filters:
             - StripPrefix=1       # 移除路径前缀 /users
 
         - id: document-service
-          uri: lb://document-service
+          #uri: lb://document-service
+          uri: http://localhost:8092
           predicates:
             - Path=/document/**
           filters:
             - StripPrefix=1
+      # 处理跨域请求
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedHeaders: "*"
+            allowedOriginPatterns: "*"  # 使用 allowedOriginPatterns 代替 allowedOrigins
+            allowCredentials: true
+            allowedMethods:
+              - GET
+              - POST
+              - DELETE
+              - PUT
+              - OPTION
 
   profiles:
     active: dev # 环境标识
