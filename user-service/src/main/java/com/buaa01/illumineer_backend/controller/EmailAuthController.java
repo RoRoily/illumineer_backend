@@ -71,14 +71,14 @@ public class EmailAuthController {
 
         // 3. 发送认证邮件
         try {
-            emailService.sendVerificationEmail(email, token, verificationUrl);
+            emailService.sendVerificationEmail(email, token, verificationUrl,verifyUid);
             customResponse.setCode(200);
             customResponse.setMessage("Email send,please check ^_^");
             customResponse.setData(token);
             return customResponse;
         } catch (MessagingException e) {
             customResponse.setMessage("send failed");
-            customResponse.setCode(200);
+            customResponse.setCode(500);
             return customResponse;
         }
     }
