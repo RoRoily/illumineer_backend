@@ -95,11 +95,16 @@ public class EmailAuthController {
         if(verifyUid==null){
             customResponse.setCode(500);
             customResponse.setMessage("Invalid Token");
+            return customResponse;
         }
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         userQueryWrapper.eq("uid",verifyUid);
         User user = userMapper.selectOne(userQueryWrapper);
-
+        if(user == null){
+            customResponse.setCode(500);
+            customResponse.setMessage("Invalid User");
+            return customResponse;
+        }
         user.setIsVerify(true);
         user.setInstitution(verifiedInstitution.getName());
         // 2. 更新用户认证状态
@@ -107,7 +112,6 @@ public class EmailAuthController {
         customResponse.setCode(200);
         customResponse.setMessage("Email Verified");
         return customResponse;
-
     }
 }
 
