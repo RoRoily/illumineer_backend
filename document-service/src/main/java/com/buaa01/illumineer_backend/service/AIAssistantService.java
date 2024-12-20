@@ -45,10 +45,10 @@ public class AIAssistantService {
     public void OpenAiSessionFactory() {
         // 1. 配置文件
         Configuration configuration = new Configuration();
-        configuration.setAppId(appId);
+        configuration.setAppId("c3263c59");
         configuration.setApiHost("https://spark-api.xf-yun.com/");
-        configuration.setApiSecret(apiKey);
-        configuration.setApiKey(apiSecret);
+        configuration.setApiSecret("YTYyZTQ3NTI0MmRiODZjZDljMmY1NzZi");
+        configuration.setApiKey("9388b96655dc10c634a1b49751c3e950");
         // 2. 会话工厂
         OpenAiSessionFactory factory = new DefaultOpenAiSessionFactory(configuration);
         // 3. 开启会话
@@ -61,11 +61,9 @@ public class AIAssistantService {
                 .header(RequestDTO.HeaderDTO.builder().appId("c3263c59").uid("c3263c59").build())
                 .parameter(RequestDTO.ParameterDTO.builder().chat(RequestDTO.ParameterDTO.ChatDTO.builder().domain("4.0Ultra").maxTokens(2048).temperature(0.5F).build()).build())
                 .payload(RequestDTO.PayloadDTO.builder().message(RequestDTO.PayloadDTO.MessageDTO.builder()
-                                .text(Collections
-                                        .singletonList(MsgDTO.builder().role("user").content(question).index(1).build())
-                                ).build()
-                        ).build()
-                ).build();
+                    .text(Collections
+                            .singletonList(MsgDTO.builder().role("user").content(question).index(1).build())
+                    ).build()).build()).build();
     }
 
     /**
@@ -102,16 +100,20 @@ public class AIAssistantService {
                 // 检查是否是最后一条消息，如果是，则关闭WebSocket
                 if (responseData.getHeader().getStatus() == 2) {
                     webSocket.close(1000, "Complete");
+                    latch.countDown();
                 }
             }
 
             @Override
             public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, Response response) {
                 super.onFailure(webSocket, t, response);
+                System.out.println("error");
+                latch.countDown();
             }
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 super.onClosed(webSocket, code, reason);
+                System.out.println("closed");
                 latch.countDown();
             }
         });
@@ -120,77 +122,3 @@ public class AIAssistantService {
         return allResponse.get();
     }
 }
-//
-//package com.buaa01.illumineer_backend.service;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.http.*;
-//import org.springframework.stereotype.Service;
-//import org.springframework.util.LinkedMultiValueMap;
-//import org.springframework.util.MultiValueMap;
-//import org.springframework.web.client.RestTemplate;
-//
-//import java.util.Collections;
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//@Service
-//public class AIAssistantService {
-//
-//    private final RestTemplate restTemplate;
-//    private final String appId;
-//    private final String apiKey;
-//    private final String apiSecret;
-//
-//    @Autowired
-//    public AIAssistantService(RestTemplate restTemplate,
-//                              @Value("${ai-assistant.appId}") String appId,
-//                              @Value("${ai-assistant.apiKey}") String apiKey,
-//                              @Value("${ai-assistant.apiSecret}") String apiSecret) {
-//        this.restTemplate = restTemplate;
-//        this.appId = appId;
-//        this.apiKey = apiKey;
-//        this.apiSecret = apiSecret;
-//    }
-//
-//    public String generateKeywords(String userQuery) {
-//        // 构建请求头
-//        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-//        headers.add("Content-Type", "application/json");
-//        headers.add("Authorization", "api_key=" + apiKey + ":" + apiSecret);
-//
-//        // 构建请求体
-//        Map<String, Object> payload = new HashMap<>();
-//        payload.put("header", Collections.singletonMap("app_id", appId));
-//        Map<String, Object> parameter = new HashMap<>();
-//        parameter.put("domain", "generalv3");
-//        parameter.put("temperature", 0.5);
-//        parameter.put("max_tokens", 4096);
-//        payload.put("parameter", Collections.singletonMap("chat", parameter));
-//        Map<String, String> message = new HashMap<>();
-//        message.put("role", "user");
-//        message.put("content", userQuery);
-//        payload.put("payload", Collections.singletonMap("message", Collections.singletonMap("text", message)));
-//
-//        // 发送请求
-//        String url = "https://api.xfyun.cn/v1/service/v1/ai_model/spark_4_0_ultra";
-//        HttpHeaders httpHeaders = new HttpHeaders(headers);
-//        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, httpHeaders);
-//        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-//
-//        // 解析响应数据
-//        if (response.getStatusCode() == HttpStatus.OK) {
-//            // 提取AI生成的关键词
-//            return parseKeywordsFromResponse(response.getBody());
-//        } else {
-//            return "Error: " + response.getStatusCode();
-//        }
-//    }
-//
-//    private String parseKeywordsFromResponse(String responseBody) {
-//        // 解析JSON结构
-//        return "parsed_keywords";
-//    }
-//}
