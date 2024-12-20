@@ -281,7 +281,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         Map<String, Integer> themes = new LinkedHashMap<>();
 
         for (SearchResultPaper paper : papers) {
-            System.out.println(paper.getPublishDate());
             String year;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             if (paper.getPublishDate().toString().contains(" ")) {
@@ -290,7 +289,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 year = years.get(paper.getPublishDate().getYear()).toString();
             }
             // year
-            System.out.println(year);
             if (years.get(year) == null) {
                 years.put(year, 1);
             } else {
