@@ -231,17 +231,17 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
             SearchResultPaper searchResultPaper = new SearchResultPaper(
                     Long.parseLong(paper.get("pid").toString()),
-                    paper.get("title").toString(),
+                    paper.get("title")==null?"":paper.get("title").toString(),
                     paper.get("keywords")==null?"":paper.get("keywords").toString(),
                     paper.get("auths")==null?"":paper.get("auths").toString(),
-                    paper.get("category").toString(),
-                    paper.get("type").toString(),
-                    paper.get("theme").toString(),
+                    paper.get("category")==null?"":paper.get("category").toString(),
+                    paper.get("type")==null?"":paper.get("type").toString(),
+                    paper.get("theme")==null?"":paper.get("theme").toString(),
                     date,
-                    paper.get("derivation").toString(),
+                    paper.get("derivation")==null?"":paper.get("derivation").toString(),
                     Integer.parseInt(paper.get("ref_times").toString()),
                     Integer.parseInt(paper.get("fav_times").toString()),
-                    paper.get("content_url").toString());
+                    paper.get("content_url")==null?"":paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
 
