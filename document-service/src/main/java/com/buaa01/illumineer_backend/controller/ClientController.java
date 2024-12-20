@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -86,6 +87,7 @@ public class ClientController {
         return paperService.getPaperByFid(fid);
     }
 
+
     @GetMapping("/paper/getCategory")
     List<String> getCategory(@RequestParam List<String> ids) throws JsonProcessingException {
         List<String> result = new ArrayList<>();
@@ -94,6 +96,22 @@ public class ClientController {
         return result;
     }
 
+
+    /**
+     * 修改文章的所有者情况
+     *
+     * @param Pid
+     * @param name
+     * @param uid
+     * @return
+     */
+    @PostMapping("/paper/modiftAuth")
+    CustomResponse modifyAuth(@RequestParam("pid")Long Pid,
+                              @RequestParam("name")String name,
+                              @RequestParam("uid")Integer uid
+    ){
+        return paperService.modifyAuth(Pid,name,uid);
+    }
     // @PostMapping("/document/adoption")
     // CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name){
     // CustomResponse customResponse = new CustomResponse();

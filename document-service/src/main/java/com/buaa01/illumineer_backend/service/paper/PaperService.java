@@ -71,4 +71,13 @@ public interface PaperService {
 
     CustomResponse getPaperByFid(Integer fid);
 
+    /**
+     * 修改文章的归属情况
+     * @param pid
+     * @param name
+     * @param uid
+     * @return
+     */
+    CustomResponse modifyAuth(Long pid,String name,Integer uid);
+
 }

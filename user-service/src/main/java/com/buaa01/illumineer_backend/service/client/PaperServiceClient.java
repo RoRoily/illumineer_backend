@@ -46,6 +46,13 @@ public interface PaperServiceClient {
     @GetMapping("/paper/getByFid/{fid}")
     CustomResponse getPaperByFid(@PathVariable("fid") Integer fid);
 
+    @PostMapping("/paper/modiftAuth")
+    CustomResponse modifyAuth(@RequestParam("pid")Long Pid,
+                              @RequestParam("name")String name,
+                              @RequestParam("uid")Integer uid
+    );
+
     @GetMapping("/paper/getCategory")
     List<String> getCategory(@RequestParam List<String> ids);
 }
+

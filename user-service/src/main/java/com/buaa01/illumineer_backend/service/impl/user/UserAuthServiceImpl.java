@@ -22,8 +22,8 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     /**
      * 按照无序集合查询
-     * 同时维护两个set
-     * paperBelonged : 拥有改文章的作者的uid集合
+     * 同时维护两个set1
+     * paperBelonged : 拥有该文章的作者的uid集合
      * property : 某个作者拥有文章的pid集合
      * **/
     @Override
