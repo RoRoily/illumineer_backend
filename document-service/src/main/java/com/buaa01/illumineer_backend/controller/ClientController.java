@@ -5,6 +5,7 @@ import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.service.CategoryService;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,9 @@ public class ClientController {
 
     @Autowired
     private PaperAdoptionService paperAdoptionService;
+
+    @Autowired
+    private CategoryService categoryService;
 
     /***
      * 根据文章列表返回对应文章列表
@@ -79,6 +84,14 @@ public class ClientController {
     @GetMapping("/paper/getByFid/{fid}")
     public CustomResponse getPaperByFid(@PathVariable("fid") Integer fid) {
         return paperService.getPaperByFid(fid);
+    }
+
+    @GetMapping("/paper/getCategory")
+    List<String> getCategory(@RequestParam List<String> ids) throws JsonProcessingException {
+        List<String> result = new ArrayList<>();
+        for (String id : ids)
+            result.add(categoryService.getCategoryByID(id).toJsonString());
+        return result;
     }
 
     // @PostMapping("/document/adoption")

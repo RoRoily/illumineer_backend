@@ -45,4 +45,7 @@ public interface PaperServiceClient {
 
     @GetMapping("/paper/getByFid/{fid}")
     CustomResponse getPaperByFid(@PathVariable("fid") Integer fid);
+
+    @GetMapping("/paper/getCategory")
+    List<String> getCategory(@RequestParam List<String> ids);
 }

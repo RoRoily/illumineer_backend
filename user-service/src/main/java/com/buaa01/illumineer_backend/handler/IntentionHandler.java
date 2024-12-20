@@ -10,7 +10,7 @@ import org.apache.ibatis.type.JdbcType;
 import java.sql.*;
 import java.util.Map;
 
-public class CategoryTypeHandler extends BaseTypeHandler<Map<Category, Integer>> {
+public class IntentionHandler extends BaseTypeHandler<Map<Category, Integer>> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

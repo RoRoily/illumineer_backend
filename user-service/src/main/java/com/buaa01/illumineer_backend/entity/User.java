@@ -2,7 +2,9 @@ package com.buaa01.illumineer_backend.entity;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.buaa01.illumineer_backend.handler.IntentionHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +29,7 @@ public class User {
     private Integer status; // 0为管理员,1~9为不同权限的用户
     private Boolean isVerify; //是否已实名认证
     private Integer stats; // 0 正常 1 封禁 2 已注销
+    @TableField(typeHandler = IntentionHandler.class)
     private Map<Category,Integer> intention;
     //实际个人的相关信息
     private String name;

@@ -5,6 +5,8 @@ import com.buaa01.illumineer_backend.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 public class UserController {
     @Autowired
@@ -58,15 +60,15 @@ public class UserController {
     }
 
     /**
-     * 更新用户简历信息
+     * 更新用户信息
      *
-     * @param description 新的用户简历信息
+     * @param map 新的用户信息
      * @return 更新结果
      */
 
-    @PutMapping("/user/personal/updateResume")
-    public CustomResponse updateUserResume(@RequestBody String description) {
-        int num = userService.updateUserResume(description);
+    @PutMapping("/user/personal/updateInfo")
+    public CustomResponse updateUserResume(@RequestBody Map<String, Object> map) {
+        int num = userService.updateUserInfo(map);
         if (num == 1)
             return new CustomResponse(200, "OK", null);
         else
@@ -111,6 +113,7 @@ public class UserController {
         }
         return customResponse;
     }
+
     /**
      * 管理员解封用户
      *

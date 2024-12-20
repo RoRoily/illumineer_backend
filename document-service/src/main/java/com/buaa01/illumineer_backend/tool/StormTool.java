@@ -240,7 +240,7 @@ public class StormTool {
             if (matcher.find()) {
                 fieldNumber = matcher.group(1);
             }
-            Category rs = categoryService.getCategoryByID(subfieldNumber, fieldNumber);
+            Category rs = categoryService.getCategoryByID(subfieldNumber);
             if (rs == null) {
                 rs = categoryService.insertCategory(subfieldNumber, fieldNumber, subfield, field);
             }
