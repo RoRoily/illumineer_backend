@@ -29,7 +29,7 @@ public interface PaperMapper extends BaseMapper<Paper> {
     @Select("select * from paper where #{condStr}")
     List<Paper> getAdvancedSearchPapers(String condStr);
 
-    @Insert("insert into paper(pid,title,keywords,content_url,auths,field,type,theme,publish_date,derivation,ref_times,fav_time,refs,stats,essabs,category_id) values(#{pid},#{title},#{keywords},#{contentUrl},#{auths},#{field},#{type},#{theme},#{publishDate},#{derivation},#{refTimes},#{favTimes},#{refs},#{stats},#{essabs},#{categoryId})")
+    @Insert("insert into paper(pid,title,keywords,content_url,auths,category,type,theme,publish_date,derivation,ref_times,fav_times,refs,stats,ess_abs) values(#{pid},#{title},#{keywords},#{contentUrl},#{auths},#{field},#{type},#{theme},#{publishDate},#{derivation},#{refTimes},#{favTimes},#{refs},#{stats},#{essabs})")
     void insertPaper(Long pid,
                      String title,
                      String essabs,
@@ -44,6 +44,5 @@ public interface PaperMapper extends BaseMapper<Paper> {
                      String refs,
                      Integer refTimes,
                      Integer favTimes,
-                     Integer stats,
-                     Integer categoryId);
+                     Integer stats);
 }

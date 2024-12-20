@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.mapper.UserPaperMapper;
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
@@ -51,7 +52,7 @@ public class UserPaperServiceImpl implements UserPaperService {
 
     /**
      * 更新访问次数以及最近访问时间，顺便返回记录信息，没有记录则创建新记录
-     * 
+     *
      * @param uid 用户ID
      * @param pid 文章ID
      * @return 更新后的数据信息
@@ -82,7 +83,7 @@ public class UserPaperServiceImpl implements UserPaperService {
 
     /**
      * 收藏或取消收藏
-     * 
+     *
      * @param uid       用户ID
      * @param pid       文章ID
      * @param isCollect 是否收藏 true收藏 false取消
@@ -115,7 +116,7 @@ public class UserPaperServiceImpl implements UserPaperService {
         // 获取最新的weight
         Map<Category, Integer> intention = user.getIntention();
         for (Category category : intention.keySet()) {
-            if (Objects.equals(category.getCid(), cid)) {
+            if (Objects.equals(Integer.parseInt(category.getSubClassId()), cid)) {
                 Integer weight = intention.get(category);
                 intention.put(category, weight + addWeight);
                 break;

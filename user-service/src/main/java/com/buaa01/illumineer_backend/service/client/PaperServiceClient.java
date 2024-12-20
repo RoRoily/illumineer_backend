@@ -4,7 +4,6 @@ import com.buaa01.illumineer_backend.config.FeignConfig;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,4 +51,8 @@ public interface PaperServiceClient {
                               @RequestParam("name")String name,
                               @RequestParam("uid")Integer uid
     );
+
+    @GetMapping("/paper/getCategory")
+    List<String> getCategory(@RequestParam List<String> ids);
 }
+

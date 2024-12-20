@@ -38,7 +38,6 @@ public class PaperServiceImpl implements PaperService {
     public CustomResponse getRefTimes(Long pid) {
         CustomResponse customResponse = new CustomResponse();
         Map<String, Object> paper = paperMapper.getPaperByPid(pid);
-        System.out.println(paper);
 
         Map<String, Integer> result = new HashMap<>();
         result.put("ref_times", Integer.parseInt(paper.get("ref_times").toString()));
@@ -72,7 +71,7 @@ public class PaperServiceImpl implements PaperService {
         CustomResponse customResponse = new CustomResponse();
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("fav_time = fav_time + 1");
+        updateWrapper.setSql("fav_times = fav_times + 1");
 
         paperMapper.update(null, updateWrapper);
 
@@ -111,7 +110,7 @@ public class PaperServiceImpl implements PaperService {
         paper.setContentUrl(contentUrl);
 
         // 存入数据库
-        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssabs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString(), paper.getField(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTime(), paper.getRefTimes(), paper.getStats(), paper.getCategoryId());
+        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
 //        esTool.addPaper(paperMapper);
 
         customResponse.setMessage("文章上传成功！");
@@ -135,8 +134,7 @@ public class PaperServiceImpl implements PaperService {
                                       String theme,
                                       String publishDate,
                                       String derivation,
-                                      List<Long> refs,
-                                      Integer categoryId) {
+                                      List<Long> refs) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -159,7 +157,7 @@ public class PaperServiceImpl implements PaperService {
 
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = '" + title + "', essabs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', field = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "', category_id = '" + categoryId + "'");
+        updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
 
         paperMapper.update(null, updateWrapper);
 

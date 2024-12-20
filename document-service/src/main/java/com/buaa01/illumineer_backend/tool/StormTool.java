@@ -174,9 +174,9 @@ public class StormTool {
             article.setTitle("");
         JsonElement abstractIndex = jsonObject.get("abstract_inverted_index");
         if (abstractIndex != null && abstractIndex.isJsonObject()) {
-            article.setEssabs(montage(abstractIndex.toString()));
+            article.setEssAbs(montage(abstractIndex.toString()));
         } else {
-            article.setEssabs(""); // 或者设为某个默认值
+            article.setEssAbs(""); // 或者设为某个默认值
         }
         JsonElement keywordsElement = jsonObject.get("keywords");
         List<String> keywordList = new ArrayList<>();
@@ -226,7 +226,7 @@ public class StormTool {
             String field = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("display_name").getAsString();
             String subfieldId = topicElement.getAsJsonObject().get("subfield").getAsJsonObject().get("id").getAsString();
             String fieldId = topicElement.getAsJsonObject().get("field").getAsJsonObject().get("id").getAsString();
-            article.setCategoryId(Integer.parseInt(fieldId));
+//            article.setCategoryId(Integer.parseInt(fieldId));
             // 定义正则表达式：提取 URL 中最后的数字
             Pattern pattern = Pattern.compile("(\\d+)$");
             Matcher matcher = pattern.matcher(subfieldId.trim());
@@ -240,11 +240,11 @@ public class StormTool {
             if (matcher.find()) {
                 fieldNumber = matcher.group(1);
             }
-            Category rs = categoryService.getCategoryByID(subfieldNumber, fieldNumber);
+            Category rs = categoryService.getCategoryByID(subfieldNumber);
             if (rs == null) {
                 rs = categoryService.insertCategory(subfieldNumber, fieldNumber, subfield, field);
             }
-            article.setField(rs.toJsonString());
+            article.setCategory(rs.toJsonString());
         }
         String date = jsonObject.get("publication_date").getAsString();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -279,7 +279,7 @@ public class StormTool {
             referenceList.add(id);
         }
         article.setRefs(referenceList);
-        article.setFavTime(0);
+        article.setFavTimes(0);
         article.setStats(0);
         JsonElement typeElement = jsonObject.get("type");
         if (typeElement != null && !typeElement.isJsonNull()) {

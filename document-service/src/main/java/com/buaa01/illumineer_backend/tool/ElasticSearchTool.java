@@ -48,13 +48,13 @@ public class ElasticSearchTool {
                     paper.getPid(),
                     paper.getTitle(),
                     paper.getAuths(),
-                    paper.getField(),
+                    paper.getCategory(),
                     paper.getType(),
                     paper.getTheme(),
                     paper.getPublishDate(),
                     paper.getDerivation(),
                     paper.getRefTimes(),
-                    paper.getFavTime(),
+                    paper.getFavTimes(),
                     paper.getStats());
             elasticsearchClient.index(
                     i -> i.index("paper").id(esPaper.getPid().toString()).document(esPaper));
@@ -81,13 +81,13 @@ public class ElasticSearchTool {
                     paper.getPid(),
                     paper.getTitle(),
                     paper.getAuths(),
-                    paper.getField(),
+                    paper.getCategory(),
                     paper.getType(),
                     paper.getTheme(),
                     paper.getPublishDate(),
                     paper.getDerivation(),
                     paper.getRefTimes(),
-                    paper.getFavTime(),
+                    paper.getFavTimes(),
                     paper.getStats());
             elasticsearchClient.update(i->i.index("paper").id(paper.getPid().toString()).doc(esPaper),ElasticSearchPaper.class);
         }catch (IOException e){

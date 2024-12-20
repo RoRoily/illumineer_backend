@@ -95,6 +95,17 @@ public class UserFavoriteController {
     }
 
     /**
+     * 查看单文献在所有收藏夹的fid
+     *
+     * @param pid
+     * @return CustomResponse
+     **/
+    @GetMapping("/user/fav/pidinUserFav")
+    public CustomResponse ReturnPidsinAllUserFavs(@RequestParam("pid") Long pid) {
+        return userFavoriteService.ReturnPidsinAllUserFavs(pid);
+    }
+
+    /**
      * 查找收藏夹中的文章
      *
      * @param fid 收藏夹id

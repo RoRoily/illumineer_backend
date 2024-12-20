@@ -2,6 +2,7 @@ package com.buaa01.illumineer_backend.service.user;
 
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 import com.buaa01.illumineer_backend.entity.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.Map;
 
@@ -33,13 +34,13 @@ public interface UserService {
     Map<String, Object> getUserResume(Integer uid);
 
     /**
-     * 更新用户简历信息
+     * 更新用户信息
      *
-     * @param description 更新信息
+     * @param info 更新信息
      * @return 更新结果
      */
 
-    int updateUserResume(String description);
+    int updateUserInfo(Map<String, Object> info);
 
     /**
      * 用户注销
@@ -55,6 +56,7 @@ public interface UserService {
      * @return 封禁结果
      */
     int disableUser(Integer uid);
+
     /**
      * 解封用户
      *

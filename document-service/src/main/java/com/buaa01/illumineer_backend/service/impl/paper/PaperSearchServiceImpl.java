@@ -5,7 +5,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.alibaba.druid.sql.ast.statement.SQLForeignKeyImpl;
+import co.elastic.clients.elasticsearch.indices.ExistsRequest;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
@@ -13,23 +13,18 @@ import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.mapper.SearchResultPaperMapper;
-import com.buaa01.illumineer_backend.mapper.StormMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.utils.PaperSortScorer;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -236,17 +231,17 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
             SearchResultPaper searchResultPaper = new SearchResultPaper(
                     Long.parseLong(paper.get("pid").toString()),
-                    paper.get("title").toString(),
+                    paper.get("title")==null?"":paper.get("title").toString(),
                     paper.get("keywords")==null?"":paper.get("keywords").toString(),
                     paper.get("auths")==null?"":paper.get("auths").toString(),
-                    paper.get("field").toString(),
-                    paper.get("type").toString(),
-                    paper.get("theme").toString(),
+                    paper.get("category")==null?"":paper.get("category").toString(),
+                    paper.get("type")==null?"":paper.get("type").toString(),
+                    paper.get("theme")==null?"":paper.get("theme").toString(),
                     date,
-                    paper.get("derivation").toString(),
+                    paper.get("derivation")==null?"":paper.get("derivation").toString(),
                     Integer.parseInt(paper.get("ref_times").toString()),
-                    Integer.parseInt(paper.get("fav_time").toString()),
-                    paper.get("content_url").toString());
+                    Integer.parseInt(paper.get("fav_times").toString()),
+                    paper.get("content_url")==null?"":paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
 
@@ -286,7 +281,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         Map<String, Integer> themes = new LinkedHashMap<>();
 
         for (SearchResultPaper paper : papers) {
-            System.out.println(paper.getPublishDate());
             String year;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             if (paper.getPublishDate().toString().contains(" ")) {
@@ -295,29 +289,34 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 year = years.get(paper.getPublishDate().getYear()).toString();
             }
             // year
-            System.out.println(year);
             if (years.get(year) == null) {
                 years.put(year, 1);
             } else {
                 years.put(year, years.get(year) + 1);
             }
             // derivations
-            if (derivations.get(paper.getDerivation()) == null) {
-                derivations.put(paper.getDerivation(), 1);
-            } else {
-                derivations.put(paper.getDerivation(), derivations.get(paper.getDerivation()) + 1);
+            if (!paper.getDerivation().isEmpty()) {
+                if (derivations.get(paper.getDerivation()) == null) {
+                    derivations.put(paper.getDerivation(), 1);
+                } else {
+                    derivations.put(paper.getDerivation(), derivations.get(paper.getDerivation()) + 1);
+                }
             }
             // types
-            if (types.get(paper.getType()) == null) {
-                types.put(paper.getType(), 1);
-            } else {
-                types.put(paper.getType(), types.get(paper.getType()) + 1);
+            if (!paper.getType().isEmpty()) {
+                if (types.get(paper.getType()) == null) {
+                    types.put(paper.getType(), 1);
+                } else {
+                    types.put(paper.getType(), types.get(paper.getType()) + 1);
+                }
             }
             // themes
-            if (themes.get(paper.getTheme()) == null) {
-                themes.put(paper.getTheme(), 1);
-            } else {
-                themes.put(paper.getTheme(), themes.get(paper.getTheme()) + 1);
+            if (!paper.getTheme().isEmpty()) {
+                if (themes.get(paper.getTheme()) == null) {
+                    themes.put(paper.getTheme(), 1);
+                } else {
+                    themes.put(paper.getTheme(), themes.get(paper.getTheme()) + 1);
+                }
             }
         }
 
@@ -336,20 +335,40 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         Map<String, Map<String, Integer>> options = new HashMap<>();
 
         years = new LinkedHashMap<>();
+        int num = 0;
         for (Map.Entry<String, Integer> year: yearsList) {
             years.put(year.getKey(), year.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
         derivations = new LinkedHashMap<>();
+        num = 0;
         for (Map.Entry<String, Integer> derivation: derivationsList) {
             derivations.put(derivation.getKey(), derivation.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
         types = new LinkedHashMap<>();
+        num = 0;
         for (Map.Entry<String, Integer> type: typesList) {
             types.put(type.getKey(), type.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
         themes = new LinkedHashMap<>();
+        num = 0;
         for (Map.Entry<String, Integer> theme: themesList) {
             themes.put(theme.getKey(), theme.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
 
         options.put("years", years);
@@ -368,21 +387,22 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     List<Map<String, Object>> searchByKeyword(String condition, String keyword) {
         List<Paper> list = null;
         try {
-            Query query;
+            if (checkIndexExists("paper")) {
+                Query query;
 
-            // query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
-            query = Query.of(q -> q.bool(b -> {
-                b.must(m -> m.match(ma -> ma.field(condition).query(keyword)));
-                b.must(m -> m.match(ma -> ma.field("stats").query(0)));
-                return b;
-            }));
-
-            SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
-            SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
-            list = new ArrayList<>();
-            for (Hit<Paper> hit : searchResponse.hits().hits()) {
-                if (hit.source() != null) {
-                    list.add(hit.source());
+                // query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
+                query = Query.of(q -> q.bool(b -> {
+                    b.must(m -> m.match(ma -> ma.field(condition).query(keyword)));
+                    b.must(m -> m.match(ma -> ma.field("stats").query(0)));
+                    return b;
+                }));
+                SearchRequest searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
+                SearchResponse<Paper> searchResponse = client.search(searchRequest, Paper.class);
+                list = new ArrayList<>();
+                for (Hit<Paper> hit : searchResponse.hits().hits()) {
+                    if (hit.source() != null) {
+                        list.add(hit.source());
+                    }
                 }
             }
         } catch (IOException e) {
@@ -400,13 +420,13 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 paperMap.put("title", paper.getTitle());
                 paperMap.put("keywords", paper.getKeywords());
                 paperMap.put("auths", paper.getAuths());
-                paperMap.put("field", paper.getField());
-                paperMap.put("type", paper.getField());
+                paperMap.put("field", paper.getCategory());
+                paperMap.put("type", paper.getType());
                 paperMap.put("theme", paper.getTheme());
                 paperMap.put("publish_date", paper.getPublishDate());
                 paperMap.put("derivation", paper.getDerivation());
                 paperMap.put("ref_times", paper.getRefTimes());
-                paperMap.put("fav_time", paper.getFavTime());
+                paperMap.put("fav_time", paper.getFavTimes());
                 paperList.add(paperMap);
             }
         }
@@ -546,6 +566,18 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     // 删除 redis 中的信息
     public void deleteFromRedis() {
         redisTool.deleteByPrefix("paper");
+    }
+
+    boolean checkIndexExists(String indexName) {
+        try {
+            ExistsRequest existsRequest = new ExistsRequest.Builder()
+                    .index(indexName)
+                    .build();
+            return client.indices().exists(existsRequest).value();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

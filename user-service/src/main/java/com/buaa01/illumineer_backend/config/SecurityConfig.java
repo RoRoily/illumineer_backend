@@ -36,21 +36,7 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-    /*@Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .anyRequest().authenticated()
-                .and()
-                .formLogin();
-//        http.csrf().disable() // 禁用 CSRF 保护
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 无状态
-//                .and()
-//                .authorizeRequests()
-//                .anyRequest().permitAll() // 放开所有权限
-//                .and()
-//                .logout().permitAll(); // 允许登出
-    }*/
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -1,15 +1,19 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
+import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
+import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +29,8 @@ public class UserServiceImpl implements UserService {
     private CurrentUser currentUser;
     @Autowired
     private Executor taskExecutor;
+    @Autowired
+    private PaperServiceClient paperServiceClient;
 
     /**
      * 根据用户ID获取用户信息
@@ -92,18 +98,30 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 更新用户个人简历信息
+     * 更新用户个人信息
      *
-     * @param description 新的用户个人简历信息
+     * @param info 新的用户个人信息
      * @return 更新结果
      */
     @Override
-    public int updateUserResume(String description) {
+    public int updateUserInfo(Map<String, Object> info){
         Integer loginUserId = currentUser.getUserId();
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
+        String nick_name = (String) info.get("nickName");
+        String email = (String) info.get("email");
+        int gender = (int) info.get("gender");
+        String institution = (String) info.get("institution");
+        String description = (String) info.get("description");
+        List<String> category_ids = (List<String>) info.get("category");
+        List<String> category = paperServiceClient.getCategory(category_ids);
+        user.setNickName(nick_name);
+        user.setEmail(email);
+        user.setGender(gender);
+        user.setInstitution(institution);
         user.setDescription(description);
+        user.setField(category);
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));

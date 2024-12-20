@@ -16,6 +16,9 @@ public class AIAssistantController {
     private final AIAssistantService aiAssistantService;
 
     @Autowired
+    PaperSearchServiceImpl paperSearchService;
+
+    @Autowired
     public AIAssistantController(AIAssistantService aiAssistantService) {
         this.aiAssistantService = aiAssistantService;
     }
@@ -28,7 +31,12 @@ public class AIAssistantController {
      */
     @PostMapping("/AI/generateKeywords")
     public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
-        String keywords = aiAssistantService.StartChat("我想调查“" + query + "”领域的论文资料，请帮我推荐相关的关键词，尽量简短，只用空格隔开。");
+
+        String keywords = aiAssistantService.StartChat(
+                "推荐“" +
+                        query +
+                        "”领域的关键词，尽量简短，10个以内，只用空格隔开。");
+        System.out.println("keywords: " + keywords);
         return ResponseEntity.ok(keywords);
     }
 
@@ -48,8 +56,12 @@ public class AIAssistantController {
                                       @RequestParam("offset") Integer offset,
                                       @RequestParam("type") Integer sortType,
                                       @RequestParam("order") Integer order) throws Exception{
-        String keywords = aiAssistantService.StartChat("我想调查“" + query + "”领域的论文资料，请帮我推荐相关的关键词，尽量简短，只用空格隔开。");
-        String[] keywordSplit = keywords.split("[ 、。，,.]+");// 我不清楚AI会写出什么分割符（一般是、），所以使用正则表达式来识别
+        String keywords = aiAssistantService
+                .StartChat("推荐“" +
+                        query +
+                        "”领域的关键词，尽量简短，10个以内，只用空格隔开。");
+        String[] keywordSplit = keywords.split("[ 、。，,.]+");
+        // 我不清楚AI会写出什么分割符（一般是、），所以使用正则表达式来识别
         List<String> keywordList = Arrays.stream(keywordSplit).toList();
         List<String> logicList = new ArrayList<>();
         List<String> conditionList = new ArrayList<>();
@@ -66,7 +78,7 @@ public class AIAssistantController {
         String logic = String.join(",", logicList);
         String condition = String.join(",", conditionList);
         String keyword = String.join(",", keywordList);
-        Object data = new PaperSearchServiceImpl().advancedSearchPapers(logic, condition, keyword, size, offset, sortType, order).getData();
+        Object data = paperSearchService.advancedSearchPapers(logic, condition, keyword, size, offset, sortType, order).getData();
         Map<String, Object> result;
         if (isMapOfStringToObject(data)) {
             result = (Map<String, Object>) data;
