@@ -18,7 +18,7 @@ public class UserController {
      * @param uid 用户ID
      * @return 用户信息
      */
-    @GetMapping("/user/personal/allInfo")
+    @GetMapping("/personal/allInfo")
     public CustomResponse getUserAllInfo(@RequestParam("uid") Integer uid) {
         CustomResponse response = new CustomResponse();
         response.setCode(200);
@@ -34,7 +34,7 @@ public class UserController {
      * @return 用户主页信息
      */
 
-    @GetMapping("/user/personal/homeInfo")
+    @GetMapping("/personal/homeInfo")
     public CustomResponse getUserHomeInfo(@RequestParam("uid") Integer uid) {
         CustomResponse response = new CustomResponse();
         response.setCode(200);
@@ -50,7 +50,7 @@ public class UserController {
      * @return 用户简历信息
      */
 
-    @GetMapping("/user/personal/getResume")
+    @GetMapping("/personal/getResume")
     public CustomResponse getUserResume(@RequestParam("uid") Integer uid) {
         CustomResponse response = new CustomResponse();
         response.setCode(200);
@@ -66,7 +66,7 @@ public class UserController {
      * @return 更新结果
      */
 
-    @PutMapping("/user/personal/updateInfo")
+    @PutMapping("/personal/updateInfo")
     public CustomResponse updateUserResume(@RequestBody Map<String, Object> map) {
         int num = userService.updateUserInfo(map);
         if (num == 1)
@@ -80,7 +80,7 @@ public class UserController {
      *
      * @return 删除结果
      */
-    @PutMapping("/user/personal/delete")
+    @PutMapping("/personal/delete")
     public CustomResponse deleteUser() {
         CustomResponse customResponse = new CustomResponse();
         int code = userService.deleteUser();
@@ -100,7 +100,7 @@ public class UserController {
      * @param uid 用户ID
      * @return 封禁结果
      */
-    @PutMapping("/user/admin/disable")
+    @PutMapping("/admin/disable")
     public CustomResponse disableUser(@RequestParam Integer uid) {
         CustomResponse customResponse = new CustomResponse();
         int code = userService.disableUser(uid);
@@ -120,7 +120,7 @@ public class UserController {
      * @param uid 用户ID
      * @return 解封结果
      */
-    @PutMapping("/user/admin/able")
+    @PutMapping("/admin/able")
     public CustomResponse ableUser(@RequestParam Integer uid) {
         CustomResponse customResponse = new CustomResponse();
         int code = userService.ableUser(uid);
