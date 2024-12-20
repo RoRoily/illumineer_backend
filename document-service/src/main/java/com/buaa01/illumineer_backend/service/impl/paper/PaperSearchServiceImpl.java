@@ -295,22 +295,28 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 years.put(year, years.get(year) + 1);
             }
             // derivations
-            if (derivations.get(paper.getDerivation()) == null) {
-                derivations.put(paper.getDerivation(), 1);
-            } else {
-                derivations.put(paper.getDerivation(), derivations.get(paper.getDerivation()) + 1);
+            if (!paper.getDerivation().isEmpty()) {
+                if (derivations.get(paper.getDerivation()) == null) {
+                    derivations.put(paper.getDerivation(), 1);
+                } else {
+                    derivations.put(paper.getDerivation(), derivations.get(paper.getDerivation()) + 1);
+                }
             }
             // types
-            if (types.get(paper.getType()) == null) {
-                types.put(paper.getType(), 1);
-            } else {
-                types.put(paper.getType(), types.get(paper.getType()) + 1);
+            if (!paper.getType().isEmpty()) {
+                if (types.get(paper.getType()) == null) {
+                    types.put(paper.getType(), 1);
+                } else {
+                    types.put(paper.getType(), types.get(paper.getType()) + 1);
+                }
             }
             // themes
-            if (themes.get(paper.getTheme()) == null) {
-                themes.put(paper.getTheme(), 1);
-            } else {
-                themes.put(paper.getTheme(), themes.get(paper.getTheme()) + 1);
+            if (!paper.getTheme().isEmpty()) {
+                if (themes.get(paper.getTheme()) == null) {
+                    themes.put(paper.getTheme(), 1);
+                } else {
+                    themes.put(paper.getTheme(), themes.get(paper.getTheme()) + 1);
+                }
             }
         }
 
@@ -329,20 +335,40 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         Map<String, Map<String, Integer>> options = new HashMap<>();
 
         years = new LinkedHashMap<>();
+        int num = 0;
         for (Map.Entry<String, Integer> year: yearsList) {
             years.put(year.getKey(), year.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
         derivations = new LinkedHashMap<>();
+        num = 0;
         for (Map.Entry<String, Integer> derivation: derivationsList) {
             derivations.put(derivation.getKey(), derivation.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
         types = new LinkedHashMap<>();
+        num = 0;
         for (Map.Entry<String, Integer> type: typesList) {
             types.put(type.getKey(), type.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
         themes = new LinkedHashMap<>();
+        num = 0;
         for (Map.Entry<String, Integer> theme: themesList) {
             themes.put(theme.getKey(), theme.getValue());
+            num ++;
+            if (num >= 10) {
+                break;
+            }
         }
 
         options.put("years", years);
