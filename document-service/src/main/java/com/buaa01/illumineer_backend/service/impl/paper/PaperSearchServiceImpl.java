@@ -231,17 +231,17 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
             SearchResultPaper searchResultPaper = new SearchResultPaper(
                     Long.parseLong(paper.get("pid").toString()),
-                    paper.get("title").toString(),
+                    paper.get("title")==null?"":paper.get("title").toString(),
                     paper.get("keywords")==null?"":paper.get("keywords").toString(),
                     paper.get("auths")==null?"":paper.get("auths").toString(),
                     paper.get("category")==null?"":paper.get("category").toString(),
                     paper.get("type")==null?"":paper.get("type").toString(),
                     paper.get("theme")==null?"":paper.get("theme").toString(),
                     date,
-                    paper.get("derivation").toString(),
+                    paper.get("derivation")==null?"":paper.get("derivation").toString(),
                     Integer.parseInt(paper.get("ref_times").toString()),
                     Integer.parseInt(paper.get("fav_times").toString()),
-                    paper.get("content_url").toString());
+                    paper.get("content_url")==null?"":paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
 
@@ -281,7 +281,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         Map<String, Integer> themes = new LinkedHashMap<>();
 
         for (SearchResultPaper paper : papers) {
-            System.out.println(paper.getPublishDate());
             String year;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             if (paper.getPublishDate().toString().contains(" ")) {
@@ -290,7 +289,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 year = years.get(paper.getPublishDate().getYear()).toString();
             }
             // year
-            System.out.println(year);
             if (years.get(year) == null) {
                 years.put(year, 1);
             } else {

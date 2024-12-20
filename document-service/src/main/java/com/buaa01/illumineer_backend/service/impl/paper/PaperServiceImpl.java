@@ -38,7 +38,6 @@ public class PaperServiceImpl implements PaperService {
     public CustomResponse getRefTimes(Long pid) {
         CustomResponse customResponse = new CustomResponse();
         Map<String, Object> paper = paperMapper.getPaperByPid(pid);
-        System.out.println(paper);
 
         Map<String, Integer> result = new HashMap<>();
         result.put("ref_times", Integer.parseInt(paper.get("ref_times").toString()));
