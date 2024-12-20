@@ -193,4 +193,31 @@ public class PaperServiceImpl implements PaperService {
         }
         return customResponse;
     }
+
+    @Override
+    public CustomResponse modifyAuth(Long pid, String name, Integer uid) {
+        // 创建更新条件
+        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("pid", pid);
+
+        // 查询文章
+        Paper paper = paperMapper.selectOne(updateWrapper);
+
+        if (paper == null) {
+            return new CustomResponse(400, "文章不存在", null);
+        }
+
+        // 修改文章的作者信息
+        paper.getAuths().put(name, uid);
+
+        // 更新数据库中的文章信息
+        int rowsAffected = paperMapper.update(paper, updateWrapper);
+
+        if (rowsAffected > 0) {
+            return new CustomResponse(200, "修改文章作者信息成功", null);
+        } else {
+            return new CustomResponse(500, "修改失败", null);
+        }
+    }
+
 }

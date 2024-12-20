@@ -81,6 +81,23 @@ public class ClientController {
         return paperService.getPaperByFid(fid);
     }
 
+    /**
+     * 修改文章的所有者情况
+     *
+     * @param Pid
+     * @param name
+     * @param uid
+     * @return
+     */
+    @PostMapping("/paper/modiftAuth")
+    CustomResponse modifyAuth(@RequestParam("pid")Long Pid,
+                              @RequestParam("name")String name,
+                              @RequestParam("uid")Integer uid
+    ){
+        return paperService.modifyAuth(Pid,name,uid);
+    }
+
+
     // @PostMapping("/document/adoption")
     // CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name){
     // CustomResponse customResponse = new CustomResponse();

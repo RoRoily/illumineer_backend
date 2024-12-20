@@ -51,9 +51,6 @@ public class HistoryServiceImpl implements HistoryService {
         String hisKey = "uForHis" + uid;
         Set<Object> pidList= redisTool.getSetMembers(hisKey);
 
-        QueryWrapper<History> historyQueryWrapper = new QueryWrapper<>();
-        historyQueryWrapper.eq("hid",uid);
-        History history = historyMapper.selectOne(historyQueryWrapper);
         if (index == null) {
             index = 1;
         }

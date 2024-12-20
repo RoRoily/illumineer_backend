@@ -45,7 +45,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true); // 允许跨域发送 cookie
+        config.setAllowCredentials(true); // 允许跨域发送cookie
         config.setAllowedOriginPatterns(Arrays.asList("http://localhost:8091","http://localhost:9090")); // 允许所有来源
         config.setAllowedHeaders(List.of("*")); // 允许所有请求头
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE")); // 允许所有方法

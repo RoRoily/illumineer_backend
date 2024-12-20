@@ -21,9 +21,9 @@ public class ORCIDController {
 
         private String redirectUri;
 
-        private String authorizeUrl;
+        private String authorizeUrl = "https://orcid.org/oauth/authorize";
 
-        private String tokenUrl;
+        private String tokenUrl ;
 
         private String userInfoUrl;
 
