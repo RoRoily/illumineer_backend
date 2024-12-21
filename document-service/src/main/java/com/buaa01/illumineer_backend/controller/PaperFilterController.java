@@ -35,11 +35,11 @@ public class PaperFilterController {
      */
 
     @PostMapping("get/filter")
-    public CustomResponse ResultFilter(@RequestBody Map<String, Object> filtercondition,
-            @RequestParam("size") Integer size,
+    public CustomResponse ResultFilter(@RequestParam("size") Integer size,
             @RequestParam("offset") Integer offset,
             @RequestParam("type") Integer sortType,
-            @RequestParam("order") Integer order) {
+            @RequestParam("order") Integer order,
+            @RequestBody Map<String, Object> filtercondition) {
         CustomResponse customResponse = new CustomResponse();
         Map<String, Object> returnValues = new HashMap<>();
         FilterCondition sc = new FilterCondition(filtercondition);
