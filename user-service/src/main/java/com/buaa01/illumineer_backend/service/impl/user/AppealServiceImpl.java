@@ -67,10 +67,10 @@ public class AppealServiceImpl implements AppealService {
      if(acceptAppeal){
          //申诉成功，修改文章的所有者信息
          appealEntry.setAcceptedByAppellant(true);
-         Integer appellantId = appealEntry.getAppellant_id();
+         Integer appellantId = appealEntry.getAppellantId();
          User appellant = userService.getUserByUId(appellantId);
 
-         Integer ownerId = appealEntry.getOwner_id();
+         Integer ownerId = appealEntry.getOwnerId();
 
 
          Long conflictPid = appealEntry.getPid();

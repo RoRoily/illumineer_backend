@@ -46,7 +46,8 @@ public interface PaperServiceClient {
     @GetMapping("/paper/getByFid/{fid}")
     CustomResponse getPaperByFid(@PathVariable("fid") Integer fid);
 
-    @PostMapping("/paper/modiftAuth")
+    //FIXME:在函数头添加了document
+    @PostMapping("/document/paper/modiftAuth")
     CustomResponse modifyAuth(@RequestParam("pid")Long Pid,
                               @RequestParam("name")String name,
                               @RequestParam("uid")Integer uid

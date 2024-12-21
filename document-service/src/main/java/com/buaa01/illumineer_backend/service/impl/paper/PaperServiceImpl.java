@@ -8,6 +8,8 @@ import com.buaa01.illumineer_backend.service.client.UserClientService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 import com.buaa01.illumineer_backend.tool.OssTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+
+
+
 
 @Slf4j
 @Service
@@ -198,24 +203,45 @@ public class PaperServiceImpl implements PaperService {
         UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("pid", pid);
 
-        // 查询文章
-        Paper paper = paperMapper.selectOne(updateWrapper);
+
+        Map<String, Object> paper = paperMapper.getPaperByPid(pid);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+
+            // auths 的转换
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {});
+            paper.put("auths", auths);
+            auths.put(name,uid);
+
+
+            // 将修改后的 auths 写回 paper
+            paper.put("auths", objectMapper.writeValueAsString(auths));  // 将 Map 转换为 JSON 字符串
+
+            // 3. 使用 MyBatis 更新数据
+            int rowsAffected = paperMapper.updatePaper(pid, paper);  // 假设你有一个方法可以更新数据库中的文章
+
+            if (rowsAffected > 0) {
+                return new CustomResponse(200, "修改文章作者信息成功", null);
+            } else {
+                return new CustomResponse(500, "修改失败", null);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (paper == null) {
             return new CustomResponse(400, "文章不存在", null);
         }
-
+        System.out.println(paper);
         // 修改文章的作者信息
-        paper.getAuths().put(name, uid);
+        //paper.getAuths().put(name, uid);
 
         // 更新数据库中的文章信息
-        int rowsAffected = paperMapper.update(paper, updateWrapper);
+        //int rowsAffected = paperMapper.update(paper, updateWrapper);
 
-        if (rowsAffected > 0) {
-            return new CustomResponse(200, "修改文章作者信息成功", null);
-        } else {
-            return new CustomResponse(500, "修改失败", null);
-        }
+        return new CustomResponse();
     }
 
 }

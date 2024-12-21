@@ -5,6 +5,7 @@ import com.buaa01.illumineer_backend.entity.Paper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 import java.util.List;
@@ -45,4 +46,12 @@ public interface PaperMapper extends BaseMapper<Paper> {
                      Integer refTimes,
                      Integer favTimes,
                      Integer stats);
+
+    // 更新文献信息
+    @Update("UPDATE paper " +
+            "SET title = #{paper.title}, " +
+            "auths = #{paper.auths} " +
+            "WHERE pid = #{pid}")
+    int updatePaper( Long pid, Map<String,Object> paper);
+
 }
