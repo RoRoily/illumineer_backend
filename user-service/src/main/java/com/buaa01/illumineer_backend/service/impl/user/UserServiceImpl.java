@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
      * @return 更新结果
      */
     @Override
-    public int updateUserInfo(Map<String, Object> info){
+    public int updateUserInfo(Map<String, Object> info) {
         Integer loginUserId = currentUser.getUserId();
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
         int gender = (int) info.get("gender");
         String institution = (String) info.get("institution");
         String description = (String) info.get("description");
-        List<String> category_ids = (List<String>) info.get("category");
+        List<String> category_ids = List.of(((String) info.get("category")).split(","));
         List<String> category = paperServiceClient.getCategory(category_ids);
         user.setNickName(nick_name);
         user.setEmail(email);
