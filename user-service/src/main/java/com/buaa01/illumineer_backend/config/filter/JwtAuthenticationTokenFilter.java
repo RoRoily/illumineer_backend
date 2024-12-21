@@ -37,13 +37,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = request.getHeader("Authorization");
-        if (!StringUtils.hasText(token) || !token.startsWith("Bearer ")) {
-            // 通过开放接口过滤器后，如果没有可解析的token就放行
-            System.out.println("judge token");
-            filterChain.doFilter(request, response);
-            return;
-        }
-        token = token.substring(7);
+//        if (!StringUtils.hasText(token) || !token.startsWith("Bearer ")) {
+//            // 通过开放接口过滤器后，如果没有可解析的token就放行
+//            System.out.println("judge token");
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+        //token = token.substring(7);
         //解析token
         boolean verifyToken = jsonWebTokenTool.verifyToken(token);
         if (!verifyToken) {

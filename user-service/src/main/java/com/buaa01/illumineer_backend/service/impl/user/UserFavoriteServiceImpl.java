@@ -65,6 +65,8 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         return customResponse;
     }
 
+
+
     /**
      * 删除一个收藏夹
      */
@@ -82,6 +84,8 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         }
         return customResponse;
     }
+
+
 
     /**
      * 收藏夹重命名
