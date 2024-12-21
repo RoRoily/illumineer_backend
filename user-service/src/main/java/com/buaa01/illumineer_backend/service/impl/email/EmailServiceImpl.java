@@ -31,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        String link = verificationUrl + uid +"/scholarHome?token=" + token + "&email=" + to;
+        String link = verificationUrl + uid +"/authenticationInfo?token=" + token + "&email=" + to;
         String content = "<p>点击以下链接完成认证：</p>" +
                 "<a href=\"" + link + "\">完成认证</a>";
 
