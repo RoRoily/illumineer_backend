@@ -61,7 +61,7 @@ public class UserAuthController {
      * List中包含的是map属性 分别是文章的 name writer Date isClaimed pid
      *名称 作者 时间 是否被该用户实名认证的对象认领(被同名的认领了) 文章对应的pid（方便认领完成后返回给后端进行更新）
      * */
-    @GetMapping("user/auth/getClaimList")
+    @GetMapping("auth/getClaimList")
     public CustomResponse getClaimList(){
         try {
             CustomResponse customResponse = new CustomResponse();
