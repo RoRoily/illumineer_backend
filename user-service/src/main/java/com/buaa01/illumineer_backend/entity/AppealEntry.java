@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class AppealEntry {
     @TableId(type = IdType.AUTO)
-    Integer appealID;
+    Integer appealId;
 
     PaperAdo conflictPaperEntry;
 
