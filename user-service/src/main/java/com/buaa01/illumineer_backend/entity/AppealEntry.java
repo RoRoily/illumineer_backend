@@ -17,9 +17,9 @@ public class AppealEntry {
 
     Long pid;
 
-    Integer appellant_id;
+    Integer appellantId;
 
-    Integer owner_id;
+    Integer ownerId;
 
     boolean isAcceptedByAppellant;
 
@@ -31,8 +31,8 @@ public class AppealEntry {
     public AppealEntry(PaperAdo paperAdo,User appellant,User owner){
         Date now = new Date();
         this.setPid(paperAdo.getPid());
-        this.setAppellant_id(appellant.getUid());
-        this.setOwner_id(owner.getUid());
+        this.setAppellantId(appellant.getUid());
+        this.setOwnerId(owner.getUid());
         this.setAcceptedByAppellant(false);
         this.setAccomplish(false);
         this.setAppealTime(now);
