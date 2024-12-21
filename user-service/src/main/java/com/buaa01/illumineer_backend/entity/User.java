@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.buaa01.illumineer_backend.handler.IntentionHandler;
+import com.buaa01.illumineer_backend.handler.StringListTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public class User {
     private String name;
     private Integer gender;
     private String background;
+    @TableField(typeHandler = StringListTypeHandler.class)
     private List<String> field ;// 相关领域
     private String institution;
     //需要在Redis中存储的信息

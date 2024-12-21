@@ -9,7 +9,9 @@ import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -19,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -114,14 +117,19 @@ public class UserServiceImpl implements UserService {
         int gender = (int) info.get("gender");
         String institution = (String) info.get("institution");
         String description = (String) info.get("description");
-        List<String> category_ids = List.of(((String) info.get("category")).split(","));
-        List<String> category = paperServiceClient.getCategory(category_ids);
+//        List<String> category_ids = List.of(((String) info.get("category")).split(","));
+//        List<String> category = paperServiceClient.getCategory(category_ids);
+        List<String> category = List.of(((String) info.get("category")).split(","));
         user.setNickName(nick_name);
         user.setEmail(email);
         user.setGender(gender);
         user.setInstitution(institution);
         user.setDescription(description);
         user.setField(category);
+        if (userMapper.getUserByNickName(nick_name) != null)
+            return -1;
+        if (userMapper.getUserByEmail(email) != null)
+            return -2;
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
