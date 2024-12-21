@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,17 +10,17 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
-    //@Value("${spring.mail.host}")
-    private final String mailHost = "smtp.163.com";
+    @Value("${spring.mail.host}")
+    private String mailHost;
 
-    //@Value("${spring.mail.port}")
-    private final int mailPort = 25;
+    @Value("${spring.mail.port}")
+    private int mailPort;
 
-    //@Value("${spring.mail.username}")
-    private final String mailUsername = "XinyangPengbuaa@163.com";
+    @Value("${spring.mail.username}")
+    private String mailUsername;
 
-    //@Value("${spring.mail.password}")
-    private final String mailPassword = "JQyYDwCv2ecf32jW";
+    @Value("${spring.mail.password}")
+    private String mailPassword;
 
     @Bean
     public JavaMailSender javaMailSender() {
