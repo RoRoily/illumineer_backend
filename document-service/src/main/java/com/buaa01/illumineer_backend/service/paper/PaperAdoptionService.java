@@ -7,6 +7,11 @@ import com.buaa01.illumineer_backend.entity.PaperAdo;
 import java.util.List;
 
 public interface PaperAdoptionService {
+    /***
+     * 返回该用户已认领的文献
+     * @param name 姓名
+     * **/
+    CustomResponse getPaperBelongedByName(String name);
 
     /***
      * 根据作者姓名返回包含该姓名的认领条目列表
