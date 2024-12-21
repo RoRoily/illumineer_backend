@@ -42,7 +42,7 @@ public class AIAssistantService {
         OpenAiSessionFactory();
     }
     private OpenAiSession openAiSession;
-    private final CountDownLatch latch = new CountDownLatch(1); // 用于等待
+    private CountDownLatch latch = new CountDownLatch(1); // 用于等待
 
     public void OpenAiSessionFactory() {
         // 1. 配置文件
@@ -81,6 +81,7 @@ public class AIAssistantService {
         AtomicReference<String> allResponse = new AtomicReference<>("");
 
         OpenAiSessionFactory();
+        latch = new CountDownLatch(1);
 
         // 3. 发起请求
         WebSocket webSocket = openAiSession.completions(chatCompletion, new WebSocketListener() {
