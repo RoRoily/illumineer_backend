@@ -2,6 +2,7 @@ package com.buaa01.illumineer_backend.service.impl.email;
 
 import com.buaa01.illumineer_backend.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
-
-    private String mailFrom = "XinyangPengbuaa@163.com";
+    @Value("${spring.mail.username}")
+    private String mailFrom;
 
     public void EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;

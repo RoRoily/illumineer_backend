@@ -16,6 +16,23 @@ public class PaperAdoptionController {
     private PaperAdoptionService paperAdoptionService;
 
     /***
+     * 返回该用户已认领的文献
+     * @param name 姓名
+     * **/
+    @GetMapping("/belong/name")
+    public CustomResponse getPaperBelongedByName(@RequestParam("name") String name){
+        try {
+            return paperAdoptionService.getPaperBelongedByName(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("无法获取认领的文献！");
+            return customResponse;
+        }
+    }
+
+    /***
      * 根据作者姓名返回包含该姓名的认领条目列表
      * @param name 姓名
      * **/
