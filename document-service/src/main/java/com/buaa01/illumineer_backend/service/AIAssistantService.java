@@ -15,10 +15,12 @@ import org.jetbrains.annotations.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,10 +73,14 @@ public class AIAssistantService {
      * 此对话模型 V4.0 接近于官网体验 & 流式应答
      */
 
-    public String StartChat(String content) throws Exception {
-        RequestDTO chatCompletion = createRequest(content); // 例如："帮我找一下“人工智能”相关领域，100字以内回答，请仅提取关键词并用逗号分割，不要输出其余信息。"
+    @Async  // 标记该方法为异步执行
+    public CompletableFuture<String> StartChat(String content) throws Exception {
+        RequestDTO chatCompletion = createRequest(content);
+        // 例如："帮我找一下“人工智能”相关领域，100字以内回答，请仅提取关键词并用逗号分割，不要输出其余信息。"
 
         AtomicReference<String> allResponse = new AtomicReference<>("");
+
+        OpenAiSessionFactory();
 
         // 3. 发起请求
         WebSocket webSocket = openAiSession.completions(chatCompletion, new WebSocketListener() {
@@ -90,15 +96,18 @@ public class AIAssistantService {
                 ResponseDTO responseData = JSONObject.parseObject(text, ResponseDTO.class);
                 // 如果响应数据中的 header 的 code 值不为 0，则表示响应错误
                 if (responseData.getHeader().getCode() != 0) {
+                    webSocket.close(1400, "Failure");
                     return;
                 }
                 // 将回答进行拼接
                 for (MsgDTO msgDTO : responseData.getPayload().getChoices().getText()) {
                     String content = msgDTO.getContent();
+                    System.out.println(content);
                     allResponse.getAndAccumulate(content, (acc, newContent) -> acc + newContent);
                 }
                 // 检查是否是最后一条消息，如果是，则关闭WebSocket
-                if (responseData.getHeader().getStatus() == 2) {
+                if (responseData.getHeader().getStatus() == 2 ||
+                        responseData.getPayload().getChoices().getText().isEmpty()) {
                     webSocket.close(1000, "Complete");
                     latch.countDown();
                 }
@@ -108,17 +117,18 @@ public class AIAssistantService {
             public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, Response response) {
                 super.onFailure(webSocket, t, response);
                 System.out.println("error");
+                webSocket.close(1400, "Failure");
                 latch.countDown();
             }
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 super.onClosed(webSocket, code, reason);
-                System.out.println("closed");
+                System.out.println("WebSocket closed with code: " + code + ", reason: " + reason);
                 latch.countDown();
             }
         });
         latch.await();
         // 对字符串进行处理...
-        return allResponse.get();
+        return CompletableFuture.completedFuture(allResponse.get());
     }
 }

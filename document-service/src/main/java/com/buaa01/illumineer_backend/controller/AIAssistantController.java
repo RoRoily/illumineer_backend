@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/document")
 public class AIAssistantController {
 
     private final AIAssistantService aiAssistantService;
@@ -31,13 +31,14 @@ public class AIAssistantController {
      */
     @PostMapping("/AI/generateKeywords")
     public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
-
-        String keywords = aiAssistantService.StartChat(
+        CompletableFuture<String> future = aiAssistantService.StartChat(
                 "推荐“" +
                         query +
-                        "”领域的关键词，尽量简短，10个以内，只用空格隔开。");
+                        "”领域的英文关键词，尽量简短，10个以内，只用空格隔开。");
+        System.out.println(future.isDone());
+        String keywords = future.get();
         System.out.println("keywords: " + keywords);
-        return ResponseEntity.ok(keywords);
+        return ResponseEntity.ok(future.get());
     }
 
     /**
@@ -56,11 +57,12 @@ public class AIAssistantController {
                                       @RequestParam("offset") Integer offset,
                                       @RequestParam("type") Integer sortType,
                                       @RequestParam("order") Integer order) throws Exception{
-        String keywords = aiAssistantService
-                .StartChat("推荐“" +
+        String keywords = aiAssistantService.StartChat(
+                "推荐“" +
                         query +
-                        "”领域的关键词，尽量简短，10个以内，只用空格隔开。");
-        String[] keywordSplit = keywords.split("[ 、。，,.]+");
+                        "”领域的英文关键词，尽量简短，10个以内，只用空格隔开。").get();
+        System.out.println("keywords: " + keywords);
+        String[] keywordSplit = keywords.split("[ 、。，,.\\s+]+");
         // 我不清楚AI会写出什么分割符（一般是、），所以使用正则表达式来识别
         List<String> keywordList = Arrays.stream(keywordSplit).toList();
         List<String> logicList = new ArrayList<>();
@@ -70,7 +72,7 @@ public class AIAssistantController {
                 logicList.add("0");
             }
             else {
-                logicList.add("1");
+                logicList.add("2"); // or instead of and
             }
             conditionList.add("keywords");
         }
