@@ -14,17 +14,23 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class ORCIDController {
 
+        @Value("${orcid.clientId}")
         private String clientId;
 
+        @Value("${orcid.clientSecret}")
         private String clientSecret;
 
-
+        @Value("${orcid.redirectUri}")
         private String redirectUri;
 
         private String authorizeUrl = "https://orcid.org/oauth/authorize";
 
+
+        //用于从ORCID服务器获取访问令牌
+        @Value("${orcid.tokenUrl}")
         private String tokenUrl ;
 
+        @Value("${orcid.userInfoUrl}")
         private String userInfoUrl;
 
         /**
@@ -55,7 +61,7 @@ public class ORCIDController {
             params.add("client_secret", clientSecret);
             params.add("grant_type", "authorization_code");
             params.add("code", code);
-            params.add("redirect_uri", "http://localhost:8080/auth/orcid/callback");
+            params.add("redirect_uri", "http://127.0.0.1:8091/auth/orcid/callback");
 
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
             ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);

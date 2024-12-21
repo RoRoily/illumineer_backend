@@ -152,10 +152,12 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                         paperAdos.add(paperAdo);
                         // 缓存
                         if (isBelonged) {
-
-                        } else {
                             CompletableFuture.runAsync(() -> {
                                 redisTool.setExObjectValue("AdoptObject:" + name, paper);    // 认领条目
+                            }, taskExecutor);
+                        } else {
+                            CompletableFuture.runAsync(() -> {
+                                redisTool.setExObjectValue("property:" + name, paper);    // 已认领的文献
                             }, taskExecutor);
                         }
                     }

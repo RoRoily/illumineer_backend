@@ -67,14 +67,17 @@ public class AppealServiceImpl implements AppealService {
      if(acceptAppeal){
          //申诉成功，修改文章的所有者信息
          appealEntry.setAcceptedByAppellant(true);
-         User appellant = appealEntry.getAppellant();
+         Integer appellantId = appealEntry.getAppellant_id();
+         User appellant = userService.getUserByUId(appellantId);
 
-         Long conflictPid = appealEntry.getConflictPaperEntry().getPid();
+         Integer ownerId = appealEntry.getOwner_id();
+
+
+         Long conflictPid = appealEntry.getPid();
          //对mysql中Paper实体类修改文章的所有者信息
          paperServiceClient.modifyAuth(conflictPid,appellant.getName(),appellant.getUid());
 
-         Integer appellantId = appellant.getUid();
-         Integer ownerId  = appealEntry.getOwner().getUid() ;
+
          //修改Redis信息
          // paperBelonged : 拥有该文章的作者的uid集合
          // property : 某个作者拥有文章的pid集合
