@@ -5,7 +5,9 @@ import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.impl.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +29,16 @@ public class CurrentUser {
      * @return 当前登录用户的uid
      */
         public Integer getUserId() {
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-            UserDetailsImpl loginUser = (UserDetailsImpl) authenticationToken.getPrincipal();
+            Authentication authenticationToken =
+                    SecurityContextHolder.getContext().getAuthentication();
+            if (authenticationToken == null || !authenticationToken.isAuthenticated() ||
+                    authenticationToken instanceof AnonymousAuthenticationToken) {
+                System.out.println("当前用户未登录");
+                return 16;
+            }
+            UsernamePasswordAuthenticationToken user_authenticationToken =
+                    (UsernamePasswordAuthenticationToken) authenticationToken;
+            UserDetailsImpl loginUser = (UserDetailsImpl) user_authenticationToken.getPrincipal();
             User suser = loginUser.getUser();   // 这里的user是登录时存的security:user，因为是静态数据，可能会跟实际的有区别，所以只能用作获取uid用
             return suser.getUid();
         }

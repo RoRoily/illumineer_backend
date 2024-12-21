@@ -2,6 +2,7 @@ package com.buaa01.illumineer_backend.service.impl.email;
 
 import com.buaa01.illumineer_backend.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+    @Value("${spring.mail.username}")
+    private String mailFrom;
 
     public void EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -24,14 +27,15 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendVerificationEmail(String to, String token, String verificationUrl) throws MessagingException {
+    public void sendVerificationEmail(String to, String token, String verificationUrl, Integer uid) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        String link = verificationUrl + "?token=" + token;
+        String link = verificationUrl + uid +"/scholarHome?token=" + token + "&email=" + to;
         String content = "<p>点击以下链接完成认证：</p>" +
                 "<a href=\"" + link + "\">完成认证</a>";
 
+        helper.setFrom(mailFrom);
         helper.setTo(to);
         helper.setSubject("邮箱认证");
         helper.setText(content, true);

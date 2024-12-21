@@ -16,11 +16,12 @@ public class FilterCondition {
     private ArrayList<String> type; // 类型
     private ArrayList<String> theme; // 主题
 
-    public FilterCondition(Map<String, ArrayList<String>> sc) { // 构造函数
-        this.year = sc.get("year");
-        this.derivation = sc.get("derivation");
-        this.type = sc.get("type");
-        this.theme = sc.get("theme");
+    @SuppressWarnings("unchecked")
+    public FilterCondition(Map<String, Object> sc) { // 构造函数
+        this.year = (ArrayList<String>) sc.get("year");
+        this.derivation = (ArrayList<String>) sc.get("derivation");
+        this.type = (ArrayList<String>) sc.get("type");
+        this.theme = (ArrayList<String>) sc.get("theme");
 
         // 若无则赋值为空
         if (year == null) {

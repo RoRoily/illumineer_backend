@@ -5,17 +5,18 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buaa01.illumineer_backend.entity.*;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
-import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -37,31 +38,40 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
     private Executor taskExecutor;
 
     /***
+     * 返回该用户已认领的文献
+     * @param name 姓名
+     * **/
+    @Override
+    public CustomResponse getPaperBelongedByName(String name){
+        CustomResponse customResponse = new CustomResponse();
+        int total = 0;
+
+        List<PaperAdo> paperAdos = getPapersBelonged(name, true);
+        total = paperAdos.size();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", paperAdos);
+        result.put("total", total);
+        customResponse.setData(result);
+        return customResponse;
+    }
+
+    /***
      * 根据作者姓名返回包含该姓名的认领条目列表
      * @param name 姓名
      * **/
     @Override
     public CustomResponse getPaperAdoptionsByName(String name){
         CustomResponse customResponse = new CustomResponse();
+        int total = 0;
 
-        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-        List<Paper> papers = paperMapper.selectList(queryWrapper);
-        List<PaperAdo> paperAdos = new ArrayList<>();
+        List<PaperAdo> paperAdos = getPapersBelonged(name, false);
+        total = paperAdos.size();
 
-        for (Paper paper: papers) {
-            Map<String, Integer> auths = paper.getAuths();
-            if (auths.get(name) != null) {
-                PaperAdo paperAdo = new PaperAdo();
-                paperAdo = paperAdo.setNewPaperAdo(paper, name);
-                paperAdos.add(paperAdo);
-                // 缓存
-                CompletableFuture.runAsync(() -> {
-                    redisTool.setExObjectValue("AdoptObject:" + name, paper);    // 异步更新到redis
-                }, taskExecutor);
-            }
-        }
-
-        customResponse.setData(paperAdos);
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", paperAdos);
+        result.put("total", total);
+        customResponse.setData(result);
         return customResponse;
     }
 
@@ -89,6 +99,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
      * @param category
      * @param total 总数
      * **/
+    @Override
     public List<PaperAdo> getPaperAdoptionsByCategory(Category category, Integer total) {
         List<PaperAdo> paperAdos = new ArrayList<>();
         List<Paper> papers = null;
@@ -102,6 +113,57 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
         paperAdos = getPaperAdoptionsByList(pids);
         paperAdos = paperAdos.subList(0, total);
 
+        return paperAdos;
+    }
+
+    // 返回已认领/未认领的文献
+    private List<PaperAdo> getPapersBelonged(String name, boolean isBelonged) {
+        List<Map<String, Object>> papers = paperMapper.getPapers();
+        List<PaperAdo> paperAdos = new ArrayList<>();
+
+        for (Map<String, Object> paper: papers) {
+            if (paper.get("auths") != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {
+                    });
+                    if (auths.get(name) != null) {
+                        if (isBelonged && auths.get(name) == 0) {
+                            continue;
+                        }
+                        Date date;
+                        // 判断是否是 ISO 格式，转换date格式
+                        if (!paper.get("publish_date").toString().contains(" ")) {
+                            date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                    .atZone(ZoneId.systemDefault()).toInstant());
+                        } else {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                            date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), formatter)
+                                    .atZone(ZoneId.systemDefault()).toInstant());
+                        }
+                        PaperAdo paperAdo = new PaperAdo(
+                                Long.parseLong(paper.get("pid").toString()),
+                                paper.get("title").toString(),
+                                auths,
+                                date,
+                                0,
+                                false
+                        );
+                        paperAdos.add(paperAdo);
+                        // 缓存
+                        if (isBelonged) {
+
+                        } else {
+                            CompletableFuture.runAsync(() -> {
+                                redisTool.setExObjectValue("AdoptObject:" + name, paper);    // 认领条目
+                            }, taskExecutor);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return paperAdos;
     }
 }

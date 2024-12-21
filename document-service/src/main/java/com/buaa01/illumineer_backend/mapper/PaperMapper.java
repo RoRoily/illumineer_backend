@@ -25,9 +25,9 @@ public interface PaperMapper extends BaseMapper<Paper> {
     @Select("SELECT * FROM paper WHERE ${condition} LIKE CONCAT('%', #{keyword}, '%') AND stats = 0")
     List<Map<String, Object>> searchByKeyword(String condition, String keyword);
 
-    // 获取高级检索结果
-    @Select("select * from paper where #{condStr}")
-    List<Paper> getAdvancedSearchPapers(String condStr);
+    // 获取所有文献
+    @Select("select * from paper where stats = 0")
+    List<Map<String, Object>> getPapers();
 
     @Insert("insert into paper(pid,title,keywords,content_url,auths,category,type,theme,publish_date,derivation,ref_times,fav_times,refs,stats,ess_abs) values(#{pid},#{title},#{keywords},#{contentUrl},#{auths},#{field},#{type},#{theme},#{publishDate},#{derivation},#{refTimes},#{favTimes},#{refs},#{stats},#{essabs})")
     void insertPaper(Long pid,
