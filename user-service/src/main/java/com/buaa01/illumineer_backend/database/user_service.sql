@@ -88,6 +88,22 @@ CREATE TABLE institutions (
                               name VARCHAR(255) NOT NULL            -- 机构名称
 );
 
+DROP TABLE IF EXISTS `appeal_entry`;
+
+CREATE TABLE `appeal_entry` (
+                                `appeal_id` INT NOT NULL AUTO_INCREMENT COMMENT 'Appeal ID',
+                                `conflict_paper_entry` INT NOT NULL COMMENT 'Conflicting Paper ID',  -- 假设 conflictPaperEntry 对应 PaperAdo 实体的主键
+                                `appellant_id` INT NOT NULL COMMENT 'Appellant ID',  -- 假设 appellant 对应 User 实体的主键
+                                `owner_id` INT NOT NULL COMMENT 'Owner ID',  -- 假设 owner 对应 User 实体的主键
+                                `is_accepted_by_appellant` BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Whether the appeal is accepted by the appellant',
+                                `accomplish` BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Whether the appeal has been accomplished',
+                                `appeal_time` DATETIME NOT NULL COMMENT 'Appeal Time',
+                                `handle_time` DATETIME NULL COMMENT 'Handle Time',
+                                PRIMARY KEY (`appeal_id`),
+                                CONSTRAINT `fk_appellant` FOREIGN KEY (`appellant_id`) REFERENCES `user`(`uid`),  -- 假设 User 表对应为 user，且主键为 user_id
+                                CONSTRAINT `fk_owner` FOREIGN KEY (`owner_id`) REFERENCES `user`(`uid`)  -- 假设 User 表对应为 user，且主键为 user_id
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Appeal Entry Table';
+
 
 
 INSERT INTO institutions (domain, name) VALUES
