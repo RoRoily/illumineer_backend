@@ -23,7 +23,7 @@ public class UserFavoriteController {
     /**
      * 新增用户收藏夹
      **/
-    @PostMapping("/user/fav/createFav")
+    @PostMapping("/fav/createFav")
     public CustomResponse createFav(@RequestParam("favName") String favName) {
         return userFavoriteService.createFav(favName);
     }
@@ -34,7 +34,7 @@ public class UserFavoriteController {
      * @param
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/deleteFav")
+    @PostMapping("/fav/deleteFav")
     public CustomResponse deleteFav(@RequestParam("fid") Integer fid) {
         return userFavoriteService.deleteFav(fid);
     }
@@ -45,7 +45,7 @@ public class UserFavoriteController {
      * @param fid 收藏夹id newName 新的收藏夹名称
      * @return CustomResponse
      **/
-    @PutMapping("/user/fav/changeName")
+    @PutMapping("/fav/changeName")
     public CustomResponse changeFavName(@RequestParam("fid") Integer fid, @RequestParam("name") String name) {
         return userFavoriteService.changeFavName(fid, name);
     }
@@ -56,7 +56,7 @@ public class UserFavoriteController {
      * @param pid 文章的id fid 收藏夹的id
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/add")
+    @PostMapping("/fav/add")
     public CustomResponse addPapertoFav(@RequestParam("pid") Long pid, @RequestParam("fid") Integer fid) {
         return userFavoriteService.addPapertoFav(fid, pid);
     }
@@ -67,7 +67,7 @@ public class UserFavoriteController {
      * @param pid 文章的id fid 收藏夹的id
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/remove")
+    @PostMapping("/fav/remove")
     public CustomResponse removePaperfromFav(@RequestParam("pid") Long pid, @RequestParam("fid") Integer fid) {
         return userFavoriteService.removePaperfromFav(fid, pid);
     }
@@ -78,7 +78,7 @@ public class UserFavoriteController {
      * @param
      * @return CustomResponse
      **/
-    @GetMapping("/user/fav/searchAll")
+    @GetMapping("/fav/searchAll")
     public CustomResponse searchAll() {
         return userFavoriteService.searchAll();
     }
@@ -89,7 +89,7 @@ public class UserFavoriteController {
      * @param pid 文章id fids 收藏夹id的集合
      * @return CustomResponse
      **/
-    @PostMapping("/user/fav/Batch")
+    @PostMapping("/fav/Batch")
     public CustomResponse ProcessFavBatch(@RequestParam("pid") Long pid, @RequestParam("fids") List<Integer> fids) {
         return userFavoriteService.ProcessFavBatch(pid, fids);
     }
@@ -100,7 +100,7 @@ public class UserFavoriteController {
      * @param pid
      * @return CustomResponse
      **/
-    @GetMapping("/user/fav/pidinUserFav")
+    @GetMapping("/fav/pidinUserFav")
     public CustomResponse ReturnPidsinAllUserFavs(@RequestParam("pid") Long pid) {
         return userFavoriteService.ReturnPidsinAllUserFavs(pid);
     }
@@ -112,7 +112,7 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
 
-    @PostMapping("/user/fav/papers")
+    @PostMapping("/fav/papers")
     public CustomResponse getPapersByFid(@RequestParam("fid") Integer fid) {
         return userFavoriteService.getPapersByFid(fid);
     }
