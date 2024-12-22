@@ -20,8 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -73,21 +72,26 @@ public class AIAssistantService {
      * 此对话模型 V4.0 接近于官网体验 & 流式应答
      */
 
+    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
     @Async  // 标记该方法为异步执行
     public CompletableFuture<String> StartChat(String content) throws Exception {
-        RequestDTO chatCompletion = createRequest(content);
-        // 例如："帮我找一下“人工智能”相关领域，100字以内回答，请仅提取关键词并用逗号分割，不要输出其余信息。"
 
+        RequestDTO chatCompletion = createRequest(content);
         AtomicReference<String> allResponse = new AtomicReference<>("");
 
-        OpenAiSessionFactory();
-        latch = new CountDownLatch(1);
-
-        // 3. 发起请求
+        // 创建并启动 WebSocket
         WebSocket webSocket = openAiSession.completions(chatCompletion, new WebSocketListener() {
             @Override
             public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
                 super.onOpen(webSocket, response);
+                // 10秒后检查并关闭 WebSocket
+                scheduler.schedule(() -> {
+                    if (!webSocket.close(1000, "Timeout")) {
+                        System.out.println("WebSocket timeout, closed after 10 seconds");
+                    }
+                    latch.countDown();
+                }, 10, TimeUnit.SECONDS); // 10秒后执行定时任务
             }
 
             @Override
@@ -95,32 +99,34 @@ public class AIAssistantService {
                 super.onMessage(webSocket, text);
                 // 将大模型回复的 JSON 文本转为 ResponseDTO 对象
                 ResponseDTO responseData = JSONObject.parseObject(text, ResponseDTO.class);
-                // 如果响应数据中的 header 的 code 值不为 0，则表示响应错误
                 if (responseData.getHeader().getCode() != 0) {
                     webSocket.close(1400, "Failure");
                     return;
                 }
-                // 将回答进行拼接
+                // 拼接回复内容
                 for (MsgDTO msgDTO : responseData.getPayload().getChoices().getText()) {
                     String content = msgDTO.getContent();
                     System.out.println(content);
                     allResponse.getAndAccumulate(content, (acc, newContent) -> acc + newContent);
                 }
-                // 检查是否是最后一条消息，如果是，则关闭WebSocket
+
+                // 如果是最后一条消息或接收到空内容，关闭 WebSocket
                 if (responseData.getHeader().getStatus() == 2 ||
                         responseData.getPayload().getChoices().getText().isEmpty()) {
                     webSocket.close(1000, "Complete");
                     latch.countDown();
                 }
+                System.out.println("status = " + responseData.getHeader().getStatus());
             }
 
             @Override
             public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, Response response) {
                 super.onFailure(webSocket, t, response);
-                System.out.println("error");
+                System.out.println("Error occurred, closing WebSocket...");
                 webSocket.close(1400, "Failure");
                 latch.countDown();
             }
+
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 super.onClosed(webSocket, code, reason);
@@ -128,8 +134,13 @@ public class AIAssistantService {
                 latch.countDown();
             }
         });
+
+        // 创建 CountDownLatch 等待 WebSocket 关闭
+        latch = new CountDownLatch(1);
+
+        // 等待 WebSocket 完成或者超时
         latch.await();
-        // 对字符串进行处理...
+        // 处理响应内容
         return CompletableFuture.completedFuture(allResponse.get());
     }
 }
