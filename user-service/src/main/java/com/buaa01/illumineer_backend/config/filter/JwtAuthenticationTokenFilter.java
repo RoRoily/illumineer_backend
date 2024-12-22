@@ -28,6 +28,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     /**
      * 认证过滤器，所有token都需要进入这里进行验证
+     *
      * @param request
      * @param response
      * @param filterChain
@@ -36,6 +37,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//        if (request.getRequestURI().equals("account/register") || request.getRequestURI().equals("/account/login") || request.getRequestURI().equals("/account/adminLogin")) {
+//            filterChain.doFilter(request, response);
+//            return;//放行注册和登录接口
+//        }
         String token = request.getHeader("Authorization");
         if (!StringUtils.hasText(token) || !token.startsWith("Bearer ")) {
             // 通过开放接口过滤器后，如果没有可解析的token就放行

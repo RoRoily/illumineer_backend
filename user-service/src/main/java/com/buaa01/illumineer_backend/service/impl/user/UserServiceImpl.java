@@ -112,6 +112,7 @@ public class UserServiceImpl implements UserService {
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
+        String name = (String) info.get("name");
         String nick_name = (String) info.get("nickName");
         String email = (String) info.get("email");
         int gender = (int) info.get("gender");
@@ -120,6 +121,7 @@ public class UserServiceImpl implements UserService {
 //        List<String> category_ids = List.of(((String) info.get("category")).split(","));
 //        List<String> category = paperServiceClient.getCategory(category_ids);
         List<String> category = List.of(((String) info.get("category")).split(","));
+        user.setName(name);
         user.setNickName(nick_name);
         user.setEmail(email);
         user.setGender(gender);
