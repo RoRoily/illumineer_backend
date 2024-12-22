@@ -118,7 +118,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
 
     // 返回已认领/未认领的文献
     private List<PaperAdo> getPapersBelonged(String name, boolean isBelonged) {
-        List<Map<String, Object>> papers = paperMapper.getPapers();
+        List<Map<String, Object>> papers = paperMapper.searchByKeywordWithStrictBooleanMode("str_auths", name);
         List<PaperAdo> paperAdos = new ArrayList<>();
 
         for (Map<String, Object> paper: papers) {
@@ -152,10 +152,12 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                         paperAdos.add(paperAdo);
                         // 缓存
                         if (isBelonged) {
-
-                        } else {
                             CompletableFuture.runAsync(() -> {
                                 redisTool.setExObjectValue("AdoptObject:" + name, paper);    // 认领条目
+                            }, taskExecutor);
+                        } else {
+                            CompletableFuture.runAsync(() -> {
+                                redisTool.setExObjectValue("property:" + name, paper);    // 已认领的文献
                             }, taskExecutor);
                         }
                     }

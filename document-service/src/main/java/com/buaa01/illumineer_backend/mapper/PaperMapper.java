@@ -5,6 +5,7 @@ import com.buaa01.illumineer_backend.entity.Paper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,18 @@ public interface PaperMapper extends BaseMapper<Paper> {
     // 获取指定文献ID的详细信息
     @Select("select * from paper where stats = #{stats}")
     List<Map<String, Object>> getPapersByStats(int stats);
+
+    // 获取检索结果
+    @Select("SELECT * FROM paper WHERE MATCH(${condition}) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) AND stats = 0")
+    List<Map<String, Object>> searchByKeywordWithFullText(String condition, String keyword);
+
+    // 获取检索结果
+    @Select("SELECT * FROM paper WHERE MATCH(${condition}) AGAINST(CONCAT(#{keyword}, '*') IN BOOLEAN MODE) AND stats = 0")
+    List<Map<String, Object>> searchByKeywordWithBooleanMode(String condition, String keyword);
+
+    // 获取检索结果
+    @Select("SELECT * FROM paper WHERE MATCH(${condition}) AGAINST(#{keyword} IN BOOLEAN MODE) AND stats = 0")
+    List<Map<String, Object>> searchByKeywordWithStrictBooleanMode(String condition, String keyword);
 
     // 获取检索结果
     @Select("SELECT * FROM paper WHERE ${condition} LIKE CONCAT('%', #{keyword}, '%') AND stats = 0")
@@ -45,4 +58,12 @@ public interface PaperMapper extends BaseMapper<Paper> {
                      Integer refTimes,
                      Integer favTimes,
                      Integer stats);
+
+    // 更新文献信息
+    @Update("UPDATE paper " +
+            "SET title = #{paper.title}, " +
+            "auths = #{paper.auths} " +
+            "WHERE pid = #{pid}")
+    int updatePaper( Long pid, Map<String,Object> paper);
+
 }

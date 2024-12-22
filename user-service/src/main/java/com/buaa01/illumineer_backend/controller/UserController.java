@@ -69,10 +69,13 @@ public class UserController {
     @PutMapping("/personal/updateInfo")
     public CustomResponse updateUserResume(@RequestBody Map<String, Object> map) {
         int num = userService.updateUserInfo(map);
-        if (num == 1)
+        if (num == 0)
             return new CustomResponse(200, "OK", null);
-        else
-            return new CustomResponse(400, "Bad Request", null);
+        else if (num == -1)
+            return new CustomResponse(400, "昵称已存在", null);
+        else if (num == -2)
+            return new CustomResponse(400, "邮箱已存在", null);
+        return new CustomResponse(400, "未知错误", null);
     }
 
     /**
