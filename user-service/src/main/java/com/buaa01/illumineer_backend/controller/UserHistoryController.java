@@ -33,8 +33,9 @@ public class UserHistoryController {
      * @param quantity,index 每次需要返回的条目数量  偏移量，用于定位需要返回的页面
      * @return CunstomResponce实体类
      */
-    @GetMapping("/user/history/getAPage")
+    @GetMapping("/history/getAPage")
     public CustomResponse getAPage(@RequestParam("quantity")Integer quantity,@RequestParam("index")Integer index){
+        System.out.println("hi");
         return historyService.getHistoryByPage(currentUser.getUserUid(),quantity,index);
     }
 }

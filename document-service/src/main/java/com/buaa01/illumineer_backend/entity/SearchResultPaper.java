@@ -22,7 +22,7 @@ public class SearchResultPaper {
     /** 文章作者 */
     private String auths;
     /** 相关领域 */
-    private String field;
+    private String category;
     /** 文章类型 */
     private String type;
     /** 文章主题 */

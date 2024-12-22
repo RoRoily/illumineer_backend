@@ -66,7 +66,7 @@ public class UserAccountController {
      * 获取当前登录用户信息接口
      * @return CustomResponse对象
      */
-    @GetMapping("/user/personal/info")
+    @GetMapping("/personal/info")
     public CustomResponse personalInfo() {
         return userAccountService.personalInfo();
     }
