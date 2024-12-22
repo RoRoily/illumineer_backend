@@ -118,7 +118,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
 
     // 返回已认领/未认领的文献
     private List<PaperAdo> getPapersBelonged(String name, boolean isBelonged) {
-        List<Map<String, Object>> papers = paperMapper.getPapers();
+        List<Map<String, Object>> papers = paperMapper.searchByKeywordWithStrictBooleanMode("str_auths", name);
         List<PaperAdo> paperAdos = new ArrayList<>();
 
         for (Map<String, Object> paper: papers) {
