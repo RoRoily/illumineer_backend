@@ -414,12 +414,14 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             String cond = "";
             if (condition.equals("auths")) {
                 cond = "str_auths";
+                paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
             } else if (condition.equals("keywords")) {
                 cond = "str_keywords";
+                paperList = paperMapper.searchByKeywordWithFullText(cond, keyword);
             } else {
                 cond = condition;
+                paperList = paperMapper.searchByKeywordWithFullText(cond, keyword);
             }
-            paperList = paperMapper.searchByKeywordWithFullText(cond, keyword);
         } else {
             paperList = new ArrayList<Map<String, Object>>();
             for (Paper paper: list) {
