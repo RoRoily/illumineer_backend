@@ -23,7 +23,7 @@ public interface PaperMapper extends BaseMapper<Paper> {
     List<Map<String, Object>> getPapersByStats(int stats);
 
     // 获取检索结果
-    @Select("SELECT * FROM paper WHERE MATCH(${condition}) AGAINST(CONCAT(#{keyword}, '*') IN BOOLEAN MODE) AND stats = 0")
+    @Select("SELECT * FROM paper WHERE MATCH(${condition}) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) AND stats = 0")
     List<Map<String, Object>> searchByKeywordWithFullText(String condition, String keyword);
 
     // 获取检索结果
