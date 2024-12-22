@@ -46,7 +46,7 @@ public class EmailAuthController {
         CustomResponse customResponse = new CustomResponse();
         // 1. 提取邮箱的域名部分
         String domain = email.substring(email.indexOf('@') + 1);
-        System.out.println(domain);
+        //System.out.println(domain);
         // 2. 根据域名查询机构
         QueryWrapper<Institution> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("domain", domain);
