@@ -45,8 +45,8 @@ public interface PaperServiceClient {
     @GetMapping("/document/paper/propider/sentinel/test/{message}")
     public String propiderSentinelTest(@PathVariable("message") String message);
 
-    @GetMapping("/document/paper/getByFid/{fid}")
-    CustomResponse getPaperByFid(@PathVariable("fid") Integer fid);
+    @GetMapping("/document/paper/getByFid")
+    CustomResponse getPaperByFid(@RequestParam("fid") Integer fid);
 
     //FIXME:在函数头添加了document
     @PostMapping("/document/document/paper/modiftAuth")

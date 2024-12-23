@@ -74,8 +74,8 @@ public class ClientController {
      * @return CustomResponse
      */
 
-    @GetMapping("/paper/getByFid/{fid}")
-    public CustomResponse getPaperByFid(@PathVariable("fid") Integer fid) {
+    @GetMapping("/paper/getByFid")
+    public CustomResponse getPaperByFid(@RequestParam("fid") Integer fid) {
         return paperService.getPaperByFid(fid);
     }
 
