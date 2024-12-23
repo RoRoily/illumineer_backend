@@ -13,26 +13,26 @@ import java.util.Date;
 @NoArgsConstructor
 public class AppealEntry {
     @TableId(type = IdType.AUTO)
-    Integer appealId;
+    private Integer appealId;
 
-    Long pid;
+    private Long pid;
 
-    Integer appellantId;
+    private Integer appellantId;
 
-    Integer ownerId;
+    private Integer ownerId;
 
-    boolean isAcceptedByAppellant;
+    private boolean isAcceptedByAppellant;
 
-    boolean accomplish;
+    private boolean accomplish;
 
-    Date appealTime;
-    Date handleTime;
+    private Date appealTime;
+    private Date handleTime;
 
-    public AppealEntry(PaperAdo paperAdo,User appellant,User owner){
+    public AppealEntry(Long pid,Integer aid,Integer ownerIdd){
         Date now = new Date();
-        this.setPid(paperAdo.getPid());
-        this.setAppellantId(appellant.getUid());
-        this.setOwnerId(owner.getUid());
+        this.setPid(pid);
+        this.setAppellantId(aid);
+        this.setOwnerId(ownerIdd);
         this.setAcceptedByAppellant(false);
         this.setAccomplish(false);
         this.setAppealTime(now);

@@ -11,6 +11,8 @@ import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 import com.buaa01.illumineer_backend.service.history.HistoryService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,13 +45,19 @@ public class HistoryServiceImpl implements HistoryService {
     /**
      * 分页返回历史记录中的条目
      * 并行处理
-     *
      */
     @Override
-    public CustomResponse getHistoryByPage(Integer uid, Integer quantity, Integer index){
+    public CustomResponse getHistoryByPage(Integer uid, Integer quantity, Integer index) {
         //从redis中获取历史记录条目集合
         String hisKey = "uForHis" + uid;
-        Set<Object> pidList= redisTool.getSetMembers(hisKey);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<Long> pidList = null;
+        try {
+            pidList = objectMapper.readValue(redisTool.getSetMembers(hisKey).toString(), new TypeReference<Set<Long>>() {
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (index == null) {
             index = 1;
@@ -62,17 +70,19 @@ public class HistoryServiceImpl implements HistoryService {
         // 检查数据是否足够满足分页查询
         if (startIndex > pidList.size()) {
             // 如果数据不足以填充当前分页，返回空列表
-            return new CustomResponse(200,"已查询结束",null);
+            return new CustomResponse(200, "已查询结束", null);
         }
         // 使用线程安全的集合类 CopyOnWriteArrayList 保证多线程处理共享List不会出现并发问题
         List<Paper> paperList = new CopyOnWriteArrayList<>();
 
         // 直接数据库分页查询    （平均耗时 13ms）
-        List<Object> idList = new ArrayList<>(pidList);
+        List<Long> idList = new ArrayList<>(pidList);
         endIndex = Math.min(endIndex, idList.size());
         //history的查询集合
-        List<Object> sublist = idList.subList(startIndex, endIndex);
+        List<Long> sublist = idList.subList(startIndex, endIndex);
+        System.out.println(sublist);
         List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
+        System.out.println(historyPaperList);
 
         // 并行处理每一个history条目，提高效率
         // 先将videoList转换为Stream
@@ -85,16 +95,16 @@ public class HistoryServiceImpl implements HistoryService {
                     map.put("paperTitle", paper.getTitle());
 
                     CompletableFuture<Void> userFuture = CompletableFuture.runAsync(() -> {
-                        StringBuilder Auths= new StringBuilder();
-                        for(Map.Entry<String,Integer>entry:paper.getAuths().entrySet()){
+                        StringBuilder Auths = new StringBuilder();
+                        for (Map.Entry<String, Integer> entry : paper.getAuths().entrySet()) {
                             Auths.append(entry.getKey()).append(",");
                         }
-                        Auths.deleteCharAt(Auths.length()-1);
+                        Auths.deleteCharAt(Auths.length() - 1);
                         map.put("auth", Auths);
                     }, taskExecutor);
 
                     CompletableFuture<Void> categoryFuture = CompletableFuture.runAsync(() -> {
-                        map.put("publishDate",paper.getPublishDate());
+                        map.put("publishDate", paper.getPublishDate());
                     }, taskExecutor);
 
                     // 使用join()等待全部任务完成
@@ -116,21 +126,21 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     /**
-     *  在历史记录中新增条目
-     *  注意：当文章已经出现在记录中时，需要更新这个条目
+     * 在历史记录中新增条目
+     * 注意：当文章已经出现在记录中时，需要更新这个条目
      */
-    public CustomResponse insertInHistory(Integer pid){
+    public CustomResponse insertInHistory(Integer pid) {
         CustomResponse customResponse = new CustomResponse();
 
         return customResponse;
     }
 
     /**
-     *  在历史记录中删除条目
-     * */
-   public CustomResponse deleteInHistory(){
-       CustomResponse customResponse = new CustomResponse();
+     * 在历史记录中删除条目
+     */
+    public CustomResponse deleteInHistory() {
+        CustomResponse customResponse = new CustomResponse();
 
-       return customResponse;
-   }
+        return customResponse;
+    }
 }

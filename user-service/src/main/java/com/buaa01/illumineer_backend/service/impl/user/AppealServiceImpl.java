@@ -37,14 +37,17 @@ public class AppealServiceImpl implements AppealService {
     @Override
     public CustomResponse createAppealEntry(Integer appellantUid, String sameName, Integer conflictPaperPid){
         CustomResponse customResponse = new CustomResponse();
-        Paper conflictPaper = paperServiceClient.getPaperById(conflictPaperPid);
-        PaperAdo conflictPaperInfo = new PaperAdo(conflictPaper,sameName);
-        User appliant = userService.getUserByUId(appellantUid);
-        Integer ownerUid = conflictPaper.getAuths().get(sameName);
+        //Paper conflictPaper = paperServiceClient.getPaperById(conflictPaperPid);
+        //PaperAdo conflictPaperInfo = new PaperAdo(conflictPaper,sameName);
+       // User appliant = userService.getUserByUId(appellantUid);
+        //Integer ownerUid = conflictPaper.getAuths().get(sameName);
+        Long pid  = Long.valueOf(conflictPaperPid);
+        Integer ownerUid = paperServiceClient.getAuthId(sameName,pid);
 
-        User owner = userService.getUserByUId(ownerUid);
 
-        AppealEntry appealEntry = new AppealEntry(conflictPaperInfo,appliant,owner);
+        //User owner = userService.getUserByUId(ownerUid);
+
+        AppealEntry appealEntry = new AppealEntry(pid,appellantUid,ownerUid);
         QueryWrapper<AppealEntry> queryWrapper = new QueryWrapper<>();
         //保存至数据库
         appealMapper.insert(appealEntry);

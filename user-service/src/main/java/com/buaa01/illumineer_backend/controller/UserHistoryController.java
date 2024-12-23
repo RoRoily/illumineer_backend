@@ -4,11 +4,15 @@ import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.History;
 import com.buaa01.illumineer_backend.service.history.HistoryService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.tool.JsonWebTokenTool;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class UserHistoryController {
@@ -34,8 +38,16 @@ public class UserHistoryController {
      * @return CunstomResponce实体类
      */
     @GetMapping("/history/getAPage")
-    public CustomResponse getAPage(@RequestParam("quantity")Integer quantity,@RequestParam("index")Integer index){
-        System.out.println("hi");
-        return historyService.getHistoryByPage(currentUser.getUserUid(),quantity,index);
+    public CustomResponse getAPage(@RequestParam("quantity")Integer quantity,@RequestParam("index")Integer index, HttpServletRequest request){
+        String token = request.getHeader("Authorization");
+        if (token.isEmpty()) {
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("缺少token");
+        }
+        token = token.substring(7);
+        String userId = JsonWebTokenTool.getSubjectFromToken(token);
+        return historyService.getHistoryByPage(Integer.parseInt(userId) ,quantity,index);
+//        return historyService.getHistoryByPage(currentUser.getUserUid(),quantity,index);
     }
 }
