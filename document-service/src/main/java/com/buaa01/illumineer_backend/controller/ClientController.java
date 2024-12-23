@@ -9,12 +9,12 @@ import com.buaa01.illumineer_backend.service.CategoryService;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -44,17 +44,9 @@ public class ClientController {
      *
      * @param pids 文章id列表
      **/
-    @PostMapping("/ado/subList")
-    public CustomResponse getPaperAdoptionsByList(List<Long> pids) {
-        CustomResponse customResponse = new CustomResponse();
-        try {
-            customResponse.setData(paperAdoptionService.getPaperAdoptionsByList(pids));
-        } catch (Exception e) {
-            e.printStackTrace();
-            customResponse.setCode(500);
-            customResponse.setMessage("无法获取认领条目列表！");
-        }
-        return customResponse;
+    @GetMapping("/ado/subList")
+    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") List<Long> pids) {
+        return paperAdoptionService.getPaperAdoptionsByList(pids);
     }
 
     /***
@@ -82,8 +74,8 @@ public class ClientController {
      * @return CustomResponse
      */
 
-    @GetMapping("/paper/getByFid/{fid}")
-    public CustomResponse getPaperByFid(@PathVariable("fid") Integer fid) {
+    @GetMapping("/paper/getByFid")
+    public CustomResponse getPaperByFid(@RequestParam("fid") Integer fid) {
         return paperService.getPaperByFid(fid);
     }
 
@@ -110,7 +102,38 @@ public class ClientController {
                               @RequestParam("name")String name,
                               @RequestParam("uid")Integer uid
     ){
+        System.out.println("ok");
         return paperService.modifyAuth(Pid,name,uid);
+    }
+
+    /**
+     * 通过姓名获取id
+     * @param name
+     * @param pid
+     * @return
+     */
+    @GetMapping("/paper/getAuthUid")
+    Integer getAuthId(@RequestParam("name")String name,@RequestParam("pid")Long pid)
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> paper = paperMapper.getPaperByPid(pid);
+        Integer uid=null;
+
+        try {
+            // auths 的转换
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {});
+            paper.put("auths", auths);
+            uid = auths.get(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return uid;
+    }
+    @GetMapping("/paper/{name}")
+    List<PaperAdo> getPaperAdoByName(@PathVariable("name") String name){
+        CustomResponse customResponse = paperAdoptionService.getPaperAdoptionsByName(name);
+        Map<String,Object> map = (Map<String, Object>) customResponse.getData();
+        return (List<PaperAdo>) map.get("result");
     }
     // @PostMapping("/document/adoption")
     // CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name){

@@ -3,6 +3,7 @@ package com.buaa01.illumineer_backend.service.impl.paper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.client.UserClientService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -188,7 +192,22 @@ public class PaperServiceImpl implements PaperService {
             Set<Object> paperSet = redisTool.zRange(fidKey, 0, -1);
             for (Object paperId : paperSet) {
                 paper = paperMapper.getPaperByPid(Long.valueOf(paperId.toString()));
-                papers.add(paper);
+
+                Map<String, Object> searchResultPaper = new HashMap<>();
+                searchResultPaper.put("pid", paper.get("pid"));
+                searchResultPaper.put("title", paper.get("title"));
+                searchResultPaper.put("keywords", paper.get("keywords"));
+                searchResultPaper.put("auths", paper.get("auths"));
+                searchResultPaper.put("category", paper.get("category"));
+                searchResultPaper.put("type", paper.get("type"));
+                searchResultPaper.put("theme", paper.get("theme"));
+                searchResultPaper.put("publish_date", paper.get("publish_date"));
+                searchResultPaper.put("derivation", paper.get("derivation"));
+                searchResultPaper.put("ref_times", paper.get("ref_times"));
+                searchResultPaper.put("fav_times", paper.get("fav_times"));
+                searchResultPaper.put("content_url", paper.get("content_url"));
+
+                papers.add(searchResultPaper);
             }
             customResponse.setCode(200);
             customResponse.setMessage("获取成功");

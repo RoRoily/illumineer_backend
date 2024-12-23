@@ -46,7 +46,7 @@ public class EmailAuthController {
         CustomResponse customResponse = new CustomResponse();
         // 1. 提取邮箱的域名部分
         String domain = email.substring(email.indexOf('@') + 1);
-        System.out.println(domain);
+        //System.out.println(domain);
         // 2. 根据域名查询机构
         QueryWrapper<Institution> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("domain", domain);
@@ -56,8 +56,6 @@ public class EmailAuthController {
             customResponse.setMessage("unknown academic institution");
             return customResponse;
         }
-        String institutionName = institution.getName();
-
 
         // 2. 生成认证 token 并保存用户信息(uid和认证机构)
         Integer verifyUid = currentUser.getUserId();

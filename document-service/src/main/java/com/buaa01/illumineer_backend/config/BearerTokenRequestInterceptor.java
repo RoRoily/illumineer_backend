@@ -18,18 +18,19 @@ public class BearerTokenRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        final String authorization = HttpHeaders.AUTHORIZATION;
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (Objects.nonNull(requestAttributes)) {
-            String authorizationHeader = requestAttributes.getRequest().getHeader(HttpHeaders.AUTHORIZATION);
-            if (Objects.nonNull(authorizationHeader)){
-                Matcher matcher = BEARER_TOKEN_HEADER_PATTERN.matcher(authorizationHeader);
-                if (matcher.matches()) {
-                    // 清除token头 避免传染
-                    template.header(authorization);
-                    template.header(authorization, authorizationHeader);
-                }
-            }
-        }
+//        final String authorization = HttpHeaders.AUTHORIZATION;
+//        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+//        if (Objects.nonNull(requestAttributes)) {
+//            String authorizationHeader = requestAttributes.getRequest().getHeader(HttpHeaders.AUTHORIZATION);
+//            if (Objects.nonNull(authorizationHeader)){
+//                Matcher matcher = BEARER_TOKEN_HEADER_PATTERN.matcher(authorizationHeader);
+//                if (matcher.matches()) {
+//                    // 清除token头 避免传染
+//                    template.header(authorization);
+//                    template.header(authorization, authorizationHeader);
+//                }
+//            }
+//        }
+        template.removeHeader("Authorization");
     }
 }

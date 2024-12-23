@@ -36,7 +36,7 @@ public class UserAuthController {
      * @param map 包含name institution gender 的map
      * @return CustomResponse实例
      */
-    @PostMapping("/user/auth/authentation")
+    @PostMapping("/auth/authentation")
     public CustomResponse authentation(@RequestBody Map<String,String> map){
         String name = map.get("name");
         String institution = map.get("institution");
@@ -61,7 +61,7 @@ public class UserAuthController {
      * List中包含的是map属性 分别是文章的 name writer Date isClaimed pid
      *名称 作者 时间 是否被该用户实名认证的对象认领(被同名的认领了) 文章对应的pid（方便认领完成后返回给后端进行更新）
      * */
-    @GetMapping("auth/getClaimList")
+    @GetMapping("/auth/getClaimList")
     public CustomResponse getClaimList(){
         try {
             CustomResponse customResponse = new CustomResponse();
@@ -86,10 +86,10 @@ public class UserAuthController {
      *
      * 更新：该端口弃用，被ClientController调用的Auth端口完成功能
      * **/
-    @PostMapping("user/auth/claim")
-    public CustomResponse claim(@RequestBody List<Integer> pidList){
+    @PostMapping("/auth/claim")
+    public CustomResponse claim(@RequestBody List<Integer> pidList, @RequestParam("uid") Integer uid){
         try {
-            return gainAdoptService.updateAdoption(pidList,currentUser.getUserId());
+            return gainAdoptService.updateAdoption(pidList,uid);
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

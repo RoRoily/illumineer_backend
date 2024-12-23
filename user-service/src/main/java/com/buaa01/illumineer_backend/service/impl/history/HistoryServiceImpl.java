@@ -1,19 +1,20 @@
 package com.buaa01.illumineer_backend.service.impl.history;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.buaa01.illumineer_backend.entity.*;
 import com.buaa01.illumineer_backend.entity.DTO.HistoryDTO;
-import com.buaa01.illumineer_backend.entity.History;
-import com.buaa01.illumineer_backend.entity.Paper;
-import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.HistoryMapper;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 import com.buaa01.illumineer_backend.service.history.HistoryService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -43,13 +44,20 @@ public class HistoryServiceImpl implements HistoryService {
     /**
      * 分页返回历史记录中的条目
      * 并行处理
-     *
      */
     @Override
-    public CustomResponse getHistoryByPage(Integer uid, Integer quantity, Integer index){
+    public CustomResponse getHistoryByPage(Integer uid, Integer quantity, Integer index) {
         //从redis中获取历史记录条目集合
-        String hisKey = "uForHis" + uid;
-        Set<Object> pidList= redisTool.getSetMembers(hisKey);
+        String hisKey = "uForHis:" + uid;
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<Long> pidList = null;
+        try {
+            Set<Object> pidObj = redisTool.zRange(hisKey, 0, -1);
+            pidList = objectMapper.readValue(pidObj.toString(), new TypeReference<Set<Long>>() {
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (index == null) {
             index = 1;
@@ -62,16 +70,16 @@ public class HistoryServiceImpl implements HistoryService {
         // 检查数据是否足够满足分页查询
         if (startIndex > pidList.size()) {
             // 如果数据不足以填充当前分页，返回空列表
-            return new CustomResponse(200,"已查询结束",null);
+            return new CustomResponse(200, "已查询结束", null);
         }
         // 使用线程安全的集合类 CopyOnWriteArrayList 保证多线程处理共享List不会出现并发问题
         List<Paper> paperList = new CopyOnWriteArrayList<>();
 
         // 直接数据库分页查询    （平均耗时 13ms）
-        List<Object> idList = new ArrayList<>(pidList);
+        List<Long> idList = new ArrayList<>(pidList);
         endIndex = Math.min(endIndex, idList.size());
         //history的查询集合
-        List<Object> sublist = idList.subList(startIndex, endIndex);
+        List<Long> sublist = idList.subList(startIndex, endIndex);
         List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
 
         // 并行处理每一个history条目，提高效率
@@ -85,16 +93,16 @@ public class HistoryServiceImpl implements HistoryService {
                     map.put("paperTitle", paper.getTitle());
 
                     CompletableFuture<Void> userFuture = CompletableFuture.runAsync(() -> {
-                        StringBuilder Auths= new StringBuilder();
-                        for(Map.Entry<String,Integer>entry:paper.getAuths().entrySet()){
+                        StringBuilder Auths = new StringBuilder();
+                        for (Map.Entry<String, Integer> entry : paper.getAuths().entrySet()) {
                             Auths.append(entry.getKey()).append(",");
                         }
-                        Auths.deleteCharAt(Auths.length()-1);
+                        Auths.deleteCharAt(Auths.length() - 1);
                         map.put("auth", Auths);
                     }, taskExecutor);
 
                     CompletableFuture<Void> categoryFuture = CompletableFuture.runAsync(() -> {
-                        map.put("publishDate",paper.getPublishDate());
+                        map.put("publishDate", paper.getPublishDate());
                     }, taskExecutor);
 
                     // 使用join()等待全部任务完成
@@ -106,6 +114,8 @@ public class HistoryServiceImpl implements HistoryService {
                     return map;
                 })
                 .collect(Collectors.toList());
+
+
         CustomResponse customResponse = new CustomResponse();
         customResponse.setMessage("分页查询结果成功");
         customResponse.setData(mapList);
@@ -116,21 +126,63 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     /**
-     *  在历史记录中新增条目
-     *  注意：当文章已经出现在记录中时，需要更新这个条目
+     * 在历史记录中新增条目
+     * 注意：当文章已经出现在记录中时，需要更新这个条目
      */
-    public CustomResponse insertInHistory(Integer pid){
+    public CustomResponse insertInHistory(Integer userID, Long pid) {
         CustomResponse customResponse = new CustomResponse();
+
+        try {
+            Integer hID = userID;
+            String favKey = "uForHis:" + userID;
+
+            redisTool.storeZSetByTime(favKey, pid);
+            QueryWrapper<History> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("hid", hID);
+            History history = historyMapper.selectOne(queryWrapper);
+            if (history == null) {
+                historyMapper.insert(new History(hID, userID, 0));
+            } else {
+                UpdateWrapper<History> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.eq("hid", hID);
+                updateWrapper.setSql("count = count + 1");
+                historyMapper.update(null, updateWrapper);
+            }
+            customResponse.setMessage("添加历史记录成功");
+            customResponse.setData(hID);
+        } catch (Exception e) {
+            e.printStackTrace();
+            customResponse.setCode(500);
+            customResponse.setMessage("添加历史记录失败");
+        }
 
         return customResponse;
     }
 
     /**
-     *  在历史记录中删除条目
-     * */
-   public CustomResponse deleteInHistory(){
-       CustomResponse customResponse = new CustomResponse();
-
-       return customResponse;
-   }
+     * 在历史记录中删除条目
+     */
+    public CustomResponse deleteInHistory(Integer userId, Long pid) {
+        CustomResponse customResponse = new CustomResponse();
+        String favKey = "uForHis:" + userId;
+        if (!redisTool.isExistInZSet(favKey, pid)) {
+            customResponse.setCode(500);
+            customResponse.setMessage("该历史记录不存在");
+        } else {
+            redisTool.deleteZSetMember(favKey, pid);
+        }
+        QueryWrapper<History> queryWrapper = new QueryWrapper<>();
+        Integer hID = userId;
+        queryWrapper.eq("hid", hID);
+        History history = historyMapper.selectOne(queryWrapper);
+        if (history == null) {
+            historyMapper.insert(new History(hID, userId, 0));
+        } else {
+            UpdateWrapper<History> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("hid", hID);
+            updateWrapper.setSql("count = count - 1");
+            historyMapper.update(null, updateWrapper);
+        }
+        return customResponse;
+    }
 }

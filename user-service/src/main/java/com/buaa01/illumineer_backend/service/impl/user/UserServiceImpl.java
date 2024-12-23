@@ -11,6 +11,7 @@ import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private CurrentUser currentUser;
+    @Qualifier("taskExecutor")
     @Autowired
     private Executor taskExecutor;
     @Autowired
@@ -112,22 +114,22 @@ public class UserServiceImpl implements UserService {
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
-        String name = (String) info.get("name");
-        String nick_name = (String) info.get("nickName");
+//        String name = (String) info.get("name");
+        String nick_name = (String) info.get("username");
         String email = (String) info.get("email");
-        int gender = (int) info.get("gender");
+//        int gender = (int) info.get("gender");
         String institution = (String) info.get("institution");
-        String description = (String) info.get("description");
+//        String description = (String) info.get("description");
 //        List<String> category_ids = List.of(((String) info.get("category")).split(","));
 //        List<String> category = paperServiceClient.getCategory(category_ids);
-        List<String> category = List.of(((String) info.get("category")).split(","));
-        user.setName(name);
+//        List<String> category = List.of(((String) info.get("category")).split(","));
+//        user.setName(name);
         user.setNickName(nick_name);
         user.setEmail(email);
-        user.setGender(gender);
+//        user.setGender(gender);
         user.setInstitution(institution);
-        user.setDescription(description);
-        user.setField(category);
+//        user.setDescription(description);
+//        user.setField(category);
         if (userMapper.getUserByNickName(nick_name) != null)
             return -1;
         if (userMapper.getUserByEmail(email) != null)
@@ -184,5 +186,18 @@ public class UserServiceImpl implements UserService {
         user.setUid(uid);
         user.setStats(0);
         return userMapper.updateById(user);
+    }
+
+    @Override
+    public void modifyAuthInfo(String name,String institutionName,String address){
+        Integer loginUserId = currentUser.getUserId();
+        User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
+        if (user == null)
+            user = userMapper.selectById(loginUserId);
+        user.setName(name);
+        user.setInstitution(institutionName);
+        userMapper.updateById(user);
+        User finalUser = user;
+        CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
     }
 }
