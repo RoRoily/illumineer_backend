@@ -1,7 +1,10 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Favorite;
+import com.buaa01.illumineer_backend.entity.History;
 import com.buaa01.illumineer_backend.entity.singleton.FidnumSingleton;
 import com.buaa01.illumineer_backend.mapper.FavoriteMapper;
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
@@ -41,19 +44,19 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * @return 返回一新的收藏夹id
      */
     @Override
-    public CustomResponse createFav(String favName) {
+    public CustomResponse createFav(String favName, Integer userID) {
         CustomResponse customResponse = new CustomResponse();
 
         try {
-            Integer userID = currentUser.getUserId();
-            Integer fID = fidnumInstance.addFidnum();
             String favKey = "uForFav:" + userID;
+            Long fidBias = redisTool.getZSetNumber(favKey);
+            Integer fID =(int) (fidBias * 10000 + userID);
             if (favName == null) {
                 favName = "收藏夹" + fID;
             }
 
             redisTool.storeZSetByTime(favKey, fID);
-            favoriteMapper.insert(new Favorite(fID, userID, 1, favName, 0, 0));
+            favoriteMapper.insert(new Favorite(fID, userID, 2, favName, 0, 0));
             customResponse.setMessage("新建收藏夹成功");
             customResponse.setData(fID);
         } catch (Exception e) {
@@ -71,11 +74,14 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * 删除一个收藏夹
      */
     @Override
-    public CustomResponse deleteFav(Integer fid) {
+    public CustomResponse deleteFav(Integer fid, Integer userID) {
         CustomResponse customResponse = new CustomResponse();
 
-        String favKey = "uForFav:" + currentUser.getUserId();
-        if (!redisTool.isExistInZSet(favKey, fid)) {
+        String favKey = "uForFav:" + userID;
+        QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("fid", fid);
+        Favorite favorite = favoriteMapper.selectOne(queryWrapper);
+        if (favorite == null) {
             customResponse.setCode(500);
             customResponse.setMessage("该收藏夹不存在");
         } else {
@@ -94,12 +100,17 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     public CustomResponse changeFavName(Integer fid, String newName) {
         CustomResponse customResponse = new CustomResponse();
 
-        String favKey = "fid:" + fid;
-        if (!redisTool.isExist(favKey)) {
+        QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("fid", fid);
+        Favorite favorite = favoriteMapper.selectOne(queryWrapper);
+        if (favorite == null)  {
             customResponse.setCode(500);
             customResponse.setMessage("该收藏夹不存在");
         } else {
-            favoriteMapper.selectById(fid).setTitle(newName);
+            UpdateWrapper<Favorite> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("fid", fid);
+            updateWrapper.set("title", newName);
+            favoriteMapper.update(null, updateWrapper);
             customResponse.setMessage("收藏夹更名成功！");
         }
         return customResponse;
@@ -116,19 +127,25 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         CustomResponse customResponse = new CustomResponse();
         // fid不存在
         String fidKey = "fid:" + fid;
-        if (!redisTool.isExist(fidKey)) {
+        QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("fid", fid);
+        Favorite favorite = favoriteMapper.selectOne(queryWrapper);
+        if (favorite == null) {
             customResponse.setCode(500);
             customResponse.setMessage("该收藏夹不存在");
         }
         // fid下已经有该论文
         else if (redisTool.isExistInZSet(fidKey, pid)) {
             customResponse.setCode(500);
-            customResponse.setMessage("收藏夹fid" + fid + "已存在该论文");
+            customResponse.setMessage("收藏夹" + fid + "已存在该论文");
         }
         // 收藏论文
         else {
             redisTool.storeZSetByTime(fidKey, pid);
-            favoriteMapper.selectById(fid).updataFavCounts(1);
+            UpdateWrapper<Favorite> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("fid", fid);
+            updateWrapper.setSql("count = count + 1");
+            favoriteMapper.update(null, updateWrapper);
             customResponse.setCode(200);
             customResponse.setMessage("收藏成功");
         }
@@ -156,7 +173,10 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         // 移除论文
         else {
             redisTool.deleteZSetMember(fidKey, pid);
-            favoriteMapper.selectById(fid).updataFavCounts(0);
+            UpdateWrapper<Favorite> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("fid", fid);
+            updateWrapper.setSql("count = count - 1");
+            favoriteMapper.update(null, updateWrapper);
             customResponse.setCode(200);
             customResponse.setMessage("移除收藏成功");
         }
@@ -170,18 +190,16 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
      * @return 返回对应用户所有收藏夹的title，count字段以及其中pid的集合(set<Object>)
      **/
     @Override
-    public CustomResponse searchAll() {
+    public CustomResponse searchAll(Integer uid) {
         CustomResponse customResponse = new CustomResponse();
-        Map<String, Object> data = new HashMap<>();
-        List<Integer> paperNumsofFav = new ArrayList<>();
-        List<String> favNames = new ArrayList<>();
-        List<List<Integer>> pidslist = new ArrayList<>();
+        List<Map<String, Object>> data = new ArrayList<>();
         try {
-            String favKey = "uForFav:" + currentUser.getUserId();
-            Set<Object> fids = redisTool.zRange(favKey, 0, -1);
+            QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("uid", uid);
+            List<Favorite> favorites = favoriteMapper.selectList(queryWrapper);
 
-            for (Object fid_Object : fids) {
-                Integer fid = (Integer) fid_Object;
+            for (Favorite favorite : favorites) {
+                Integer fid = favorite.getFid();
                 String fidKey = "fid:" + fid;
                 Set<Object> pids_Set = redisTool.zRange(fidKey, 0, -1);
                 List<Integer> pids_List = pids_Set.stream()
@@ -189,17 +207,14 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                         .map(obj -> (Integer) obj)
                         .collect(Collectors.toCollection(ArrayList::new));
 
-                paperNumsofFav.add(pids_List.size());
-                favNames.add(favoriteMapper.selectById(fid).getTitle());
-                pidslist.add(pids_List);
+                Map<String, Object> fav = new HashMap<>();
+                fav.put("fid", fid);
+                fav.put("favName", favorite.getTitle());
+                fav.put("num", pids_List.size());
+                fav.put("pidList", pids_List);
+                data.add(fav);
             }
-
-            data.put("pids", pidslist);
-            data.put("favNames", favNames);
-            data.put("paperNumsofFav", paperNumsofFav);
-            data.put("fids", fids);
             customResponse.setData(data);
-
             customResponse.setMessage("返回所有收藏夹成功");
         } catch (Exception e) {
             e.printStackTrace();

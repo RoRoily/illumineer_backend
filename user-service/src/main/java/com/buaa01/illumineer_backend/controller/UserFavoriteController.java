@@ -3,15 +3,18 @@ package com.buaa01.illumineer_backend.controller;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.service.user.UserFavoriteService;
 
+import com.buaa01.illumineer_backend.tool.JsonWebTokenTool;
 import feign.Param;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 
@@ -24,8 +27,16 @@ public class UserFavoriteController {
      * 新增用户收藏夹
      **/
     @PostMapping("/fav/createFav")
-    public CustomResponse createFav(@RequestParam("favName") String favName) {
-        return userFavoriteService.createFav(favName);
+    public CustomResponse createFav(@RequestParam("favName") String favName, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token.isEmpty()) {
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("缺少token");
+        }
+        token = token.substring(7);
+        String userId = JsonWebTokenTool.getSubjectFromToken(token);
+        return userFavoriteService.createFav(favName, Integer.parseInt(userId));
     }
 
     /**
@@ -35,8 +46,16 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
     @PostMapping("/fav/deleteFav")
-    public CustomResponse deleteFav(@RequestParam("fid") Integer fid) {
-        return userFavoriteService.deleteFav(fid);
+    public CustomResponse deleteFav(@RequestParam("fid") Integer fid, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token.isEmpty()) {
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("缺少token");
+        }
+        token = token.substring(7);
+        String userId = JsonWebTokenTool.getSubjectFromToken(token);
+        return userFavoriteService.deleteFav(fid, Integer.parseInt(userId));
     }
 
     /**
@@ -45,7 +64,7 @@ public class UserFavoriteController {
      * @param fid 收藏夹id newName 新的收藏夹名称
      * @return CustomResponse
      **/
-    @PutMapping("/fav/changeName")
+    @PostMapping("/fav/changeName")
     public CustomResponse changeFavName(@RequestParam("fid") Integer fid, @RequestParam("name") String name) {
         return userFavoriteService.changeFavName(fid, name);
     }
@@ -79,8 +98,16 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
     @GetMapping("/fav/searchAll")
-    public CustomResponse searchAll() {
-        return userFavoriteService.searchAll();
+    public CustomResponse searchAll(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token.isEmpty()) {
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("缺少token");
+        }
+        token = token.substring(7);
+        String userId = JsonWebTokenTool.getSubjectFromToken(token);
+        return userFavoriteService.searchAll(Integer.parseInt(userId));
     }
 
     /**
@@ -100,8 +127,8 @@ public class UserFavoriteController {
      * @param pid
      * @return CustomResponse
      **/
-    @GetMapping("/fav/pidinUserFav")
-    public CustomResponse ReturnPidsinAllUserFavs(@RequestParam("pid") Long pid) {
+    @GetMapping("/fav/pidInUserFav")
+    public CustomResponse ReturnPidsInAllUserFavs(@RequestParam("pid") Long pid) {
         return userFavoriteService.ReturnPidsinAllUserFavs(pid);
     }
 
@@ -112,7 +139,7 @@ public class UserFavoriteController {
      * @return CustomResponse
      **/
 
-    @PostMapping("/fav/papers")
+    @GetMapping("/fav/papers")
     public CustomResponse getPapersByFid(@RequestParam("fid") Integer fid) {
         return userFavoriteService.getPapersByFid(fid);
     }
