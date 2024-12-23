@@ -45,16 +45,10 @@ public class ClientController {
      * @param pids 文章id列表
      **/
     @PostMapping("/ado/subList")
-    public CustomResponse getPaperAdoptionsByList(List<Long> pids) {
-        CustomResponse customResponse = new CustomResponse();
-        try {
-            customResponse.setData(paperAdoptionService.getPaperAdoptionsByList(pids));
-        } catch (Exception e) {
-            e.printStackTrace();
-            customResponse.setCode(500);
-            customResponse.setMessage("无法获取认领条目列表！");
-        }
-        return customResponse;
+    public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids) {
+        System.out.println("ok");
+        return null;
+//        return paperAdoptionService.getPaperAdoptionsByList(pids);
     }
 
     /***
@@ -110,6 +104,7 @@ public class ClientController {
                               @RequestParam("name")String name,
                               @RequestParam("uid")Integer uid
     ){
+        System.out.println("ok");
         return paperService.modifyAuth(Pid,name,uid);
     }
     // @PostMapping("/document/adoption")
