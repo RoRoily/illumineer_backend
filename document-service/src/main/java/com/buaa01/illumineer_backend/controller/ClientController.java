@@ -47,11 +47,9 @@ public class ClientController {
      *
      * @param pids 文章id列表
      **/
-    @PostMapping("/ado/subList")
-    public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids) {
-        System.out.println("ok");
-        return null;
-//        return paperAdoptionService.getPaperAdoptionsByList(pids);
+    @GetMapping("/ado/subList")
+    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") List<Long> pids) {
+        return paperAdoptionService.getPaperAdoptionsByList(pids);
     }
 
     /***

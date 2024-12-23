@@ -83,13 +83,43 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
     public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids) {
         List<PaperAdo> paperAdos = new ArrayList<>();
         for (Long pid : pids) {
-            Paper paper = null;
-            QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("pid", pid);
-            paper = paperMapper.selectOne(queryWrapper);
+            Map<String, Object> paper = null;
+            paper = paperMapper.getPaperByPid(pid);
 
-            PaperAdo paperAdo = new PaperAdo(pid, paper.getTitle(), paper.getAuths(), paper.getPublishDate(), paper.getStats(), false);
-            paperAdos.add(paperAdo);
+            ObjectMapper objectMapper = new ObjectMapper();
+            PaperAdo paperAdo = null;
+            try {
+                // auths 的转换
+                Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {
+                });
+                paper.put("auths", auths);
+
+                Date date;
+                // 判断是否是 ISO 格式，转换date格式
+                if (!paper.get("publish_date").toString().contains(" ")) {
+                    date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                            .atZone(ZoneId.systemDefault()).toInstant());
+                } else {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                    date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), formatter)
+                            .atZone(ZoneId.systemDefault()).toInstant());
+                }
+
+                // stats
+                Integer stats = 0;
+                if (paper.get("stats").toString().equals("false")) {
+                    stats = 0;
+                } else if (paper.get("stats").toString().equals("true")) {
+                    stats = 1;
+                } else {
+                    stats = Integer.parseInt(paper.get("stats").toString().strip());
+                }
+
+                paperAdo = new PaperAdo(pid, paper.get("title").toString(), auths, date, stats, false);
+                paperAdos.add(paperAdo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return paperAdos;
     }
