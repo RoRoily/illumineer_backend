@@ -9,10 +9,7 @@ import com.buaa01.illumineer_backend.service.CategoryService;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -131,6 +128,12 @@ public class ClientController {
             e.printStackTrace();
         }
         return uid;
+    }
+    @GetMapping("/paper/{name}")
+    List<PaperAdo> getPaperAdoByName(@PathVariable("name") String name){
+        CustomResponse customResponse = paperAdoptionService.getPaperAdoptionsByName(name);
+        Map<String,Object> map = (Map<String, Object>) customResponse.getData();
+        return (List<PaperAdo>) map.get("result");
     }
     // @PostMapping("/document/adoption")
     // CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name){

@@ -11,6 +11,7 @@ import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private CurrentUser currentUser;
+    @Qualifier("taskExecutor")
     @Autowired
     private Executor taskExecutor;
     @Autowired
@@ -184,5 +186,18 @@ public class UserServiceImpl implements UserService {
         user.setUid(uid);
         user.setStats(0);
         return userMapper.updateById(user);
+    }
+
+    @Override
+    public void modifyAuthInfo(String name,String institutionName,String address){
+        Integer loginUserId = currentUser.getUserId();
+        User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
+        if (user == null)
+            user = userMapper.selectById(loginUserId);
+        user.setName(name);
+        user.setInstitution(institutionName);
+        userMapper.updateById(user);
+        User finalUser = user;
+        CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
     }
 }
