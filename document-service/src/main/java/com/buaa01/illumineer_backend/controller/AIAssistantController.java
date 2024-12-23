@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/document")
 public class AIAssistantController {
 
     private final AIAssistantService aiAssistantService;
@@ -31,13 +31,14 @@ public class AIAssistantController {
      */
     @PostMapping("/AI/generateKeywords")
     public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
-
-        String keywords = aiAssistantService.StartChat(
-                "推荐“" +
-                        query +
-                        "”领域的关键词，尽量简短，10个以内，只用空格隔开。");
+        CompletableFuture<String> future = aiAssistantService.StartChat(
+                "推荐“" + query + "”" +
+                        "领域的2个英文关键词，尽量简短，每个占一行" +
+                        "（只输出关键词，不要附加其他内容）");
+        System.out.println(future.isDone());
+        String keywords = future.get();
         System.out.println("keywords: " + keywords);
-        return ResponseEntity.ok(keywords);
+        return ResponseEntity.ok(future.get());
     }
 
     /**
@@ -56,12 +57,14 @@ public class AIAssistantController {
                                       @RequestParam("offset") Integer offset,
                                       @RequestParam("type") Integer sortType,
                                       @RequestParam("order") Integer order) throws Exception{
-        String keywords = aiAssistantService
-                .StartChat("推荐“" +
-                        query +
-                        "”领域的关键词，尽量简短，10个以内，只用空格隔开。");
-        String[] keywordSplit = keywords.split("[ 、。，,.]+");
-        // 我不清楚AI会写出什么分割符（一般是、），所以使用正则表达式来识别
+        CompletableFuture<String> keywords = aiAssistantService.StartChat(
+                "推荐“" + query + "”" +
+                        "领域的2个英文关键词，尽量简短，每个占一行" +
+                        "（只输出关键词，不要附加其他内容）");
+        String keywordsContent = keywords.get();
+        System.out.println("keywords: " + keywordsContent);
+        String[] keywordSplit = keywordsContent.split("\\n+");
+        // 使用正则表达式来识别分割
         List<String> keywordList = Arrays.stream(keywordSplit).toList();
         List<String> logicList = new ArrayList<>();
         List<String> conditionList = new ArrayList<>();
@@ -70,41 +73,38 @@ public class AIAssistantController {
                 logicList.add("0");
             }
             else {
-                logicList.add("1");
+                logicList.add("2"); // or instead of and
             }
-            conditionList.add("keywords");
+            conditionList.add("title");
         }
+        for (String condition: conditionList) {
+            System.out.print(condition + ",");
+        }
+        System.out.println();
+        for (String logic: logicList) {
+            System.out.print(logic + ",");
+        }
+        System.out.println();
+        for (String keyword: keywordList) {
+            System.out.print(keyword + ",");
+        }
+        System.out.println();
 
         String logic = String.join(",", logicList);
         String condition = String.join(",", conditionList);
         String keyword = String.join(",", keywordList);
         Object data = paperSearchService.advancedSearchPapers(logic, condition, keyword, size, offset, sortType, order).getData();
-        Map<String, Object> result;
-        if (isMapOfStringToObject(data)) {
-            result = (Map<String, Object>) data;
-            result.put("generatedKeywords", keywordList);
-            return new CustomResponse(200, "OK", result);
-        }
-        else {
-            return new CustomResponse(500, "Internal Error", null);
-        }
-    }
-
-    public static boolean isMapOfStringToObject(Object obj) {
-        // 1. 检查 obj 是否是一个 Map 实例
-        if (obj instanceof Map<?, ?> map) {
-
+        Map<String, Object> result = new HashMap<>();
+        if (data instanceof Map<?, ?> map) {
             // 2. 检查键是否为 String 类型，值是否为 Object 类型
             Set<?> keys = map.keySet();
             for (Object key : keys) {
-                if (!(key instanceof String)) {
-                    return false;  // 键不是 String 类型
+                if (key instanceof String keyInStr) {
+                    result.put(keyInStr, map.get(key));
                 }
-                // 值的类型通常是 Object，所以不需要显式检查
             }
-            return true; // 所有键都是 String 类型
         }
-        return false;  // obj 不是 Map 类型
+        result.put("generatedKeywords", keywordList);
+        return new CustomResponse(200, "OK", result);
     }
-
 }

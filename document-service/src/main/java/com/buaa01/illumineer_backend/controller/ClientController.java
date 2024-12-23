@@ -11,10 +11,13 @@ import com.buaa01.illumineer_backend.service.paper.PaperService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -106,6 +109,30 @@ public class ClientController {
     ){
         System.out.println("ok");
         return paperService.modifyAuth(Pid,name,uid);
+    }
+
+    /**
+     * 通过姓名获取id
+     * @param name
+     * @param pid
+     * @return
+     */
+    @GetMapping("/paper/getAuthUid")
+    Integer getAuthId(@RequestParam("name")String name,@RequestParam("pid")Long pid)
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> paper = paperMapper.getPaperByPid(pid);
+        Integer uid=null;
+
+        try {
+            // auths 的转换
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {});
+            paper.put("auths", auths);
+            uid = auths.get(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return uid;
     }
     // @PostMapping("/document/adoption")
     // CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name){
