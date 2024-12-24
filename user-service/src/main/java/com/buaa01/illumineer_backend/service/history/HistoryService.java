@@ -19,5 +19,5 @@ public interface HistoryService {
     /**
      *  在历史记录中删除条目
      * */
-    public CustomResponse deleteInHistory(Integer userID, Long pid);
+    public CustomResponse deleteInHistory(Integer userID, List<Long> pids);
 }
