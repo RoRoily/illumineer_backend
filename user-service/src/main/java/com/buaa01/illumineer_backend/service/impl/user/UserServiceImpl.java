@@ -1,6 +1,5 @@
 package com.buaa01.illumineer_backend.service.impl.user;
 
-import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.DTO.UserDTO;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.UserMapper;
@@ -8,15 +7,12 @@ import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -207,6 +203,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void modifyAuthInfo(String name, String institutionName, String address) {
         Integer loginUserId = currentUser.getUserId();
+        User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
+        if (user == null)
+            user = userMapper.selectById(loginUserId);
+        user.setName(name);
+        user.setInstitution(institutionName);
+        user.setIsVerify(true);
+        userMapper.updateById(user);
+        User finalUser = user;
+        CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
+    }
+
+
+    @Override
+    public void modifyAuthInfoWithRedis(String name, String institutionName, String address){
+        Integer loginUserId =redisTool.getObjectByClass("orcid:", Integer.class);
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);

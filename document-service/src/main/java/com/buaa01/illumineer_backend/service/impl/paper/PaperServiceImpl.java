@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
@@ -21,8 +22,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-
 
 
 @Slf4j
@@ -118,11 +117,19 @@ public class PaperServiceImpl implements PaperService {
         // 将文章信息封装
         paper.setContentUrl(contentUrl);
 
-        // 存入数据库
-        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
-//        esTool.addPaper(paperMapper);
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("title", paper.getTitle());
+        Paper searchPaper = paperMapper.selectOne(queryWrapper);
+        if (searchPaper == null) {
 
-        customResponse.setMessage("文章上传成功！");
+            // 存入数据库
+            paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
+//        esTool.addPaper(paperMapper);
+            customResponse.setMessage("文章上传成功！");
+        } else {
+            customResponse.setCode(505);
+            customResponse.setMessage("该文献已在数据库中");
+        }
         return customResponse;
     }
 
@@ -164,15 +171,24 @@ public class PaperServiceImpl implements PaperService {
             return customResponse;
         }
 
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("title", title);
+        Paper paper = paperMapper.selectOne(queryWrapper);
+        if (paper == null) {
+            UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("pid", pid);
+            updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
 
-        paperMapper.update(null, updateWrapper);
+            paperMapper.update(null, updateWrapper);
 
-        customResponse.setMessage("文章更新成功！");
+            customResponse.setMessage("文章更新成功！");
+        } else {
+            customResponse.setCode(505);
+            customResponse.setMessage("该文献已在数据库中");
+        }
         return customResponse;
     }
+
     /**
      * 查找用户收藏夹内所有文献
      *
@@ -193,18 +209,49 @@ public class PaperServiceImpl implements PaperService {
             for (Object paperId : paperSet) {
                 paper = paperMapper.getPaperByPid(Long.valueOf(paperId.toString()));
 
+                ObjectMapper objectMapper = new ObjectMapper();
+                List<String> keywords = null;
+                Map<String, Integer> auths = null;
+                try {
+                    // keywords 的转换
+                    keywords = objectMapper.readValue(paper.get("keywords").toString(),
+                            new TypeReference<List<String>>() {
+                            });
+                    paper.put("keywords", keywords);
+
+                    // auths 的转换
+                    auths = objectMapper.readValue(paper.get("auths").toString(),
+                            new TypeReference<Map<String, Integer>>() {
+                            });
+                    paper.put("auths", auths);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Date date;
+                // 判断是否是 ISO 格式，转换date格式
+                if (!paper.get("publish_date").toString().contains(" ")) {
+                    date = Date.from(
+                            LocalDateTime.parse(paper.get("publish_date").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                    .atZone(ZoneId.systemDefault()).toInstant());
+                } else {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                    date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), formatter)
+                            .atZone(ZoneId.systemDefault()).toInstant());
+                }
+
                 Map<String, Object> searchResultPaper = new HashMap<>();
                 searchResultPaper.put("pid", paper.get("pid"));
                 searchResultPaper.put("title", paper.get("title"));
-                searchResultPaper.put("keywords", paper.get("keywords"));
-                searchResultPaper.put("auths", paper.get("auths"));
+                searchResultPaper.put("keywords", keywords);
+                searchResultPaper.put("auths", auths);
                 searchResultPaper.put("category", paper.get("category"));
                 searchResultPaper.put("type", paper.get("type"));
                 searchResultPaper.put("theme", paper.get("theme"));
-                searchResultPaper.put("publish_date", paper.get("publish_date"));
+                searchResultPaper.put("publish_date", date);
                 searchResultPaper.put("derivation", paper.get("derivation"));
-                searchResultPaper.put("ref_times", paper.get("ref_times"));
-                searchResultPaper.put("fav_times", paper.get("fav_times"));
+                searchResultPaper.put("ref_times", Integer.parseInt(paper.get("ref_times").toString()));
+                searchResultPaper.put("fav_times", Integer.parseInt(paper.get("fav_times").toString()));
                 searchResultPaper.put("content_url", paper.get("content_url"));
 
                 papers.add(searchResultPaper);
@@ -229,9 +276,10 @@ public class PaperServiceImpl implements PaperService {
         try {
 
             // auths 的转换
-            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {});
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {
+            });
             paper.put("auths", auths);
-            auths.put(name,uid);
+            auths.put(name, uid);
 
 
             // 将修改后的 auths 写回 paper
