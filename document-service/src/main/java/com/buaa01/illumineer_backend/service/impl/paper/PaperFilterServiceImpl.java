@@ -39,8 +39,8 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
         List<SearchResultPaper> filteredPapers = paperSearchServiceImpl.getFromRedis().parallelStream()
                 .filter(paper -> {
-                    boolean matchesYear = isYearEmpty
-                            || filterYears.contains(String.valueOf(paper.getPublishDate().getYear()));
+                    Integer PublishYear = paper.getPublishDate().getYear() + 1900;
+                    boolean matchesYear = isYearEmpty || filterYears.contains(PublishYear.toString());
                     boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
                     boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
                     boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
