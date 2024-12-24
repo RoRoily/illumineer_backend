@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.impl.paper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
@@ -21,8 +22,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-
 
 
 @Slf4j
@@ -118,11 +117,19 @@ public class PaperServiceImpl implements PaperService {
         // 将文章信息封装
         paper.setContentUrl(contentUrl);
 
-        // 存入数据库
-        paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
-//        esTool.addPaper(paperMapper);
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("title", paper.getTitle());
+        Paper searchPaper = paperMapper.selectOne(queryWrapper);
+        if (searchPaper == null) {
 
-        customResponse.setMessage("文章上传成功！");
+            // 存入数据库
+            paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
+//        esTool.addPaper(paperMapper);
+            customResponse.setMessage("文章上传成功！");
+        } else {
+            customResponse.setCode(505);
+            customResponse.setMessage("该文献已在数据库中");
+        }
         return customResponse;
     }
 
@@ -164,15 +171,24 @@ public class PaperServiceImpl implements PaperService {
             return customResponse;
         }
 
-        UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid);
-        updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
+        QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("title", title);
+        Paper paper = paperMapper.selectOne(queryWrapper);
+        if (paper == null) {
+            UpdateWrapper<Paper> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("pid", pid);
+            updateWrapper.setSql("title = '" + title + "', ess_abs = '" + essabs + "', keywords = '" + keywords.toString() + "', content_url = '" + contentUrl + "', auths = '" + auths.toString().replace("=", ":") + "', category = '" + field + "', type = '" + type + "', theme = '" + theme + "', publish_date = '" + publishDate + "', derivation = '" + derivation + "', refs = '" + refs.toString() + "'");
 
-        paperMapper.update(null, updateWrapper);
+            paperMapper.update(null, updateWrapper);
 
-        customResponse.setMessage("文章更新成功！");
+            customResponse.setMessage("文章更新成功！");
+        } else {
+            customResponse.setCode(505);
+            customResponse.setMessage("该文献已在数据库中");
+        }
         return customResponse;
     }
+
     /**
      * 查找用户收藏夹内所有文献
      *
@@ -260,9 +276,10 @@ public class PaperServiceImpl implements PaperService {
         try {
 
             // auths 的转换
-            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {});
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {
+            });
             paper.put("auths", auths);
-            auths.put(name,uid);
+            auths.put(name, uid);
 
 
             // 将修改后的 auths 写回 paper
