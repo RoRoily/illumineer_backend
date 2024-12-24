@@ -45,8 +45,8 @@ public class ClientController {
      * @param pids 文章id列表
      **/
     @GetMapping("/ado/subList")
-    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") List<Long> pids) {
-        return paperAdoptionService.getPaperAdoptionsByList(pids);
+    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") List<Long> pids, String name) {
+        return paperAdoptionService.getPaperAdoptionsByList(pids, name);
     }
 
     /***

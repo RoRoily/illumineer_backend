@@ -80,7 +80,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
      * @param pids
      * **/
     @Override
-    public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids) {
+    public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids, String name) {
         List<PaperAdo> paperAdos = new ArrayList<>();
         for (Long pid : pids) {
             Map<String, Object> paper = null;
@@ -115,7 +115,11 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                     stats = Integer.parseInt(paper.get("stats").toString().strip());
                 }
 
-                paperAdo = new PaperAdo(pid, paper.get("title").toString(), auths, date, stats, false);
+                boolean hasBeenAdopted = false;
+                if (name != null && auths.get(name) != null) {
+                    hasBeenAdopted = true;
+                }
+                paperAdo = new PaperAdo(pid, paper.get("title").toString(), auths, date, stats, hasBeenAdopted);
                 paperAdos.add(paperAdo);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -140,7 +144,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
         for (Paper paper: papers) {
             pids.add(paper.getPid());
         }
-        paperAdos = getPaperAdoptionsByList(pids);
+        paperAdos = getPaperAdoptionsByList(pids, null);
         paperAdos = paperAdos.subList(0, total);
 
         return paperAdos;
@@ -171,13 +175,17 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                             date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), formatter)
                                     .atZone(ZoneId.systemDefault()).toInstant());
                         }
+                        boolean hasBeenAdopted = false;
+                        if (isBelonged) {
+                            hasBeenAdopted = true;
+                        }
                         PaperAdo paperAdo = new PaperAdo(
                                 Long.parseLong(paper.get("pid").toString()),
                                 paper.get("title").toString(),
                                 auths,
                                 date,
                                 0,
-                                false
+                                hasBeenAdopted
                         );
                         paperAdos.add(paperAdo);
                         // 缓存

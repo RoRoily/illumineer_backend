@@ -37,7 +37,7 @@ public interface PaperServiceClient {
                                      @RequestParam("count") Integer count);
 
     @GetMapping("/document/ado/subList")
-    List<PaperAdo> getPaperAdoByList(@RequestParam("pids") List<Long> subList);
+    List<PaperAdo> getPaperAdoByList(@RequestParam("pids") List<Long> subList, String name);
 
     @GetMapping("/document/paper/propider/test/{message}")
     public String getPropiderTest(@PathVariable("message") String message);
