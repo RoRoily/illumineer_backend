@@ -5,7 +5,11 @@ import com.buaa01.illumineer_backend.service.StormService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -14,7 +18,7 @@ public class StormController {
     private StormService stormService;
 
     @PostMapping("/admin/updatePaper")
-    public CustomResponse updatePaper() {
+    public CustomResponse updatePaper() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
         CompletableFuture<String> future = stormService.getStorm();
         future.whenComplete((result, exception) -> {
             if (exception != null) {
