@@ -80,45 +80,49 @@ public class HistoryServiceImpl implements HistoryService {
         endIndex = Math.min(endIndex, idList.size());
         //history的查询集合
         List<Long> sublist = idList.subList(startIndex, endIndex);
+        Integer total = idList.size();
         List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
 
         // 并行处理每一个history条目，提高效率
         // 先将videoList转换为Stream
-        Stream<PaperAdo> paperStream = historyPaperList.stream();
-        List<Map<String, Object>> mapList = paperStream.parallel() // 利用parallel()并行处理
-                .map(paper -> {
-//                    long start = System.currentTimeMillis();
-//                    System.out.println("================ 开始查询 " + video.getVid() + " 号视频相关信息 ===============   当前时间 " + start);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("paperTitle", paper.getTitle());
+//        Stream<PaperAdo> paperStream = historyPaperList.stream();
+//        List<Map<String, Object>> mapList = paperStream.parallel() // 利用parallel()并行处理
+//                .map(paper -> {
+////                    long start = System.currentTimeMillis();
+////                    System.out.println("================ 开始查询 " + video.getVid() + " 号视频相关信息 ===============   当前时间 " + start);
+//                    Map<String, Object> map = new HashMap<>();
+//                    map.put("paperTitle", paper.getTitle());
 
-                    CompletableFuture<Void> userFuture = CompletableFuture.runAsync(() -> {
-                        StringBuilder Auths = new StringBuilder();
-                        for (Map.Entry<String, Integer> entry : paper.getAuths().entrySet()) {
-                            Auths.append(entry.getKey()).append(",");
-                        }
-                        Auths.deleteCharAt(Auths.length() - 1);
-                        map.put("auth", Auths);
-                    }, taskExecutor);
+//                    CompletableFuture<Void> userFuture = CompletableFuture.runAsync(() -> {
+//                        StringBuilder Auths = new StringBuilder();
+//                        for (Map.Entry<String, Integer> entry : paper.getAuths().entrySet()) {
+//                            Auths.append(entry.getKey()).append(",");
+//                        }
+//                        Auths.deleteCharAt(Auths.length() - 1);
+//                        map.put("auth", Auths);
+//                    }, taskExecutor);
 
-                    CompletableFuture<Void> categoryFuture = CompletableFuture.runAsync(() -> {
-                        map.put("publishDate", paper.getPublishDate());
-                    }, taskExecutor);
+//                    CompletableFuture<Void> categoryFuture = CompletableFuture.runAsync(() -> {
+//                        map.put("publishDate", paper.getPublishDate());
+//                    }, taskExecutor);
 
                     // 使用join()等待全部任务完成
-                    userFuture.join();
-                    categoryFuture.join();
+//                    userFuture.join();
+//                    categoryFuture.join();
 //                    long end = System.currentTimeMillis();
 //                    System.out.println("================ 结束查询 " + video.getVid() + " 号视频相关信息 ===============   当前时间 " + end + "   耗时 " + (end - start));
 
-                    return map;
-                })
-                .collect(Collectors.toList());
+//                    return map;
+//                })
+//                .collect(Collectors.toList());
 
 
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", historyPaperList);
+        result.put("total", total);
         CustomResponse customResponse = new CustomResponse();
         customResponse.setMessage("分页查询结果成功");
-        customResponse.setData(mapList);
+        customResponse.setData(result);
         customResponse.setCode(200);
 //        end = System.currentTimeMillis();
 //        System.out.println("封装耗时：" + (end - start));
@@ -162,26 +166,28 @@ public class HistoryServiceImpl implements HistoryService {
     /**
      * 在历史记录中删除条目
      */
-    public CustomResponse deleteInHistory(Integer userId, Long pid) {
+    public CustomResponse deleteInHistory(Integer userId, List<Long> pids) {
         CustomResponse customResponse = new CustomResponse();
         String favKey = "uForHis:" + userId;
-        if (!redisTool.isExistInZSet(favKey, pid)) {
-            customResponse.setCode(500);
-            customResponse.setMessage("该历史记录不存在");
-        } else {
-            redisTool.deleteZSetMember(favKey, pid);
-        }
-        QueryWrapper<History> queryWrapper = new QueryWrapper<>();
-        Integer hID = userId;
-        queryWrapper.eq("hid", hID);
-        History history = historyMapper.selectOne(queryWrapper);
-        if (history == null) {
-            historyMapper.insert(new History(hID, userId, 0));
-        } else {
-            UpdateWrapper<History> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("hid", hID);
-            updateWrapper.setSql("count = count - 1");
-            historyMapper.update(null, updateWrapper);
+        for (Long pid : pids) {
+            if (!redisTool.isExistInZSet(favKey, pid)) {
+                customResponse.setCode(500);
+                customResponse.setMessage("该历史记录不存在");
+            } else {
+                redisTool.deleteZSetMember(favKey, pid);
+            }
+            QueryWrapper<History> queryWrapper = new QueryWrapper<>();
+            Integer hID = userId;
+            queryWrapper.eq("hid", hID);
+            History history = historyMapper.selectOne(queryWrapper);
+            if (history == null) {
+                historyMapper.insert(new History(hID, userId, 0));
+            } else {
+                UpdateWrapper<History> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.eq("hid", hID);
+                updateWrapper.setSql("count = count - 1");
+                historyMapper.update(null, updateWrapper);
+            }
         }
         return customResponse;
     }
