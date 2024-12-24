@@ -16,9 +16,9 @@ public class PaperEsUploadController {
     @Autowired
     private PaperEsUploadService paperEsUploadService;
 
-    @PostMapping("upload/Es")
-    public CustomResponse uploadES( ) {
-        paperEsUploadService.UploadPaperInEs();
+    @PostMapping("/upload/Es")
+    public CustomResponse uploadES() {
+       paperEsUploadService.UploadPaperInEs();
        return new CustomResponse(200,"更新成功",null);
     }
 }

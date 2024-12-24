@@ -31,9 +31,14 @@ public class EmailServiceImpl implements EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        String link = verificationUrl + uid +"/authenticationInfo?token=" + token + "&email=" + to;
-        String content = "<p>please click the url: </p>" +
-                "<a href=\"" + link + "\"> complete the check</a>";
+        String link = "http://" + verificationUrl + uid +"/authenticationInfo?token=" + token + "&email=" + to;
+        String content = "<html>" +
+                "<body>" +
+                "<p>Please click the following link to complete verification:</p>" +
+                "<a href=\"" + link + "\" target=\"_blank\">" +
+                "Complete Verification</a>" +
+                "</body>" +
+                "</html>";
 
         helper.setFrom(mailFrom);
         helper.setTo(to);
