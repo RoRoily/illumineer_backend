@@ -35,8 +35,8 @@ public class AIAssistantController {
                 "推荐“" + query + "”" +
                         "领域的2个英文关键词，尽量简短，每个占一行" +
                         "（只输出关键词，不要附加其他内容）");
-        System.out.println(future.isDone());
         String keywords = future.get();
+        keywords = keywords.replaceAll("[^a-zA-Z\\s\\n]", "");
         System.out.println("keywords: " + keywords);
         return ResponseEntity.ok(future.get());
     }
@@ -57,13 +57,14 @@ public class AIAssistantController {
                                       @RequestParam("offset") Integer offset,
                                       @RequestParam("type") Integer sortType,
                                       @RequestParam("order") Integer order) throws Exception{
-        CompletableFuture<String> keywords = aiAssistantService.StartChat(
+        CompletableFuture<String> future = aiAssistantService.StartChat(
                 "推荐“" + query + "”" +
                         "领域的2个英文关键词，尽量简短，每个占一行" +
                         "（只输出关键词，不要附加其他内容）");
-        String keywordsContent = keywords.get();
-        System.out.println("keywords: " + keywordsContent);
-        String[] keywordSplit = keywordsContent.split("\\n+");
+        String keywords = future.get();
+        keywords = keywords.replaceAll("[^a-zA-Z\\s\\n]", "");
+        System.out.println("keywords: " + keywords);
+        String[] keywordSplit = keywords.split("\\n+");
         // 使用正则表达式来识别分割
         List<String> keywordList = Arrays.stream(keywordSplit).toList();
         List<String> logicList = new ArrayList<>();
