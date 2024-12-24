@@ -3,16 +3,19 @@ package com.buaa01.illumineer_backend.tool;
 import com.alibaba.cloud.commons.lang.StringUtils;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.buaa01.illumineer_backend.config.RedisConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +23,9 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RedisTool {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -40,7 +46,6 @@ public class RedisTool {
     public void setExpire(String key, long expireTime) {
         redisTemplate.expire(key, expireTime, REDIS_DEFAULT_EXPIRE_TIME_UNIT);
     }
-
     /**
      * 根据键返回它的剩余的存活时间，单位：秒
      *

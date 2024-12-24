@@ -35,6 +35,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         customResponse.setCode(200);
         customResponse.setMessage("论文认领成功");
         String fidKey = "property:" + user.getUid();
+        String adoptionKey = "adoption :" + user.getName();
         //添加文章
         if(add==1) {
             for (Integer pid : pids) {
@@ -48,6 +49,7 @@ public class UserAuthServiceImpl implements UserAuthService {
                 //收藏论文
                 else {
                     redisTool.addSetMember(fidKey, pid);
+                    redisTool.deleteSetMember(adoptionKey, pid);
                     //在文章的序列中添加作者
                     String authKey = "paperBelonged:" + pid;
                     if(!redisTool.isExist(authKey)){
