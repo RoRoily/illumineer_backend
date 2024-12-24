@@ -35,7 +35,7 @@ public interface PaperMapper extends BaseMapper<Paper> {
     List<Map<String, Object>> searchByKeywordWithStrictBooleanMode(String condition, String keyword);
 
     // 获取检索结果
-    @Select("SELECT * FROM paper WHERE ${condition} LIKE CONCAT('%', #{keyword}, '%') AND stats = 0")
+    @Select("SELECT * FROM paper WHERE ${condition} LIKE CONCAT(#{keyword}, '%') AND stats = 0")
     List<Map<String, Object>> searchByKeyword(String condition, String keyword);
 
     // 获取所有文献
