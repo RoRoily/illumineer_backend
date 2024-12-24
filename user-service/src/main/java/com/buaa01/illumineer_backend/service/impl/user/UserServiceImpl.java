@@ -111,12 +111,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public int updateUserInfo(Map<String, Object> info) {
         Integer loginUserId = currentUser.getUserId();
-        User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
+        User user = redisTool.getObjectByClass("user" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
+        String old_name = user.getNickName();
+        String old_email = user.getEmail();
         if (info.get("username") != null) {
             String nick_name = (String) info.get("username");
-            if (userMapper.getUserByNickName(nick_name) != null)
+            if (userMapper.getUserByNickName(nick_name) != null && !old_name.equals(nick_name))
                 return -1;
             user.setNickName(nick_name);
         }
@@ -126,7 +128,7 @@ public class UserServiceImpl implements UserService {
         }
         if (info.get("email") != null) {
             String email = (String) info.get("email");
-            if (userMapper.getUserByEmail(email) != null)
+            if (userMapper.getUserByEmail(email) != null && !old_email.equals(email))
                 return -2;
             user.setEmail(email);
         }
