@@ -41,10 +41,22 @@ public class PaperFilterServiceImpl implements PaperFilterService {
                 .filter(paper -> {
                     Integer PublishYear = paper.getPublishDate().getYear() + 1900;
                     boolean matchesYear = isYearEmpty || filterYears.contains(PublishYear.toString());
+                    if (!matchesYear)
+                        return false; // 年份不匹配
+
                     boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
+                    if (!matchesDerivation)
+                        return false; // 来源不匹配
+
                     boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
+                    if (!matchesType)
+                        return false; // 类型不匹配
+
                     boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
-                    return matchesYear && matchesDerivation && matchesType && matchesTheme;
+                    if (!matchesTheme)
+                        return false; // 主题不匹配
+
+                    return true;
                 })
                 .collect(Collectors.toList());
 
