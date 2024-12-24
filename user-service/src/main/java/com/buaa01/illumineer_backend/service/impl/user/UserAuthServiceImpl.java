@@ -39,17 +39,13 @@ public class UserAuthServiceImpl implements UserAuthService {
         //添加文章
         if(add==1) {
             for (Integer pid : pids) {
-                if (!redisTool.isExist(fidKey)) {
-                    customResponse.setCode(500);
-                    customResponse.setMessage("Redis中该用户实名下的论文集合未创建，可能未在实名过程中调用创建函数");
-                }
-                //fid下已经有该论文
-                else if (redisTool.isSetMember(fidKey, pid)) {
+               if (redisTool.isSetMember(fidKey, pid)) {
                 }
                 //收藏论文
                 else {
                     redisTool.addSetMember(fidKey, pid);
                     redisTool.deleteSetMember(adoptionKey, pid);
+
                     //在文章的序列中添加作者
                     String authKey = "paperBelonged:" + pid;
                     if(!redisTool.isExist(authKey)){

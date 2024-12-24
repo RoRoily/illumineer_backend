@@ -18,5 +18,23 @@ public interface GainAdoptService {
      * @param pids 被认领的文章集合 uid 被认领对象的id
      */
     public CustomResponse updateAdoption(List<Integer> pids,Integer uid);
+
+    /**
+     * 给出符合条件的文献
+     * @param name 认领者的真实姓名
+     * 需要将文章对象进行缓存，在完成认领的时候需要重新调用
+     * **/
+    public List<PaperAdo> getAllGainToClaim(String name);
+
+    /**
+     * 给出符合条件的文献
+     * @param name 认领者的真实姓名
+     * 需要将文章对象进行缓存，在完成认领的时候需要重新调用
+     * **/
+    public List<PaperAdo> getAllGainClaimed(String name);
+
+
+    public CustomResponse claimAPaper(Integer uid,Long pid);
+
 }
 

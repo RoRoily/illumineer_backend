@@ -79,6 +79,56 @@ public class UserAuthController {
         }
     }
 
+
+    @GetMapping("/auth/getListToClaim")
+    public CustomResponse getListToClaim(){
+        try {
+            CustomResponse customResponse = new CustomResponse();
+            List<PaperAdo> paperAdoList = gainAdoptService.getAllGainToClaim(currentUser.getUser().getName());
+            customResponse.setCode(200);
+            customResponse.setMessage("成功获取等待认领文献表");
+            customResponse.setData(paperAdoList);
+            return customResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("获取带认领文章列表出现错误");
+            return customResponse;
+        }
+    }
+
+    @GetMapping ("/auth/getClaimedList")
+    public CustomResponse getClaimedList(){
+        try {
+            CustomResponse customResponse = new CustomResponse();
+            List<PaperAdo> paperAdoList = gainAdoptService.getAllGainClaimed(currentUser.getUser().getName());
+            customResponse.setCode(200);
+            customResponse.setMessage("成功获取等待认领文献表");
+            customResponse.setData(paperAdoList);
+            return customResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("获取带认领文章列表出现错误");
+            return customResponse;
+        }
+    }
+
+    @PostMapping("/claim")
+    public CustomResponse claim(@RequestParam("uid")Integer uid,@RequestParam("pid")Long pid){
+        try {
+            return gainAdoptService.claimAPaper(uid,pid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("认领文章出现错误");
+            return customResponse;
+        }
+    }
+
     /**
      * 完成文章的认领
      * @param pidList 被认领的pid的List

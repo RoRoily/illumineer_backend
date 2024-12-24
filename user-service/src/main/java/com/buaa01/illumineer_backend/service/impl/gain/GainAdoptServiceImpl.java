@@ -3,10 +3,13 @@ package com.buaa01.illumineer_backend.service.impl.gain;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
+import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.service.gain.GainAdoptService;
+import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.stereotype.Service;
 
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
@@ -23,6 +26,11 @@ public class GainAdoptServiceImpl implements GainAdoptService {
 
     @Autowired
     private RedisTool redisTool;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private JpaProperties jpaProperties;
+
     /**
      * 给出符合条件的文献
      * @param name 认领者的真实姓名
@@ -55,4 +63,65 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         CustomResponse customResponse = new CustomResponse(200,"待修改",null);
         return customResponse;
     }
+
+    /**
+     * 给出符合条件的文献
+     *
+     * @param name 认领者的真实姓名
+     *             需要将文章对象进行缓存，在完成认领的时候需要重新调用
+     **/
+    @Override
+    public List<PaperAdo> getAllGainToClaim(String name) {
+        String needClaimKey = "needClaim :" + name;
+        if(!redisTool.isExist(needClaimKey)){
+            //初始化key
+            List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByName(name);
+            for(PaperAdo paperAdoption : paperAdoptions){
+                redisTool.addSetMember(needClaimKey,paperAdoption.getPid());
+            }
+            return paperAdoptions;
+        }
+        //已有
+        List<Long> pids = redisTool.getAllList(needClaimKey,Long.class);
+        return paperServiceClient.getPaperAdoByList(pids);
+    }
+
+    /**
+     * 给出符合条件的文献
+     *
+     * @param name 认领者的真实姓名
+     *             需要将文章对象进行缓存，在完成认领的时候需要重新调用
+     **/
+    @Override
+    public List<PaperAdo> getAllGainClaimed(String name) {
+        String ClaimedKey = "Claimed :" + name;
+        //键值的初始化在认领中完成
+        if(!redisTool.isExist(ClaimedKey)){
+            return List.of();
+        }
+        List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
+        return paperServiceClient.getPaperAdoByList(pids);
+    }
+
+    @Override
+    public CustomResponse claimAPaper(Integer uid, Long pid) {
+        User user = userService.getUserByUId(uid);
+        String needClaimKey = "needClaim :" + user.getName();
+        String ClaimedKey = "Claimed :" + user.getName();
+        //处理显示集合
+        redisTool.addSetMember(ClaimedKey,pid);
+        redisTool.deleteSetMember(needClaimKey,pid);
+        //处理表示归属的集合
+        String paperList = "property:" + uid;
+        String AuthList = "paperBelonged:" + pid;
+        redisTool.addSetMember(paperList,pid);
+        redisTool.addSetMember(AuthList,uid);
+
+        //处理paper实体类的归属
+        paperServiceClient.modifyAuth(pid, user.getName(), uid);
+        return new CustomResponse(200,"成功认领",null);
+
+    }
+
+
 }

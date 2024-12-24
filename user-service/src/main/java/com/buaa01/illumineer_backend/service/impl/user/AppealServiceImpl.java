@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 public class AppealServiceImpl implements AppealService {
 
 
+
     @Autowired
     private PaperServiceClient paperServiceClient;
 
