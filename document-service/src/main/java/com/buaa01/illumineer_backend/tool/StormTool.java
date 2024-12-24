@@ -22,6 +22,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,6 +43,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -55,6 +60,9 @@ public class StormTool {
     private PaperMapper paperMapper;
     @Autowired
     private StormMapper stormMapper;
+    @Autowired
+    @Qualifier("taskExecutor")
+    private Executor taskExecutor;
 
     public String check() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
         String datePart = "";
@@ -92,8 +100,8 @@ public class StormTool {
     }
 
     public int getPapers(String last_update) {
-        Paper article;
-        int articles = 0;
+        AtomicReference<Paper> article = new AtomicReference<>();
+        AtomicInteger articles = new AtomicInteger();
         String downloadDir = "downloads";
         try {
             String url2 = "https://openalex.s3.amazonaws.com/?list-type=2&delimiter=%2F&prefix=data%2Fworks%2Fupdated_date%3D" + last_update + "%2F";
@@ -116,7 +124,7 @@ public class StormTool {
             File[] gzFiles = new File(downloadDir).listFiles((dir, name) -> name.endsWith(".gz"));
             if (gzFiles == null || gzFiles.length == 0) {
                 System.out.println("No .gz file found!");
-                return articles;
+                return articles.get();
             }
             for (int i = 0; i < gzFiles.length; i++) {
                 File gzFile = gzFiles[i];
@@ -133,19 +141,32 @@ public class StormTool {
                 // Read and print the decompressed file content
                 try (BufferedReader br = new BufferedReader(new FileReader(outputPath))) {
                     String line;
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
                     while ((line = br.readLine()) != null) {
+                        String finalLine = line;
                         // Assuming the line contains JSON
-                        article = handle(line);
-                        if (article != null) {
-                            articles++;
-                            stormMapper.insertPaper(article.getPid(), article.getTitle(), article.getEssAbs(),
-                                    article.getKeywords(), article.getContentUrl(), article.getAuths(),
-                                    article.getCategory(), article.getType(), article.getTheme(),
-                                    article.getPublishDate(), article.getDerivation(),
-                                    article.getRefs(), article.getRefTimes(),
-                                    article.getFavTimes(), article.getStats());
+                        article.set(handle(finalLine));
+                        if (article.get() != null && paperMapper.getPaperByPid(article.get().getPid()) == null) {
+                            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                                try {
+                                    stormMapper.insertPaper(article.get().getPid(), article.get().getTitle(),
+                                            article.get().getEssAbs(), article.get().getKeywords(),
+                                            article.get().getContentUrl(), article.get().getAuths(),
+                                            article.get().getCategory(), article.get().getType(),
+                                            article.get().getTheme(), article.get().getPublishDate(),
+                                            article.get().getDerivation(), article.get().getRefs(),
+                                            article.get().getRefTimes(), article.get().getFavTimes(),
+                                            article.get().getStats());
+                                    articles.getAndIncrement();
+                                } catch (Exception e) {
+                                    // Handle exceptions during processing
+                                    e.printStackTrace();
+                                }
+                            }, taskExecutor);
+                            futures.add(future);
                         }
                     }
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
                 }
             }
             // Delete and recreate the download directory
@@ -162,9 +183,9 @@ public class StormTool {
             Files.createDirectories(downloadPath);
         } catch (Exception e) {
             e.printStackTrace();
-            return articles;
+            return articles.get();
         }
-        return articles;
+        return articles.get();
     }
 
     private Paper handle(String line) throws ParseException, SQLException, JsonProcessingException {
@@ -174,8 +195,6 @@ public class StormTool {
         int start = oid.indexOf('W') + 1;
         int end = oid.length();
         long id = Long.parseLong(oid.substring(start, end));
-        if (paperMapper.getPaperByPid(id) != null)
-            return null;
         article.setPid(id);
         JsonElement title = jsonObject.get("title");
         if (title != null && !title.isJsonNull())

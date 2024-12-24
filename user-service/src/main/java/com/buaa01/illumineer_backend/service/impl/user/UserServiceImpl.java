@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -218,7 +219,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void modifyAuthInfoWithRedis(String name, String institutionName, String address){
-        Integer loginUserId =redisTool.getObjectByClass("orcid:", Integer.class);
+        Integer loginUserId =redisTool.getObjectByClass("orcid", Integer.class);
+        System.out.println("save in redis:" + loginUserId);
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);

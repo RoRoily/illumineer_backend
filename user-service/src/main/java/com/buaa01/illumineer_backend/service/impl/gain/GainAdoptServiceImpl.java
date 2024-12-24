@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -29,14 +30,20 @@ public class GainAdoptServiceImpl implements GainAdoptService {
      * **/
     @Override
     public List<PaperAdo> getAllGain(String name){
+        String adoptionKey = "adoption :" + name;
+        if(!redisTool.isExist(adoptionKey)){
         List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByName(name);
         //将带认领的文献列表存入redis中
         //在对应的document-service中将paper实体类放入redis
-        String adoptionKey = "adoption :" + name;
         for(PaperAdo paperAdo : paperAdoptions){
             redisTool.addSetMember(adoptionKey,paperAdo.getPid());
         }
-        return paperAdoptions;
+        redisTool.setExpire(adoptionKey,300);
+        return paperAdoptions;}
+        else{
+            List<Long> pids = redisTool.getAllList(adoptionKey,Long.class);
+            return paperServiceClient.getPaperAdoByList(pids);
+        }
     }
 
     /**
