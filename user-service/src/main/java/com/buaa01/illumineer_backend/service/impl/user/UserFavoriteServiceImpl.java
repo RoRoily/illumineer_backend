@@ -275,14 +275,14 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 
             for (Integer fid : userFids) {
                 String fidKey = "fid:" + fid;
-                if (!redisTool.isExistInZSet(fidKey, pid)) {
+                if (redisTool.isExistInZSet(fidKey, pid)) {
                     retFids.add(fid);
                 }
                 favsInfos.put(fid.toString(), favoriteMapper.selectById(fid).getTitle());
             }
 
-            data.put("UserFavs", favsInfos);
             data.put("pidInFavs", retFids);
+            data.put("UserFavs", favsInfos);
 
             customResponse.setData(data);
             customResponse.setMessage("获取单文献在所有收藏夹的fid成功");
