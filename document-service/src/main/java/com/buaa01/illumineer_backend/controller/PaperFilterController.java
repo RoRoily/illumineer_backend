@@ -45,10 +45,7 @@ public class PaperFilterController {
         FilterCondition sc = new FilterCondition(filtercondition);
 
         try {
-            List<SearchResultPaper> resultPapers = filterService.filterSearchResult(sc, size, offset, sortType,
-                    order);
-            returnValues.put("resultPapers", resultPapers);
-            returnValues.put("total", resultPapers.size());
+            Map<String, Object> resultPapers = filterService.filterSearchResult(sc, size, offset, sortType, order);
             customResponse.setData(returnValues);
             return customResponse;
         } catch (Exception e) {

@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class PaperFilterServiceImpl implements PaperFilterService {
     private PaperSearchServiceImpl paperSearchServiceImpl;
 
     @Override
-    public List<SearchResultPaper> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
+    public Map<String, Object> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
             Integer sortType, Integer order) {
 
         boolean isYearEmpty = sc.getYear().isEmpty();
@@ -50,7 +51,10 @@ public class PaperFilterServiceImpl implements PaperFilterService {
         List<SearchResultPaper> papers = sortPapers(filteredPapers, sortType, order);
         List<SearchResultPaper> sortedPapers = paperSearchServiceImpl.searchByPage(papers, size, offset);
 
-        return sortedPapers;
+        HashMap<String, Object> returnValues = new HashMap<>();
+        returnValues.put("resultPapers", sortedPapers);
+        returnValues.put("total", sortedPapers.size());
+        return returnValues;
     }
 
     List<SearchResultPaper> sortPapers(List<SearchResultPaper> papers, Integer sortType, Integer order) {

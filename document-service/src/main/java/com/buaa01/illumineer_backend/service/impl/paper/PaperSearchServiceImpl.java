@@ -458,7 +458,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @param offset  第几页
      * @return 文献信息
      */
-    List<SearchResultPaper> searchByPage(List<SearchResultPaper> papers, Integer pageNum, Integer offset) {
+    public List<SearchResultPaper> searchByPage(List<SearchResultPaper> papers, Integer pageNum, Integer offset) {
         if (offset == null || offset == 0) {
             offset = 1;
         }
