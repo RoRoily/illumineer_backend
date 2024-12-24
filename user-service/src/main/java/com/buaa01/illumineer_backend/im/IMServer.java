@@ -46,10 +46,8 @@ public class IMServer {
                             @Override
                             protected void initChannel(SocketChannel socketChannel) throws Exception {
                                 ChannelPipeline pipeline = socketChannel.pipeline(); // 处理流
-
                                 // 添加 Http 编码解码器
                                 configurePipeline(pipeline);
-
                             }
                         });
                 ChannelFuture future = bootstrap.bind(9091).sync();

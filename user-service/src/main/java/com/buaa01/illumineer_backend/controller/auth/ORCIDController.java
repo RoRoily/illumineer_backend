@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.controller.auth;
 
+import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.entity.UserInfo;
 import com.buaa01.illumineer_backend.service.user.UserService;
@@ -50,12 +51,22 @@ public class ORCIDController {
          * 引导用户跳转到 ORCID 授权页面
          */
         @GetMapping("/orcid")
-        public ResponseEntity<Void> redirectToOrcidAuth(@RequestParam("uid") Integer uid) {
+        public ResponseEntity<Void> redirectToOrcidAuth() {
             System.out.println("127.0.0.1:8091/auth/orcid");
-            redisTool.setExObjectValue("orcid",uid,120, TimeUnit.SECONDS);
+            //redisTool.setExObjectValue("orcid",uid,120, TimeUnit.SECONDS);
             String url = String.format("%s?client_id=%s&response_type=code&scope=/authenticate&redirect_uri=%s",
                     authorizeUrl, clientId, redirectUri);
             return ResponseEntity.status(HttpStatus.FOUND).header("Location", url).build();
+        }
+
+        @PostMapping("/orcid/sendRedis")
+        public void redirectToOrcidAuth1(@RequestParam("uid") Integer uid) {
+            System.out.println("11111" + uid);
+            //System.out.println("127.0.0.1:8091/auth/orcid");
+            redisTool.setExObjectValue("orcid",uid,120, TimeUnit.SECONDS);
+            //String url = String.format("%s?client_id=%s&response_type=code&scope=/authenticate&redirect_uri=%s",
+                   // authorizeUrl, clientId, redirectUri);
+            //return ResponseEntity.status(HttpStatus.FOUND).header("Location", url).build();
         }
 
 

@@ -424,7 +424,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
             } else if (condition.equals("keywords")) {
                 cond = "str_keywords";
-                paperList = paperMapper.searchByKeywordWithFullText(cond, keyword);
+                paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
             } else {
                 cond = condition;
                 paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
