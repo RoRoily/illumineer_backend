@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 public interface PaperService {
+
+    /**
+     * 推荐
+     * @param num 数据条数
+     */
+    CustomResponse getRecommend(Integer num);
+
     /**
      * 根据 pid 返回引用量
      *

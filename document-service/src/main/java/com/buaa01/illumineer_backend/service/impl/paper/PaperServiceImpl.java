@@ -38,6 +38,35 @@ public class PaperServiceImpl implements PaperService {
     private OssTool ossTool;
 
     /**
+     * 推荐
+     * @param num 数据条数
+     */
+    public CustomResponse getRecommend(Integer num) {
+        CustomResponse customResponse = new CustomResponse();
+        List<Long> pids = paperMapper.getRecommend(num);
+        List<Map<String, Object>> papers = new ArrayList<>();
+        for (Long pid : pids) {
+            Map<String, Object> searchPaper = paperMapper.getPaperByPid(pid);
+            Map<String, Object> paper = new HashMap<>();
+            paper.put("pid", searchPaper.get("pid"));
+            paper.put("title", searchPaper.get("title"));
+            paper.put("keywords", searchPaper.get("keywords"));
+            paper.put("auths", searchPaper.get("auths"));
+            paper.put("derivation", searchPaper.get("derivation"));
+            paper.put("publishDate", searchPaper.get("publishDate"));
+            paper.put("refTimes", searchPaper.get("refTimes"));
+            paper.put("favTimes", searchPaper.get("favTimes"));
+            paper.put("type", searchPaper.get("type"));
+            paper.put("theme", searchPaper.get("theme"));
+            paper.put("contentUrl", searchPaper.get("contentUrl"));
+            paper.put("category", searchPaper.get("category"));
+            papers.add(paper);
+        }
+        customResponse.setData(papers);
+        return customResponse;
+    }
+
+    /**
      * 根据 pid 返回引用量
      *
      * @param pid 文章 id

@@ -64,6 +64,12 @@ public interface PaperMapper extends BaseMapper<Paper> {
             "SET title = #{paper.title}, " +
             "auths = #{paper.auths} " +
             "WHERE pid = #{pid}")
-    int updatePaper( Long pid, Map<String,Object> paper);
+    int updatePaper(Long pid, Map<String,Object> paper);
+
+    // 推荐
+    @Select("SELECT pid FROM paper " +
+            "ORDER BY RAND() " +
+            "LIMIT ${num}")
+    List<Long> getRecommend(Integer num);
 
 }

@@ -20,6 +20,23 @@ public class PaperController {
     private PaperService paperService;
 
     /**
+     * 推荐
+     * @param num 数据条数
+     */
+    @GetMapping("/get/recommend")
+    public CustomResponse getRecommend(@RequestParam("num") Integer num) {
+        try {
+            return paperService.getRecommend(num);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("无法获取推荐文献！");
+            return customResponse;
+        }
+    }
+
+    /**
      * 根据 pid 返回引用量
      * @param pid 文章 id
      * @return 引用量
