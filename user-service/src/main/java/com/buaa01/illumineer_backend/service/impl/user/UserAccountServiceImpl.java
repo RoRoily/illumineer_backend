@@ -190,7 +190,7 @@ public class UserAccountServiceImpl implements UserAccountService {
         User user = loginUser.getUser();
 
         // 更新redis中的数据
-        redisTool.setExObjectValue("logUid:" + user.getUid(), user); // 默认存活1小时
+        redisTool.setExObjectValue("security:user:" + user.getUid(), user); // 默认存活1小时
 
         // 检查账号状态，1 表示封禁中，不允许登录
         if (user.getStats() == 1) {

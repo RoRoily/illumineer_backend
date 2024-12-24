@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class PaperFilterServiceImpl implements PaperFilterService {
     private PaperSearchServiceImpl paperSearchServiceImpl;
 
     @Override
-    public List<SearchResultPaper> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
+    public Map<String, Object> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
             Integer sortType, Integer order) {
 
         boolean isYearEmpty = sc.getYear().isEmpty();
@@ -38,19 +39,34 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
         List<SearchResultPaper> filteredPapers = paperSearchServiceImpl.getFromRedis().parallelStream()
                 .filter(paper -> {
-                    boolean matchesYear = isYearEmpty
-                            || filterYears.contains(String.valueOf(paper.getPublishDate().getYear()));
+                    Integer PublishYear = paper.getPublishDate().getYear() + 1900;
+                    boolean matchesYear = isYearEmpty || filterYears.contains(PublishYear.toString());
+                    if (!matchesYear)
+                        return false; // 年份不匹配
+
                     boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
+                    if (!matchesDerivation)
+                        return false; // 来源不匹配
+
                     boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
+                    if (!matchesType)
+                        return false; // 类型不匹配
+
                     boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
-                    return matchesYear && matchesDerivation && matchesType && matchesTheme;
+                    if (!matchesTheme)
+                        return false; // 主题不匹配
+
+                    return true;
                 })
                 .collect(Collectors.toList());
 
-        List<SearchResultPaper> papers = sortPapers(filteredPapers, sortType, order);
-        List<SearchResultPaper> sortedPapers = paperSearchServiceImpl.searchByPage(papers, size, offset);
+        List<SearchResultPaper> sortedPapers = sortPapers(filteredPapers, sortType, order);
+        List<SearchResultPaper> resultPapers = paperSearchServiceImpl.searchByPage(sortedPapers, size, offset);
 
-        return sortedPapers;
+        HashMap<String, Object> returnValues = new HashMap<>();
+        returnValues.put("resultPapers", resultPapers);
+        returnValues.put("total", sortedPapers.size());
+        return returnValues;
     }
 
     List<SearchResultPaper> sortPapers(List<SearchResultPaper> papers, Integer sortType, Integer order) {

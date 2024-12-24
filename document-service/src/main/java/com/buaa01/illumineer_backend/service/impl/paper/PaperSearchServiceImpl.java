@@ -458,7 +458,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @param offset  第几页
      * @return 文献信息
      */
-    List<SearchResultPaper> searchByPage(List<SearchResultPaper> papers, Integer pageNum, Integer offset) {
+    public List<SearchResultPaper> searchByPage(List<SearchResultPaper> papers, Integer pageNum, Integer offset) {
         if (offset == null || offset == 0) {
             offset = 1;
         }
@@ -573,11 +573,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     public List<SearchResultPaper> getFromRedis() {
         List<SearchResultPaper> papers = new ArrayList<>();
         Set<String> keySet = redisTool.getKeysByPrefix("paper");
-        // for (String key : keySet) {
-        // CompletableFuture.runAsync(() -> {
-        // papers.add(redisTool.getObjectByClass(key, SearchResultPaper.class));
-        // }, taskExecutor);
-        // }
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
