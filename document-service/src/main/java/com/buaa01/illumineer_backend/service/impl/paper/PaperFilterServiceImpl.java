@@ -28,13 +28,12 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
         boolean isYearEmpty = sc.getYear().isEmpty();
         boolean isDerivationEmpty = sc.getDerivation().isEmpty();
-        // boolean isTypeEmpty = sc.getType().isEmpty();
+        boolean isTypeEmpty = sc.getType().isEmpty();
         boolean isThemeEmpty = sc.getTheme().isEmpty();
 
         Set<String> filterYears = isYearEmpty ? Collections.emptySet() : new HashSet<>(sc.getYear());
         Set<String> filterDerivations = isDerivationEmpty ? Collections.emptySet() : new HashSet<>(sc.getDerivation());
-        // Set<String> filterTypes = isTypeEmpty ? Collections.emptySet() : new
-        // HashSet<>(sc.getType());
+        Set<String> filterTypes = isTypeEmpty ? Collections.emptySet() : new HashSet<>(sc.getType());
         Set<String> filterThemes = isThemeEmpty ? Collections.emptySet() : new HashSet<>(sc.getTheme());
 
         List<SearchResultPaper> filteredPapers = paperSearchServiceImpl.getFromRedis().parallelStream()
@@ -42,10 +41,9 @@ public class PaperFilterServiceImpl implements PaperFilterService {
                     boolean matchesYear = isYearEmpty
                             || filterYears.contains(String.valueOf(paper.getPublishDate().getYear()));
                     boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
-                    // boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
+                    boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
                     boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
-                    // return matchesYear && matchesDerivation && matchesType && matchesTheme;
-                    return matchesYear && matchesDerivation && matchesTheme;
+                    return matchesYear && matchesDerivation && matchesType && matchesTheme;
                 })
                 .collect(Collectors.toList());
 

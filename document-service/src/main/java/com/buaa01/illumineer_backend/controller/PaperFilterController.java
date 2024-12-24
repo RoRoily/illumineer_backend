@@ -34,7 +34,7 @@ public class PaperFilterController {
      * @return Map<String, Object> 筛选结果,其中resultPapers为文章，total为筛选结果的总数
      */
 
-    @PostMapping("get/filter")
+    @PostMapping("/get/filter")
     public CustomResponse ResultFilter(@RequestParam("size") Integer size,
             @RequestParam("offset") Integer offset,
             @RequestParam("sortType") Integer sortType,
