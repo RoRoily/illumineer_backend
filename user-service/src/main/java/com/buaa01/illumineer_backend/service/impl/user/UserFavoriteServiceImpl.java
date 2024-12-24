@@ -208,6 +208,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 fav.put("favName", favorite.getTitle());
                 fav.put("num", pids_List.size());
                 fav.put("pidList", pids_List);
+                
                 data.add(fav);
             }
             customResponse.setData(data);
@@ -274,6 +275,9 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
             List<Integer> retFids = new ArrayList<>();
 
             for (Integer fid : userFids) {
+                if (fid == 0) { // FIXME :为什么会出现一个零，这玩意哪来的？
+                    continue;
+                }
                 String fidKey = "fid:" + fid;
                 if (redisTool.isExistInZSet(fidKey, pid)) {
                     retFids.add(fid);
@@ -304,6 +308,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     private List<Integer> getUserFids() throws Exception {
         String favKey = "uForFav:" + currentUser.getUserId();
         Set<Object> fids_Set = redisTool.zRange(favKey, 0, -1);
+        // System.err.println(fids_Set);
         List<Integer> fids_List = fids_Set.stream()
                 .filter(obj -> obj instanceof Integer)
                 .map(obj -> (Integer) obj)
