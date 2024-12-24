@@ -65,7 +65,12 @@ public class HistoryServiceImpl implements HistoryService {
         //history的查询集合
         List<Long> sublist = idList.subList(0, endIndex);
         Integer total = idList.size();
-        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("uid", uid);
+        User user = userMapper.selectOne(queryWrapper);
+
+        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist, user.getName());
         List<PaperAdo> papers = new LinkedList<>();
         for (int i = historyPaperList.size() - 1; i >= 0; i--) {
             papers.add(historyPaperList.get(i));
