@@ -70,7 +70,11 @@ public class HistoryServiceImpl implements HistoryService {
         queryWrapper.eq("uid", uid);
         User user = userMapper.selectOne(queryWrapper);
 
-        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist, user.getName());
+        // 将 List<Long> 转换为逗号分隔的字符串
+        String pids = sublist.stream()
+                .map(String::valueOf) // 将每个 Long 转换为 String
+                .collect(Collectors.joining(",")); // 使用逗号连接
+        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(pids, user.getName());
         List<PaperAdo> papers = new LinkedList<>();
         for (int i = historyPaperList.size() - 1; i >= 0; i--) {
             papers.add(historyPaperList.get(i));

@@ -10,6 +10,7 @@ import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,8 +46,11 @@ public class ClientController {
      * @param pids 文章id列表
      **/
     @GetMapping("/ado/subList")
-    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") List<Long> pids, String name) {
-        return paperAdoptionService.getPaperAdoptionsByList(pids, name);
+    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") String pids, @RequestParam("name")String name) {
+        List<Long> subList = Arrays.stream(pids.split(","))
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+        return paperAdoptionService.getPaperAdoptionsByList(subList, name);
     }
 
     /***

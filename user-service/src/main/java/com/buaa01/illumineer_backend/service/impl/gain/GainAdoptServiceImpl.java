@@ -52,7 +52,11 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         return paperAdoptions;}
         else{
             List<Long> pids = redisTool.getAllList(adoptionKey,Long.class);
-            return paperServiceClient.getPaperAdoByList(pids, name);
+            // 将 List<Long> 转换为逗号分隔的字符串
+            String pidss = pids.stream()
+                    .map(String::valueOf) // 将每个 Long 转换为 String
+                    .collect(Collectors.joining(",")); // 使用逗号连接
+            return paperServiceClient.getPaperAdoByList(pidss, name);
         }
     }
 
@@ -98,7 +102,11 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .toList();
         System.out.println(longPids);
-        return paperServiceClient.getPaperAdoByList(longPids,name);
+        // 将 List<Long> 转换为逗号分隔的字符串
+        String pidss = longPids.stream()
+                .map(String::valueOf) // 将每个 Long 转换为 String
+                .collect(Collectors.joining(",")); // 使用逗号连接
+        return paperServiceClient.getPaperAdoByList(pidss,name);
     }
 
     /**
@@ -128,7 +136,11 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .toList();
         System.out.println(longPids);
-        return paperServiceClient.getPaperAdoByList(longPids,name);
+        // 将 List<Long> 转换为逗号分隔的字符串
+        String pidss = longPids.stream()
+                .map(String::valueOf) // 将每个 Long 转换为 String
+                .collect(Collectors.joining(",")); // 使用逗号连接
+        return paperServiceClient.getPaperAdoByList(pidss,name);
     }
 
     @Override
