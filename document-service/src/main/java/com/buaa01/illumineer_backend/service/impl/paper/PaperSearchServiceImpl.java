@@ -67,15 +67,20 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             // keywords 的转换
-            List<String> keywords = objectMapper.readValue(paper.get("keywords").toString(), new TypeReference<List<String>>() {});
+            List<String> keywords = objectMapper.readValue(paper.get("keywords").toString(),
+                    new TypeReference<List<String>>() {
+                    });
             paper.put("keywords", keywords);
 
             // auths 的转换
-            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {});
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(),
+                    new TypeReference<Map<String, Integer>>() {
+                    });
             paper.put("auths", auths);
 
             // refs 的转换
-            List<Long> refs = objectMapper.readValue(paper.get("refs").toString(), new TypeReference<List<Long>>() {});
+            List<Long> refs = objectMapper.readValue(paper.get("refs").toString(), new TypeReference<List<Long>>() {
+            });
             paper.put("refs", refs);
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,17 +150,18 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     /**
      * 高级检索
      * 
-     * @param logic_str none=0/and=1/or=2/not=3
+     * @param logic_str     none=0/and=1/or=2/not=3
      * @param condition_str
      * @param keyword_str（传 name 或者 %name%）
-     * @param size       一页多少条内容
-     * @param offset     第几页
-     * @param sortType   根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
-     * @param order      0=降序，1=升序
+     * @param size          一页多少条内容
+     * @param offset        第几页
+     * @param sortType      根据什么进行排序：1=publishDate出版时间，2=ref_times引用次数，3=fav_time收藏次数
+     * @param order         0=降序，1=升序
      * @return SearchResultPaper
      */
     @Override
-    public CustomResponse advancedSearchPapers(String logic_str, String condition_str, String keyword_str, Integer size, Integer offset,
+    public CustomResponse advancedSearchPapers(String logic_str, String condition_str, String keyword_str, Integer size,
+            Integer offset,
             Integer sortType, Integer order) {
         Set<Long> paper1 = new HashSet<>();
         Set<Long> paper2 = new HashSet<>();
@@ -165,7 +171,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         String[] keyword = keyword_str.split(",");
 
         int n = condition.length;
-        for (int i=0; i<n; i++) {
+        for (int i = 0; i < n; i++) {
             // 对该查询条件进行查询
             QueryWrapper<Paper> queryWrapper = Wrappers.query();
             if (Integer.parseInt(logic[i].strip()) == 3 || Integer.parseInt(logic[i].strip()) < 0) { // NOT
@@ -178,13 +184,13 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             List<Paper> papers = paperMapper.selectList(queryWrapper);
             if (paper1.isEmpty()) {
                 paper1 = new HashSet<>();
-                for (Paper paper: papers) {
+                for (Paper paper : papers) {
                     paper1.add(paper.getPid());
                 }
 
             } else {
                 paper2 = new HashSet<>();
-                for (Paper paper: papers) {
+                for (Paper paper : papers) {
                     paper2.add(paper.getPid());
                 }
             }
@@ -198,7 +204,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             paper2.clear();
         }
         List<Map<String, Object>> paperList = new ArrayList<Map<String, Object>>();
-        for (Long pid: paper1) {
+        for (Long pid : paper1) {
             Map<String, Object> paper = paperMapper.getPaperByPid(pid);
             paperList.add(paper);
         }
@@ -221,8 +227,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             Date date;
             // 判断是否是 ISO 格式，转换date格式
             if (!paper.get("publish_date").toString().contains(" ")) {
-                date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                        .atZone(ZoneId.systemDefault()).toInstant());
+                date = Date.from(
+                        LocalDateTime.parse(paper.get("publish_date").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                .atZone(ZoneId.systemDefault()).toInstant());
             } else {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
                 date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), formatter)
@@ -231,17 +238,17 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
             SearchResultPaper searchResultPaper = new SearchResultPaper(
                     Long.parseLong(paper.get("pid").toString()),
-                    paper.get("title")==null?"":paper.get("title").toString(),
-                    paper.get("keywords")==null?"":paper.get("keywords").toString(),
-                    paper.get("auths")==null?"":paper.get("auths").toString(),
-                    paper.get("category")==null?"":paper.get("category").toString(),
-                    paper.get("type")==null?"":paper.get("type").toString(),
-                    paper.get("theme")==null?"":paper.get("theme").toString(),
+                    paper.get("title") == null ? "" : paper.get("title").toString(),
+                    paper.get("keywords") == null ? "" : paper.get("keywords").toString(),
+                    paper.get("auths") == null ? "" : paper.get("auths").toString(),
+                    paper.get("category") == null ? "" : paper.get("category").toString(),
+                    paper.get("type") == null ? "" : paper.get("type").toString(),
+                    paper.get("theme") == null ? "" : paper.get("theme").toString(),
                     date,
-                    paper.get("derivation")==null?"":paper.get("derivation").toString(),
+                    paper.get("derivation") == null ? "" : paper.get("derivation").toString(),
                     Integer.parseInt(paper.get("ref_times").toString()),
                     Integer.parseInt(paper.get("fav_times").toString()),
-                    paper.get("content_url")==null?"":paper.get("content_url").toString());
+                    paper.get("content_url") == null ? "" : paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
 
@@ -336,36 +343,36 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
         years = new LinkedHashMap<>();
         int num = 0;
-        for (Map.Entry<String, Integer> year: yearsList) {
+        for (Map.Entry<String, Integer> year : yearsList) {
             years.put(year.getKey(), year.getValue());
-            num ++;
+            num++;
             if (num >= 10) {
                 break;
             }
         }
         derivations = new LinkedHashMap<>();
         num = 0;
-        for (Map.Entry<String, Integer> derivation: derivationsList) {
+        for (Map.Entry<String, Integer> derivation : derivationsList) {
             derivations.put(derivation.getKey(), derivation.getValue());
-            num ++;
+            num++;
             if (num >= 10) {
                 break;
             }
         }
         types = new LinkedHashMap<>();
         num = 0;
-        for (Map.Entry<String, Integer> type: typesList) {
+        for (Map.Entry<String, Integer> type : typesList) {
             types.put(type.getKey(), type.getValue());
-            num ++;
+            num++;
             if (num >= 10) {
                 break;
             }
         }
         themes = new LinkedHashMap<>();
         num = 0;
-        for (Map.Entry<String, Integer> theme: themesList) {
+        for (Map.Entry<String, Integer> theme : themesList) {
             themes.put(theme.getKey(), theme.getValue());
-            num ++;
+            num++;
             if (num >= 10) {
                 break;
             }
@@ -424,7 +431,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             }
         } else {
             paperList = new ArrayList<Map<String, Object>>();
-            for (Paper paper: list) {
+            for (Paper paper : list) {
                 Map<String, Object> paperMap = new HashMap<>();
                 paperMap.put("pid", paper.getPid());
                 paperMap.put("title", paper.getTitle());
@@ -566,10 +573,24 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     public List<SearchResultPaper> getFromRedis() {
         List<SearchResultPaper> papers = new ArrayList<>();
         Set<String> keySet = redisTool.getKeysByPrefix("paper");
+        // for (String key : keySet) {
+        // CompletableFuture.runAsync(() -> {
+        // papers.add(redisTool.getObjectByClass(key, SearchResultPaper.class));
+        // }, taskExecutor);
+        // }
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
         for (String key : keySet) {
-            SearchResultPaper paper = redisTool.getObjectByClass(key, SearchResultPaper.class);
-            papers.add(paper);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {// 异步执行任务
+                SearchResultPaper paper = redisTool.getObjectByClass(key, SearchResultPaper.class);
+                synchronized (papers) { // 确保线程安全
+                    papers.add(paper);
+                }
+            }, taskExecutor);
+            futures.add(future);
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         return papers;
     }
 

@@ -7,7 +7,11 @@ import com.buaa01.illumineer_backend.tool.StormTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
@@ -20,16 +24,16 @@ public class StormServiceImpl implements StormService {
 
     @Async
     @Override
-    public CompletableFuture<String> getStorm() {
-        ArrayList<Paper> articles = new ArrayList<>();
-        String last_update = "updated_date=2024-11-25/";
-        String isNew = storm.check(last_update);
+    public CompletableFuture<String> getStorm() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
+        int articles = 0;
+        String last_update = "2024-11-25";
+        String isNew = storm.check();
         if (!isNew.equals(last_update)) {
             last_update = isNew;
             articles = storm.getPapers(last_update);
         }
-        for (Paper article : articles)
-            stormMapper.insertPaper(article.getPid(), article.getTitle(), article.getEssAbs(), article.getKeywords(), article.getContentUrl(), article.getAuths(), article.getCategory(), article.getType(), article.getTheme(), article.getPublishDate(), article.getDerivation(), article.getRefs(), article.getRefTimes(), article.getRefTimes(), article.getStats());
-        return CompletableFuture.completedFuture(Integer.toString(articles.size()));
+//        for (Paper article : articles)
+//            stormMapper.insertPaper(article.getPid(), article.getTitle(), article.getEssAbs(), article.getKeywords(), article.getContentUrl(), article.getAuths(), article.getCategory(), article.getType(), article.getTheme(), article.getPublishDate(), article.getDerivation(), article.getRefs(), article.getRefTimes(), article.getRefTimes(), article.getStats());
+        return CompletableFuture.completedFuture(String.valueOf(articles));
     }
 }
