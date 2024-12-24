@@ -7,9 +7,13 @@ import com.buaa01.illumineer_backend.utils.FilterCondition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,13 +29,25 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
         boolean isYearEmpty = sc.getYear().isEmpty();
         boolean isDerivationEmpty = sc.getDerivation().isEmpty();
+        // boolean isTypeEmpty = sc.getType().isEmpty();
         boolean isThemeEmpty = sc.getTheme().isEmpty();
 
+        Set<String> filterYears = isYearEmpty ? Collections.emptySet() : new HashSet<>(sc.getYear());
+        Set<String> filterDerivations = isDerivationEmpty ? Collections.emptySet() : new HashSet<>(sc.getDerivation());
+        // Set<String> filterTypes = isTypeEmpty ? Collections.emptySet() : new
+        // HashSet<>(sc.getType());
+        Set<String> filterThemes = isThemeEmpty ? Collections.emptySet() : new HashSet<>(sc.getTheme());
+
         List<SearchResultPaper> filteredPapers = paperSearchServiceImpl.getFromRedis().parallelStream()
-                .filter(paper -> (isYearEmpty
-                        || sc.getYear().contains(String.valueOf(paper.getPublishDate().getYear()))) &&
-                        (isDerivationEmpty || sc.getDerivation().contains(paper.getDerivation())) &&
-                        (isThemeEmpty || sc.getTheme().contains(paper.getTheme())))
+                .filter(paper -> {
+                    boolean matchesYear = isYearEmpty
+                            || filterYears.contains(String.valueOf(paper.getPublishDate().getYear()));
+                    boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
+                    // boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
+                    boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
+                    // return matchesYear && matchesDerivation && matchesType && matchesTheme;
+                    return matchesYear && matchesDerivation && matchesTheme;
+                })
                 .collect(Collectors.toList());
 
         List<SearchResultPaper> papers = sortPapers(filteredPapers, sortType, order);
@@ -42,6 +58,7 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
     List<SearchResultPaper> sortPapers(List<SearchResultPaper> papers, Integer sortType, Integer order) {
         Comparator<SearchResultPaper> comparator;
+
         if (sortType == 1) {
             comparator = Comparator.comparing(SearchResultPaper::getPublishDate);
         } else if (sortType == 2) {
@@ -49,15 +66,21 @@ public class PaperFilterServiceImpl implements PaperFilterService {
         } else if (sortType == 3) {
             comparator = Comparator.comparingInt(SearchResultPaper::getFavTime);
         } else {
-            return papers;
+            return papers; // 如果没有匹配的排序类型，直接返回原始列表
         }
 
         if (order == 0) { // 降序
             comparator = comparator.reversed();
         }
 
-        papers.sort(comparator);
-        return papers;
+        SearchResultPaper[] paperArray = papers.toArray(new SearchResultPaper[0]);
+        Arrays.parallelSort(paperArray, comparator);
+
+        return Arrays.asList(paperArray);
+
+        // return papers.parallelStream()
+        // .sorted(comparator)
+        // .collect(Collectors.toList());
     }
 
 }
