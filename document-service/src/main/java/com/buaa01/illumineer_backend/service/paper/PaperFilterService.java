@@ -17,6 +17,6 @@ public interface PaperFilterService {
      * 
      * @return List<SearchResultPaper>
      */
-    Map<String, Object> filterSearchResult(FilterCondition sc, Integer size, Integer offset, Integer sortType,
+    Map<String, Object> filterSearchResult(Map<String, Object> sc, Integer size, Integer offset, Integer sortType,
             Integer order);
 }

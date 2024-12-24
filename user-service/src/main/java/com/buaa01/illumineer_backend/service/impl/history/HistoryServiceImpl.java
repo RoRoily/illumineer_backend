@@ -65,9 +65,14 @@ public class HistoryServiceImpl implements HistoryService {
         //history的查询集合
         List<Long> sublist = idList.subList(0, endIndex);
         Integer total = idList.size();
-        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("uid", uid);
+        User user = userMapper.selectOne(queryWrapper);
+
+        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist, user.getName());
         List<PaperAdo> papers = new LinkedList<>();
-        for (int i=total-1; i >= 0; i--) {
+        for (int i = historyPaperList.size() - 1; i >= 0; i--) {
             papers.add(historyPaperList.get(i));
         }
 
@@ -94,7 +99,7 @@ public class HistoryServiceImpl implements HistoryService {
 //                        map.put("publishDate", paper.getPublishDate());
 //                    }, taskExecutor);
 
-                    // 使用join()等待全部任务完成
+        // 使用join()等待全部任务完成
 //                    userFuture.join();
 //                    categoryFuture.join();
 //                    long end = System.currentTimeMillis();

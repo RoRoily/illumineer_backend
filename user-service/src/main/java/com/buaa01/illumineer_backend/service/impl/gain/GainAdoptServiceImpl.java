@@ -50,7 +50,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         return paperAdoptions;}
         else{
             List<Long> pids = redisTool.getAllList(adoptionKey,Long.class);
-            return paperServiceClient.getPaperAdoByList(pids);
+            return paperServiceClient.getPaperAdoByList(pids, name);
         }
     }
 

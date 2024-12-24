@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
             user = userMapper.selectById(uid);
             User finalUser = user;
             CompletableFuture.runAsync(() -> {
-                redisTool.setExObjectValue("user:" + finalUser.getUid(), finalUser);  // 默认存活1小时
+                redisTool.setExObjectValue("user:" + finalUser.getUid(), finalUser); // 默认存活1小时
             }, taskExecutor);
         }
         return user;
@@ -143,8 +143,9 @@ public class UserServiceImpl implements UserService {
             user.setDescription(description);
         }
         if (info.get("category") != null) {
-//        List<String> category_ids = List.of(((String) info.get("category")).split(","));
-//        List<String> category = paperServiceClient.getCategory(category_ids);
+            // List<String> category_ids = List.of(((String)
+            // info.get("category")).split(","));
+            // List<String> category = paperServiceClient.getCategory(category_ids);
             List<String> category = List.of(((String) info.get("category")).split(","));
             user.setField(category);
         }
@@ -215,7 +216,6 @@ public class UserServiceImpl implements UserService {
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
     }
-
 
     @Override
     public void modifyAuthInfoWithRedis(String name, String institutionName, String address){

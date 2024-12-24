@@ -41,10 +41,9 @@ public class PaperFilterController {
             @RequestParam("order") Integer order,
             @RequestBody Map<String, Object> filtercondition) {
         CustomResponse customResponse = new CustomResponse();
-        FilterCondition sc = new FilterCondition(filtercondition);
 
         try {
-            Map<String, Object> resultPapers = filterService.filterSearchResult(sc, size, offset, sortType, order);
+            Map<String, Object> resultPapers = filterService.filterSearchResult(filtercondition, size, offset, sortType, order);
             customResponse.setData(resultPapers);
             return customResponse;
         } catch (Exception e) {
