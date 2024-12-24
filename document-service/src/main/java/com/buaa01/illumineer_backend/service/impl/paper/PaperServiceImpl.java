@@ -124,7 +124,7 @@ public class PaperServiceImpl implements PaperService {
      * @param paper   文章
      * @param content 文章内容（文件）
      */
-    public CustomResponse uploadPaper(Paper paper, MultipartFile content) {
+    public CustomResponse uploadPaper(Paper paper, MultipartFile content, Integer uid) {
         CustomResponse customResponse = new CustomResponse();
 
         // 保存文件到 OSS，返回URL
@@ -155,13 +155,11 @@ public class PaperServiceImpl implements PaperService {
 
             // 存入数据库
             paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
+            searchPaper = paperMapper.selectList(queryWrapper);
+            Paper newPaper = searchPaper.get(0);
             //在redis将pid与用户绑定
-            User owner = userClientService.getCurrentUser();
-            if(owner != null){
-                Integer uid = owner.getUid();
-                redisTool.addSetMember("property:" + uid, paper.getPid());
-                redisTool.addSetMember("paperBelonged:" + paper.getPid(), uid);
-            }
+            redisTool.addSetMember("property:" + uid, newPaper.getPid());
+            redisTool.addSetMember("paperBelonged:" + newPaper.getPid(), uid);
 //        esTool.addPaper(paperMapper);
             customResponse.setMessage("文章上传成功！");
         } else {

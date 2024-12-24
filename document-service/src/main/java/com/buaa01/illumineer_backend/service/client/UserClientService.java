@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@FeignClient(name = "user-service", configuration = FeignConfig.class/*fallback = PaperServiceClientFallback.class*/)
+@FeignClient(name = "user-service", configuration = FeignConfig.class)
 public interface UserClientService {
     @GetMapping("/user/currentUser")
     User getCurrentUser();

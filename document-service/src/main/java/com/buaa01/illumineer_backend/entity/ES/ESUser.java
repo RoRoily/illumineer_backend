@@ -15,5 +15,5 @@ public class ESUser {
     private Integer uid;
     private String Username;
     private String Institution;
-    private Map<Category, Integer> field;
+    private List<String> field;
 }

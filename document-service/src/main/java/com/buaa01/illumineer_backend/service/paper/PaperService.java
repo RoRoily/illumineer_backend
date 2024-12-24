@@ -48,7 +48,7 @@ public interface PaperService {
      * @param paper   文章
      * @param content 文章内容（文件）
      */
-    CustomResponse uploadPaper(Paper paper, MultipartFile content);
+    CustomResponse uploadPaper(Paper paper, MultipartFile content, Integer uid);
 
     /**
      * 修改文章信息
