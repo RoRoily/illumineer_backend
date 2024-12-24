@@ -48,11 +48,11 @@ public class PaperFilterServiceImpl implements PaperFilterService {
                 })
                 .collect(Collectors.toList());
 
-        List<SearchResultPaper> papers = sortPapers(filteredPapers, sortType, order);
-        List<SearchResultPaper> sortedPapers = paperSearchServiceImpl.searchByPage(papers, size, offset);
+        List<SearchResultPaper> sortedPapers = sortPapers(filteredPapers, sortType, order);
+        List<SearchResultPaper> resultPapers = paperSearchServiceImpl.searchByPage(sortedPapers, size, offset);
 
         HashMap<String, Object> returnValues = new HashMap<>();
-        returnValues.put("resultPapers", sortedPapers);
+        returnValues.put("resultPapers", resultPapers);
         returnValues.put("total", sortedPapers.size());
         return returnValues;
     }
