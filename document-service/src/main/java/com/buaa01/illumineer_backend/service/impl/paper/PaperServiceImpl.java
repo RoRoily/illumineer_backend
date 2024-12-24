@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.SearchResultPaper;
+import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.client.UserClientService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
@@ -36,6 +37,7 @@ public class PaperServiceImpl implements PaperService {
     private UserClientService userClientService;
     @Autowired
     private OssTool ossTool;
+
 
     /**
      * 推荐
@@ -148,11 +150,18 @@ public class PaperServiceImpl implements PaperService {
 
         QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("title", paper.getTitle());
-        Paper searchPaper = paperMapper.selectOne(queryWrapper);
-        if (searchPaper == null) {
+        List<Paper> searchPaper = paperMapper.selectList(queryWrapper);
+        if (searchPaper == null || searchPaper.isEmpty()) {
 
             // 存入数据库
             paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
+            //在redis将pid与用户绑定
+            User owner = userClientService.getCurrentUser();
+            if(owner != null){
+                Integer uid = owner.getUid();
+                redisTool.addSetMember("property:" + uid, paper.getPid());
+                redisTool.addSetMember("paperBelonged:" + paper.getPid(), uid);
+            }
 //        esTool.addPaper(paperMapper);
             customResponse.setMessage("文章上传成功！");
         } else {
