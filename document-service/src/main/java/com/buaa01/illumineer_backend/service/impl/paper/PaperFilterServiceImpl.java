@@ -112,38 +112,39 @@ public class PaperFilterServiceImpl implements PaperFilterService {
      * ========== 缓存操作 ==========
      */
 
-    // // 将查询结果存到 redis 中
-    // public void saveToRedis(List<SearchResultPaper> searchResultPapers) {
-    //     for (SearchResultPaper paper : searchResultPapers) {
-    //         CompletableFuture.runAsync(() -> {
-    //             redisTool.setExObjectValue("paper" + paper.getPid(), paper); // 异步更新到redis
-    //         }, taskExecutor);
-    //     }
-    // }
+    // 将查询结果存到 redis 中
+    public void saveToRedis(List<SearchResultPaper> searchResultPapers) {
+        for (SearchResultPaper paper : searchResultPapers) {
+            CompletableFuture.runAsync(() -> {
+                redisTool.setExObjectValue("FilterPaper" + paper.getPid(), paper); // 异步更新到redis
+            }, taskExecutor);
+        }
+    }
 
     // // 从 redis 中获取暂存信息
     // public List<SearchResultPaper> getFromRedis() {
-    //     List<SearchResultPaper> papers = new ArrayList<>();
-    //     Set<String> keySet = redisTool.getKeysByPrefix("paper");
+    // List<SearchResultPaper> papers = new ArrayList<>();
+    // Set<String> keySet = redisTool.getKeysByPrefix("paper");
 
-    //     List<CompletableFuture<Void>> futures = new ArrayList<>();
+    // List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-    //     for (String key : keySet) {
-    //         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {// 异步执行任务
-    //             SearchResultPaper paper = redisTool.getObjectByClass(key, SearchResultPaper.class);
-    //             synchronized (papers) { // 确保线程安全
-    //                 papers.add(paper);
-    //             }
-    //         }, taskExecutor);
-    //         futures.add(future);
-    //     }
-    //     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-    //     return papers;
+    // for (String key : keySet) {
+    // CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {// 异步执行任务
+    // SearchResultPaper paper = redisTool.getObjectByClass(key,
+    // SearchResultPaper.class);
+    // synchronized (papers) { // 确保线程安全
+    // papers.add(paper);
+    // }
+    // }, taskExecutor);
+    // futures.add(future);
+    // }
+    // CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    // return papers;
     // }
 
     // // 删除 redis 中的信息
     // public void deleteFromRedis() {
-    //     redisTool.deleteByPrefix("paper");
+    // redisTool.deleteByPrefix("paper");
     // }
 
 }

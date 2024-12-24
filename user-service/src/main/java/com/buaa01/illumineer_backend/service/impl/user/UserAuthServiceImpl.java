@@ -31,6 +31,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         CustomResponse customResponse = new CustomResponse();
         User user = currentUser.getUser();
         //初始化
+
         customResponse.setCode(200);
         customResponse.setMessage("论文认领成功");
         String fidKey = "property:" + user.getUid();
