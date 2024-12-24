@@ -43,6 +43,7 @@ public class AppealController {
     public CustomResponse judgeAppeal(
             @RequestParam("appealEntryId")Integer appealEntryId,
             @RequestParam("acceptAppeal")boolean acceptAppeal){
+
         return appealService.judgeAppeal(appealEntryId,acceptAppeal);
     }
 

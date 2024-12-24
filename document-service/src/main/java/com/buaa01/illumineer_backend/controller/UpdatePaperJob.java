@@ -16,13 +16,13 @@ public class UpdatePaperJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) {
-        CompletableFuture<String> future = stormService.getStorm();
-        future.whenComplete((result, exception) -> {
-            if (exception != null) {
-                System.out.println("Exception in scheduled task: " + exception.getMessage());
-            } else {
-                System.out.println("Scheduled task completed successfully with result: " + result);
-            }
-        });
+//        CompletableFuture<String> future = stormService.getStorm();
+//        future.whenComplete((result, exception) -> {
+//            if (exception != null) {
+//                System.out.println("Exception in scheduled task: " + exception.getMessage());
+//            } else {
+//                System.out.println("Scheduled task completed successfully with result: " + result);
+//            }
+//        });
     }
 }
