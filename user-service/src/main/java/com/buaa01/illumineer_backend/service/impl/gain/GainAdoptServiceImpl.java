@@ -16,7 +16,9 @@ import com.buaa01.illumineer_backend.service.client.PaperServiceClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -82,8 +84,21 @@ public class GainAdoptServiceImpl implements GainAdoptService {
             return paperAdoptions;
         }
         //已有
-        List<Long> pids = redisTool.getAllList(needClaimKey,Long.class);
-        return paperServiceClient.getPaperAdoByList(pids,name);
+        //List<Long> pids = redisTool.getAllList(needClaimKey,Long.class);
+        Set<Object> pids = redisTool.getSetMembers(needClaimKey);
+        List<Long> longPids = pids.stream()
+                .map(item -> {
+                    try {
+                        return Long.parseLong(item.toString());
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid value: " + item);
+                        return null; // 处理转换失败的情况
+                    }
+                })
+                .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
+                .toList();
+        System.out.println(longPids);
+        return paperServiceClient.getPaperAdoByList(longPids,name);
     }
 
     /**
@@ -99,8 +114,21 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         if(!redisTool.isExist(ClaimedKey)){
             return List.of();
         }
-        List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
-        return paperServiceClient.getPaperAdoByList(pids,name);
+        //List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
+        Set<Object> pids = redisTool.getSetMembers(ClaimedKey);
+        List<Long> longPids = pids.stream()
+                .map(item -> {
+                    try {
+                        return Long.parseLong(item.toString());
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid value: " + item);
+                        return null; // 处理转换失败的情况
+                    }
+                })
+                .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
+                .toList();
+        System.out.println(longPids);
+        return paperServiceClient.getPaperAdoByList(longPids,name);
     }
 
     @Override
