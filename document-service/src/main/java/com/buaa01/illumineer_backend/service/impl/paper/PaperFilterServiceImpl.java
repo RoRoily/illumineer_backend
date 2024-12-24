@@ -24,8 +24,7 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
     @Override
     public List<SearchResultPaper> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
-            Integer sortType,
-            Integer order) {
+            Integer sortType, Integer order) {
 
         boolean isYearEmpty = sc.getYear().isEmpty();
         boolean isDerivationEmpty = sc.getDerivation().isEmpty();
