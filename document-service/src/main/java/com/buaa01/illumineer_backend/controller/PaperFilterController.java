@@ -34,22 +34,18 @@ public class PaperFilterController {
      * @return Map<String, Object> 筛选结果,其中resultPapers为文章，total为筛选结果的总数
      */
 
-    @PostMapping("get/filter")
+    @PostMapping("/get/filter")
     public CustomResponse ResultFilter(@RequestParam("size") Integer size,
             @RequestParam("offset") Integer offset,
-            @RequestParam("type") Integer sortType,
+            @RequestParam("sortType") Integer sortType,
             @RequestParam("order") Integer order,
             @RequestBody Map<String, Object> filtercondition) {
         CustomResponse customResponse = new CustomResponse();
-        Map<String, Object> returnValues = new HashMap<>();
         FilterCondition sc = new FilterCondition(filtercondition);
 
         try {
-            List<SearchResultPaper> resultPapers = filterService.filterSearchResult(sc, size, offset, sortType,
-                    order);
-            returnValues.put("resultPapers", resultPapers);
-            returnValues.put("total", resultPapers.size());
-            customResponse.setData(returnValues);
+            Map<String, Object> resultPapers = filterService.filterSearchResult(sc, size, offset, sortType, order);
+            customResponse.setData(resultPapers);
             return customResponse;
         } catch (Exception e) {
             e.printStackTrace();

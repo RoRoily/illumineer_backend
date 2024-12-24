@@ -2,6 +2,8 @@ package com.buaa01.illumineer_backend.tool;
 
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.mapper.PaperMapper;
+import com.buaa01.illumineer_backend.mapper.StormMapper;
 import com.buaa01.illumineer_backend.service.CategoryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.JsonArray;
@@ -21,8 +23,17 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,74 +51,103 @@ import java.util.zip.GZIPInputStream;
 public class StormTool {
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private PaperMapper paperMapper;
+    @Autowired
+    private StormMapper stormMapper;
 
-    public String check(String last_update) {
-        WebDriverManager.chromedriver().driverVersion("129.0.6668.59").setup();
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=old");
-        options.addArguments("--remote-allow-origins=*");
-        WebDriver driver = new ChromeDriver(options);
-        try {
-            driver.get("https://openalex.s3.amazonaws.com/browse.html#data/works/");
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            while (true) {
-                Thread.sleep(2000);
-                // 尝试查找下一页按钮
-                List<WebElement> nextPageButtonList = driver.findElements(By.xpath("//li[@class='paginate_button next']"));
-                // 如果找不到下一页按钮，直接退出循环
-                if (nextPageButtonList.isEmpty()) {
-                    WebElement tbody = driver.findElement(By.id("tbody-s3objects"));
-                    List<WebElement> rows = tbody.findElements(By.tagName("tr"));
-                    WebElement secondLastRow = rows.get(rows.size() - 2);
-                    return secondLastRow.findElements(By.tagName("td")).get(0).getText();  // 到达最后一页
-                }
-                WebElement nextPageButton = nextPageButtonList.get(0);
-                WebElement a = nextPageButton.findElement(By.tagName("a"));
-                // 使用 JavaScript 点击翻页按钮
-                JavascriptExecutor js = (JavascriptExecutor) driver;
-                js.executeScript("arguments[0].click();", a);
-                // 等待页面加载完成，或等待翻页按钮状态变化
-                wait.until(ExpectedConditions.stalenessOf(nextPageButton));  // 确保页面刷新
+    public String check() throws URISyntaxException, IOException, ParserConfigurationException, SAXException {
+        String datePart = "";
+        String url = "https://openalex.s3.amazonaws.com/?list-type=2&delimiter=%2F&prefix=data%2Fworks%2F";
+        URI uri = new URI(url);
+        URL xmlUrl = uri.toURL();
+        InputStream inputStream = xmlUrl.openStream();
+        // 创建一个 DocumentBuilder
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        // 解析 XML 输入流并返回 Document 对象
+        Document document = builder.parse(inputStream);
+        // 获取根元素
+        Element root = document.getDocumentElement();
+        // 获取所有子元素 (例如，处理 <CommonPrefixes> 标签)
+        NodeList commonPrefixes = root.getElementsByTagName("CommonPrefixes");
+        Node commonPrefix = commonPrefixes.item(commonPrefixes.getLength() - 1);
+        if (commonPrefix.getNodeType() == Node.ELEMENT_NODE) {
+            Element element = (Element) commonPrefix;
+            String path = element.getTextContent();
+            String[] parts = path.split("/");
+            Optional<String> updatedDatePart = Arrays.stream(parts)
+                    .filter(part -> part.startsWith("updated_date="))
+                    .findFirst();
+            if (updatedDatePart.isPresent()) {
+                datePart = updatedDatePart.get().substring("updated_date=".length());
+                System.out.println(datePart);
+            } else {
+                System.out.println("updated_date part not found");
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            driver.quit();
         }
+        // 关闭输入流
+        inputStream.close();
+        return datePart;
     }
 
-    public ArrayList<Paper> getPapers(String last_update) {
+    public int getPapers(String last_update) {
         Paper article;
-        ArrayList<Paper> articles = new ArrayList<>();
-        String downloadDir = "D:\\java\\demo1\\src\\main\\java\\Tool\\data";
-        WebDriverManager.chromedriver().driverVersion("129.0.6668.59").setup();
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=old");
-        options.addArguments("--remote-allow-origins=*");
-        Map<String, Object> prefs = new HashMap<>();
-        prefs.put("download.default_directory", downloadDir);  // 设置下载路径
-        prefs.put("download.prompt_for_download", false);      // 不询问下载路径
-        prefs.put("download.directory_upgrade", true);         // 自动升级目录
-        prefs.put("safebrowsing.enabled", true);               // 禁用安全浏览器保护
-        options.setExperimentalOption("prefs", prefs);
-        // Initialize ChromeDriver
-        WebDriver driver = new ChromeDriver(options);
+        int articles = 0;
+        String downloadDir = "downloads";
         try {
-            // Navigate to the URL
-            driver.get("https://openalex.s3.amazonaws.com/browse.html#data/works/" + last_update);
-            Thread.sleep(1000);
-            // Maximize browser window
-            driver.manage().window().maximize();
-            Thread.sleep(1000);
-            // Wait for the tbody to be present
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            WebElement tbody2 = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//tbody[@id='tbody-s3objects']")));
-            // Find the last row in the tbody and its first <td> element
-            List<WebElement> rows = tbody2.findElements(By.tagName("tr"));
-            WebElement lastRow = rows.get(rows.size() - 1);
-            WebElement td2 = lastRow.findElements(By.tagName("td")).get(0);
-            // Click on the link inside the <td>
-            WebElement a = td2.findElement(By.tagName("a"));
+            String url2 = "https://openalex.s3.amazonaws.com/?list-type=2&delimiter=%2F&prefix=data%2Fworks%2Fupdated_date%3D" + last_update + "%2F";
+            URI uri2 = new URI(url2);
+            URL xmlUrl2 = uri2.toURL();
+            InputStream inputStream2 = xmlUrl2.openStream();
+            DocumentBuilderFactory factory2 = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder2 = factory2.newDocumentBuilder();
+            Document document2 = builder2.parse(inputStream2);
+            Element root2 = document2.getDocumentElement();
+            NodeList commonPrefixes2 = root2.getElementsByTagName("Contents");
+            int len2 = commonPrefixes2.getLength();
+            System.out.println(len2);
+            for (int i = 0; i < len2; i++) {
+                String uri0 = String.format("https://openalex.s3.amazonaws.com/data/works/updated_date%%3D%s/part_%03d.gz", last_update, i);
+                System.out.println(uri0); // 用于调试，可以删除
+                downloadFile(uri0, "downloads\\part_" + String.format("%03d", i) + ".gz");
+            }
+            // Find the .gz file in the download directory
+            File[] gzFiles = new File(downloadDir).listFiles((dir, name) -> name.endsWith(".gz"));
+            if (gzFiles == null || gzFiles.length == 0) {
+                System.out.println("No .gz file found!");
+                return articles;
+            }
+            for (int i = 0; i < gzFiles.length; i++) {
+                File gzFile = gzFiles[i];
+                // Decompress the .gz file
+                String outputPath = "downloads\\data\\data" + i + ".txt"; // Output file path
+                try (GZIPInputStream gis = new GZIPInputStream(new FileInputStream(gzFile));
+                     FileOutputStream fos = new FileOutputStream(outputPath)) {
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = gis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                }
+                // Read and print the decompressed file content
+                try (BufferedReader br = new BufferedReader(new FileReader(outputPath))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        // Assuming the line contains JSON
+                        article = handle(line);
+                        if (article != null) {
+                            articles++;
+                            stormMapper.insertPaper(article.getPid(), article.getTitle(), article.getEssAbs(),
+                                    article.getKeywords(), article.getContentUrl(), article.getAuths(),
+                                    article.getCategory(), article.getType(), article.getTheme(),
+                                    article.getPublishDate(), article.getDerivation(),
+                                    article.getRefs(), article.getRefTimes(),
+                                    article.getFavTimes(), article.getStats());
+                        }
+                    }
+                }
+            }
             // Delete and recreate the download directory
             Path downloadPath = Paths.get(downloadDir);
             if (Files.exists(downloadPath)) {
@@ -120,38 +160,6 @@ public class StormTool {
                 }
             }
             Files.createDirectories(downloadPath);
-            // Click the download link
-            a.click();
-            String fileName = a.getText(); // Expected downloaded file name
-            waitForDownloadToComplete(downloadDir, fileName);
-            // Close the browser
-            driver.quit();
-            // Find the .gz file in the download directory
-            File[] gzFiles = new File(downloadDir).listFiles((dir, name) -> name.endsWith(".gz"));
-            if (gzFiles == null || gzFiles.length == 0) {
-                System.out.println("No .gz file found!");
-                return articles;
-            }
-            File gzFile = gzFiles[0];
-            // Decompress the .gz file
-            String outputPath = "D:\\java\\demo1\\src\\main\\java\\Tool\\data\\data.txt"; // Output file path
-            try (GZIPInputStream gis = new GZIPInputStream(new FileInputStream(gzFile));
-                 FileOutputStream fos = new FileOutputStream(outputPath)) {
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = gis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-            }
-            // Read and print the decompressed file content
-            try (BufferedReader br = new BufferedReader(new FileReader(outputPath))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    // Assuming the line contains JSON
-                    article = handle(line);
-                    articles.add(article);
-                }
-            }
         } catch (Exception e) {
             e.printStackTrace();
             return articles;
@@ -166,6 +174,8 @@ public class StormTool {
         int start = oid.indexOf('W') + 1;
         int end = oid.length();
         long id = Long.parseLong(oid.substring(start, end));
+        if (paperMapper.getPaperByPid(id) != null)
+            return null;
         article.setPid(id);
         JsonElement title = jsonObject.get("title");
         if (title != null && !title.isJsonNull())
@@ -236,7 +246,7 @@ public class StormTool {
                 subfieldNumber = matcher.group(1);
             }
             matcher = pattern.matcher(fieldId.trim());
-            String  fieldNumber = "0";
+            String fieldNumber = "0";
             if (matcher.find()) {
                 fieldNumber = matcher.group(1);
             }
@@ -311,12 +321,36 @@ public class StormTool {
         return reconstructedSentence.toString().trim();
     }
 
-    // Method to wait until the download is complete
-    public static void waitForDownloadToComplete(String downloadDir, String fileName) throws InterruptedException {
-        File file = new File(downloadDir, fileName);
-        File tempFile = new File(downloadDir, fileName + ".crdownload");
-        while (!file.exists() || tempFile.exists()) {
-            Thread.sleep(1000);
+    public static void downloadFile(String fileURL, String saveDir) throws URISyntaxException {
+        try {
+            URI url = new URI(fileURL);
+            HttpURLConnection httpConn = (HttpURLConnection) url.toURL().openConnection();
+            int responseCode = httpConn.getResponseCode();
+
+            // 检查HTTP响应码是否为200 (HTTP_OK)
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // 打开输入流
+                InputStream inputStream = httpConn.getInputStream();
+                // 打开输出流
+                FileOutputStream outputStream = new FileOutputStream(saveDir);
+
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+
+                // 关闭流
+                outputStream.close();
+                inputStream.close();
+
+                System.out.println("File downloaded and saved to " + saveDir);
+            } else {
+                System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            }
+            httpConn.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
