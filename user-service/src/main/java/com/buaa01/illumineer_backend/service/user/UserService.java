@@ -73,4 +73,6 @@ public interface UserService {
      * @param address
      */
     void modifyAuthInfo(String name,String institutionName,String address);
+
+    void modifyAuthInfoWithRedis(String name, String institutionName, String address);
 }

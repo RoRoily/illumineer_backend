@@ -97,6 +97,7 @@ public class AppealServiceImpl implements AppealService {
 
      }
      appealEntry.setAccomplish(true);
+     appealMapper.updateById(appealEntry);
      return new CustomResponse(200,"成功处理记录",null);
     }
 
