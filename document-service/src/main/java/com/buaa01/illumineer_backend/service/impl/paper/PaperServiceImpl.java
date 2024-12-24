@@ -193,18 +193,49 @@ public class PaperServiceImpl implements PaperService {
             for (Object paperId : paperSet) {
                 paper = paperMapper.getPaperByPid(Long.valueOf(paperId.toString()));
 
+                ObjectMapper objectMapper = new ObjectMapper();
+                List<String> keywords = null;
+                Map<String, Integer> auths = null;
+                try {
+                    // keywords 的转换
+                    keywords = objectMapper.readValue(paper.get("keywords").toString(),
+                            new TypeReference<List<String>>() {
+                            });
+                    paper.put("keywords", keywords);
+
+                    // auths 的转换
+                    auths = objectMapper.readValue(paper.get("auths").toString(),
+                            new TypeReference<Map<String, Integer>>() {
+                            });
+                    paper.put("auths", auths);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Date date;
+                // 判断是否是 ISO 格式，转换date格式
+                if (!paper.get("publish_date").toString().contains(" ")) {
+                    date = Date.from(
+                            LocalDateTime.parse(paper.get("publish_date").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                    .atZone(ZoneId.systemDefault()).toInstant());
+                } else {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                    date = Date.from(LocalDateTime.parse(paper.get("publish_date").toString(), formatter)
+                            .atZone(ZoneId.systemDefault()).toInstant());
+                }
+
                 Map<String, Object> searchResultPaper = new HashMap<>();
                 searchResultPaper.put("pid", paper.get("pid"));
                 searchResultPaper.put("title", paper.get("title"));
-                searchResultPaper.put("keywords", paper.get("keywords"));
-                searchResultPaper.put("auths", paper.get("auths"));
+                searchResultPaper.put("keywords", keywords);
+                searchResultPaper.put("auths", auths);
                 searchResultPaper.put("category", paper.get("category"));
                 searchResultPaper.put("type", paper.get("type"));
                 searchResultPaper.put("theme", paper.get("theme"));
-                searchResultPaper.put("publish_date", paper.get("publish_date"));
+                searchResultPaper.put("publish_date", date);
                 searchResultPaper.put("derivation", paper.get("derivation"));
-                searchResultPaper.put("ref_times", paper.get("ref_times"));
-                searchResultPaper.put("fav_times", paper.get("fav_times"));
+                searchResultPaper.put("ref_times", Integer.parseInt(paper.get("ref_times").toString()));
+                searchResultPaper.put("fav_times", Integer.parseInt(paper.get("fav_times").toString()));
                 searchResultPaper.put("content_url", paper.get("content_url"));
 
                 papers.add(searchResultPaper);

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 public class UserHistoryController {
@@ -46,7 +47,7 @@ public class UserHistoryController {
      * @return customeResponce实体类
      */
     @PostMapping("/history/delete")
-    public CustomResponse deleteOne(@RequestParam("pid")Long pid, HttpServletRequest request){
+    public CustomResponse delete(@RequestParam("pids") List<Long> pids, HttpServletRequest request){
         String token = request.getHeader("Authorization");
         if (token.isEmpty()) {
             CustomResponse customResponse = new CustomResponse();
@@ -55,7 +56,7 @@ public class UserHistoryController {
         }
         token = token.substring(7);
         String userId = JsonWebTokenTool.getSubjectFromToken(token);
-        return historyService.deleteInHistory(Integer.parseInt(userId), pid);
+        return historyService.deleteInHistory(Integer.parseInt(userId), pids);
     }
 
     /**

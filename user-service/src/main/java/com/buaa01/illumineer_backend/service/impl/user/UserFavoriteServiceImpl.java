@@ -50,7 +50,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         try {
             String favKey = "uForFav:" + userID;
             Long fidBias = redisTool.getZSetNumber(favKey);
-            Integer fID =(int) (fidBias * 10000 + userID);
+            Integer fID = (int) (fidBias * 10000 + userID);
             if (favName == null) {
                 favName = "收藏夹" + fID;
             }
@@ -67,8 +67,6 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 
         return customResponse;
     }
-
-
 
     /**
      * 删除一个收藏夹
@@ -91,8 +89,6 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         return customResponse;
     }
 
-
-
     /**
      * 收藏夹重命名
      */
@@ -103,7 +99,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         QueryWrapper<Favorite> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("fid", fid);
         Favorite favorite = favoriteMapper.selectOne(queryWrapper);
-        if (favorite == null)  {
+        if (favorite == null) {
             customResponse.setCode(500);
             customResponse.setMessage("该收藏夹不存在");
         } else {
@@ -276,21 +272,17 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
             // 收藏夹信息
             Map<String, Object> favsInfos = new HashMap<>();
             List<Integer> retFids = new ArrayList<>();
-            List<String> favNames = new ArrayList<>();
 
             for (Integer fid : userFids) {
                 String fidKey = "fid:" + fid;
                 if (!redisTool.isExistInZSet(fidKey, pid)) {
                     retFids.add(fid);
                 }
-                favNames.add(favoriteMapper.selectById(fid).getTitle());
+                favsInfos.put(fid.toString(), favoriteMapper.selectById(fid).getTitle());
             }
 
-            favsInfos.put("All fids", userFids);
-            favsInfos.put("All fav name", favNames);
-
-            data.put("All favs user have", favsInfos);
-            data.put("All favs which have pid in user's favs", retFids);
+            data.put("UserFavs", favsInfos);
+            data.put("pidInFavs", retFids);
 
             customResponse.setData(data);
             customResponse.setMessage("获取单文献在所有收藏夹的fid成功");

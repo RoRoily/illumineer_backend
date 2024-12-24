@@ -107,29 +107,45 @@ public class UserServiceImpl implements UserService {
     @Override
     public int updateUserInfo(Map<String, Object> info) {
         Integer loginUserId = currentUser.getUserId();
-        User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
+        User user = redisTool.getObjectByClass("user" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
-//        String name = (String) info.get("name");
-        String nick_name = (String) info.get("username");
-        String email = (String) info.get("email");
-//        int gender = (int) info.get("gender");
-        String institution = (String) info.get("institution");
-//        String description = (String) info.get("description");
+        String old_name = user.getNickName();
+        String old_email = user.getEmail();
+        if (info.get("username") != null) {
+            String nick_name = (String) info.get("username");
+            if (userMapper.getUserByNickName(nick_name) != null && !old_name.equals(nick_name))
+                return -1;
+            user.setNickName(nick_name);
+        }
+        if (info.get("name") != null) {
+            String name = (String) info.get("name");
+            user.setName(name);
+        }
+        if (info.get("email") != null) {
+            String email = (String) info.get("email");
+            if (userMapper.getUserByEmail(email) != null && !old_email.equals(email))
+                return -2;
+            user.setEmail(email);
+        }
+        if (info.get("institution") != null) {
+            String institution = (String) info.get("institution");
+            user.setInstitution(institution);
+        }
+        if (info.get("gender") != null) {
+            int gender = (int) info.get("gender");
+            user.setGender(gender);
+        }
+        if (info.get("description") != null) {
+            String description = (String) info.get("description");
+            user.setDescription(description);
+        }
+        if (info.get("category") != null) {
 //        List<String> category_ids = List.of(((String) info.get("category")).split(","));
 //        List<String> category = paperServiceClient.getCategory(category_ids);
-//        List<String> category = List.of(((String) info.get("category")).split(","));
-//        user.setName(name);
-        user.setNickName(nick_name);
-        user.setEmail(email);
-//        user.setGender(gender);
-        user.setInstitution(institution);
-//        user.setDescription(description);
-//        user.setField(category);
-        if (userMapper.getUserByNickName(nick_name) != null)
-            return -1;
-        if (userMapper.getUserByEmail(email) != null)
-            return -2;
+            List<String> category = List.of(((String) info.get("category")).split(","));
+            user.setField(category);
+        }
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
@@ -185,7 +201,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void modifyAuthInfo(String name,String institutionName,String address){
+    public void modifyAuthInfo(String name, String institutionName, String address) {
         Integer loginUserId = currentUser.getUserId();
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)

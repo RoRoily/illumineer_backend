@@ -11,6 +11,7 @@ import com.buaa01.illumineer_backend.tool.RedisTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -78,7 +79,10 @@ public class AppealServiceImpl implements AppealService {
 
          Long conflictPid = appealEntry.getPid();
          //对mysql中Paper实体类修改文章的所有者信息
-         paperServiceClient.modifyAuth(conflictPid,appellant.getName(),appellant.getUid());
+         System.out.println("change auth params: " + conflictPid + " " +
+                 appellant.getName() + " " +
+                 appellant.getUid());
+         paperServiceClient.modifyAuth(conflictPid, appellant.getName(), appellant.getUid());
 
 
          //修改Redis信息
@@ -97,6 +101,7 @@ public class AppealServiceImpl implements AppealService {
 
      }
      appealEntry.setAccomplish(true);
+     appealEntry.setHandleTime(new Date());
      appealMapper.updateById(appealEntry);
      return new CustomResponse(200,"成功处理记录",null);
     }
