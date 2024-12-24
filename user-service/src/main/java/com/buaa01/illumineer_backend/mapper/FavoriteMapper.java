@@ -21,4 +21,7 @@ public interface FavoriteMapper extends BaseMapper<Favorite> {
 
     @Delete("DELETE FROM favorite WHERE fid = ${fid}")
     void deleteById(Integer fid);
+
+    // @Update("UPDATE favorite SET count = count + 1 WHERE fid = ${fid}")
+    // void updateFavCount(Integer fid);
 }
