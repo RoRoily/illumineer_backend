@@ -148,8 +148,8 @@ public class PaperServiceImpl implements PaperService {
 
         QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("title", paper.getTitle());
-        Paper searchPaper = paperMapper.selectOne(queryWrapper);
-        if (searchPaper == null) {
+        List<Paper> searchPaper = paperMapper.selectList(queryWrapper);
+        if (searchPaper == null || searchPaper.isEmpty()) {
 
             // 存入数据库
             paperMapper.insertPaper(paper.getPid(), paper.getTitle(), paper.getEssAbs(), paper.getKeywords().toString(), paper.getContentUrl(), paper.getAuths().toString().replace("=", ":"), paper.getCategory(), paper.getType(), paper.getTheme(), paper.getPublishDate(), paper.getDerivation(), paper.getRefs().toString(), paper.getFavTimes(), paper.getRefTimes(), paper.getStats());
