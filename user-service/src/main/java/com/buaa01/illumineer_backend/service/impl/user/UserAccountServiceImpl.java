@@ -147,7 +147,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 
         //创建收藏夹 Redis中和数据库中
         String fidsKey = "uForFav:" + newUser.getUid();
-        redisTool.storeZSetByTime(fidsKey, fidnumInstance.addFidnum());
+        redisTool.storeZSetByTime(fidsKey, newUser.getUid());
         favoriteMapper.insert(new Favorite(newUser.getUid(), newUser.getUid(), 1, "默认收藏夹", 0, 0));
 
         //创建历史记录 hid和uid一样

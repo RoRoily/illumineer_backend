@@ -27,9 +27,35 @@ public class UserHistoryController {
      * @param pid 文献对应的pid
      * @return customeResponce实体类
      */
-    @PostMapping("/user/history/update")
-    public CustomResponse updateOne(@RequestParam("pid")Integer pid){
-        return historyService.insertInHistory(pid);
+    @PostMapping("/history/update")
+    public CustomResponse updateOne(@RequestParam("pid")Long pid, HttpServletRequest request){
+        String token = request.getHeader("Authorization");
+        if (token.isEmpty()) {
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("缺少token");
+        }
+        token = token.substring(7);
+        String userId = JsonWebTokenTool.getSubjectFromToken(token);
+        return historyService.insertInHistory(Integer.parseInt(userId), pid);
+    }
+
+    /**
+     * 删除历史记录
+     * @param pid 文献对应的pid
+     * @return customeResponce实体类
+     */
+    @PostMapping("/history/delete")
+    public CustomResponse deleteOne(@RequestParam("pid")Long pid, HttpServletRequest request){
+        String token = request.getHeader("Authorization");
+        if (token.isEmpty()) {
+            CustomResponse customResponse = new CustomResponse();
+            customResponse.setCode(500);
+            customResponse.setMessage("缺少token");
+        }
+        token = token.substring(7);
+        String userId = JsonWebTokenTool.getSubjectFromToken(token);
+        return historyService.deleteInHistory(Integer.parseInt(userId), pid);
     }
 
     /**

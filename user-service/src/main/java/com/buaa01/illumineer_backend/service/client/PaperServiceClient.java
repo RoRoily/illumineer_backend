@@ -5,17 +5,15 @@ import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.PaperAdo;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 //服务名称和url
 //用于接收paper微服务模块传输的对象
 //自动将调用路由到' document-service'
-@FeignClient(name = "document-service", configuration = FeignConfig.class/*fallback = PaperServiceClientFallback.class*/)
+//@FeignClient(name = "document-service", configuration = FeignConfig.class/*fallback = PaperServiceClientFallback.class*/)
+@FeignClient(name = "document-service")
 public interface PaperServiceClient {
 
     //从paperService中寻找提供的服务
@@ -39,7 +37,7 @@ public interface PaperServiceClient {
                                      @RequestParam("count") Integer count);
 
     @GetMapping("/document/ado/subList")
-    List<PaperAdo> getPaperAdoByList(List<Long> subList);
+    List<PaperAdo> getPaperAdoByList(@RequestParam("pids") List<Long> subList);
 
     @GetMapping("/document/paper/propider/test/{message}")
     public String getPropiderTest(@PathVariable("message") String message);
@@ -47,8 +45,8 @@ public interface PaperServiceClient {
     @GetMapping("/document/paper/propider/sentinel/test/{message}")
     public String propiderSentinelTest(@PathVariable("message") String message);
 
-    @GetMapping("/document/paper/getByFid/{fid}")
-    CustomResponse getPaperByFid(@PathVariable("fid") Integer fid);
+    @GetMapping("/document/paper/getByFid")
+    CustomResponse getPaperByFid(@RequestParam("fid") Integer fid);
 
     //FIXME:在函数头添加了document
     @PostMapping("/document/document/paper/modiftAuth")

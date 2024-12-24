@@ -3,6 +3,7 @@ package com.buaa01.illumineer_backend.service.user;
 import java.util.List;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import org.springframework.data.relational.core.sql.In;
 
 public interface UserFavoriteService {
     /**
@@ -11,7 +12,7 @@ public interface UserFavoriteService {
      * @param favName
      * @return
      */
-    public CustomResponse createFav(String favName);
+    public CustomResponse createFav(String favName, Integer userID);
 
     /**
      * 删除对应收藏夹
@@ -19,7 +20,7 @@ public interface UserFavoriteService {
      * @param fid
      * @return
      */
-    public CustomResponse deleteFav(Integer fid);
+    public CustomResponse deleteFav(Integer fid, Integer userID);
 
     /**
      * 修改收藏夹名称
@@ -51,7 +52,7 @@ public interface UserFavoriteService {
     /**
      * 查找用户的所有收藏夹,返回所有收藏夹名、收藏夹id、收藏夹内文件夹数量于
      **/
-    public CustomResponse searchAll();
+    public CustomResponse searchAll(Integer uid);
 
     /**
      * 用以在文献页面直接对该文献进行批量收藏取消收藏操作

@@ -64,4 +64,13 @@ public interface UserService {
      * @return 解封结果
      */
     int ableUser(Integer uid);
+
+    /**
+     * 修改用户的实名信息
+     *
+     * @param name
+     * @param institutionName
+     * @param address
+     */
+    void modifyAuthInfo(String name,String institutionName,String address);
 }

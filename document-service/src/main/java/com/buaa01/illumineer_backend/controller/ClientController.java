@@ -9,10 +9,7 @@ import com.buaa01.illumineer_backend.service.CategoryService;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,11 +44,9 @@ public class ClientController {
      *
      * @param pids 文章id列表
      **/
-    @PostMapping("/ado/subList")
-    public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids) {
-        System.out.println("ok");
-        return null;
-//        return paperAdoptionService.getPaperAdoptionsByList(pids);
+    @GetMapping("/ado/subList")
+    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") List<Long> pids) {
+        return paperAdoptionService.getPaperAdoptionsByList(pids);
     }
 
     /***
@@ -79,8 +74,8 @@ public class ClientController {
      * @return CustomResponse
      */
 
-    @GetMapping("/paper/getByFid/{fid}")
-    public CustomResponse getPaperByFid(@PathVariable("fid") Integer fid) {
+    @GetMapping("/paper/getByFid")
+    public CustomResponse getPaperByFid(@RequestParam("fid") Integer fid) {
         return paperService.getPaperByFid(fid);
     }
 
@@ -133,6 +128,12 @@ public class ClientController {
             e.printStackTrace();
         }
         return uid;
+    }
+    @GetMapping("/paper/{name}")
+    List<PaperAdo> getPaperAdoByName(@PathVariable("name") String name){
+        CustomResponse customResponse = paperAdoptionService.getPaperAdoptionsByName(name);
+        Map<String,Object> map = (Map<String, Object>) customResponse.getData();
+        return (List<PaperAdo>) map.get("result");
     }
     // @PostMapping("/document/adoption")
     // CustomResponse updatePaperAdoptionStatus(@RequestParam("name") String name){

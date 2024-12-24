@@ -56,8 +56,6 @@ public class EmailAuthController {
             customResponse.setMessage("unknown academic institution");
             return customResponse;
         }
-        String institutionName = institution.getName();
-
 
         // 2. 生成认证 token 并保存用户信息(uid和认证机构)
         Integer verifyUid = currentUser.getUserId();

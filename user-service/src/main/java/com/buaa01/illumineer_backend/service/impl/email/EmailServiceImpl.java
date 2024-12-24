@@ -32,12 +32,12 @@ public class EmailServiceImpl implements EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         String link = verificationUrl + uid +"/authenticationInfo?token=" + token + "&email=" + to;
-        String content = "<p>点击以下链接完成认证：</p>" +
-                "<a href=\"" + link + "\">完成认证</a>";
+        String content = "<p>please click the url: </p>" +
+                "<a href=\"" + link + "\"> complete the check</a>";
 
         helper.setFrom(mailFrom);
         helper.setTo(to);
-        helper.setSubject("邮箱认证");
+        helper.setSubject("Check Email");
         helper.setText(content, true);
 
         mailSender.send(message);

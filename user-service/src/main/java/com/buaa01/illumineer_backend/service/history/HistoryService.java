@@ -14,10 +14,10 @@ public interface HistoryService {
     /**
      *  在历史记录中新增条目
      */
-    public CustomResponse insertInHistory(Integer pid);
+    public CustomResponse insertInHistory(Integer userID, Long pid);
 
     /**
      *  在历史记录中删除条目
      * */
-    public CustomResponse deleteInHistory();
+    public CustomResponse deleteInHistory(Integer userID, Long pid);
 }
