@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.config.filter;
 
 import com.buaa01.illumineer_backend.entity.User;
+import com.buaa01.illumineer_backend.mapper.UserMapper;
 import com.buaa01.illumineer_backend.service.impl.user.UserDetailsImpl;
 import com.buaa01.illumineer_backend.tool.JsonWebTokenTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
@@ -25,6 +26,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     private JsonWebTokenTool jsonWebTokenTool;
     @Autowired
     private RedisTool redisTool;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 认证过滤器，所有token都需要进入这里进行验证
@@ -62,6 +65,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         // 从redis中获取用户信息
         User user = redisTool.getObjectByClass("security:" + role + ":" + userId, User.class);
 
+        if(user == null){
+            user = userMapper.selectById(userId);
+        }
         if (user == null) {
             response.addHeader("message", "not login"); // 设置响应头信息，给前端判断用
             response.setStatus(403);

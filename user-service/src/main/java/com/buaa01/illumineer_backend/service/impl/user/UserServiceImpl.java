@@ -210,6 +210,7 @@ public class UserServiceImpl implements UserService {
             user = userMapper.selectById(loginUserId);
         user.setName(name);
         user.setInstitution(institutionName);
+        user.setIsVerify(true);
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));

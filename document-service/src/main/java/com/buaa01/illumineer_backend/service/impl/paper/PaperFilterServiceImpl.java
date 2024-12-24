@@ -39,20 +39,32 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
         List<SearchResultPaper> filteredPapers = paperSearchServiceImpl.getFromRedis().parallelStream()
                 .filter(paper -> {
-                    boolean matchesYear = isYearEmpty
-                            || filterYears.contains(String.valueOf(paper.getPublishDate().getYear()));
+                    Integer PublishYear = paper.getPublishDate().getYear() + 1900;
+                    boolean matchesYear = isYearEmpty || filterYears.contains(PublishYear.toString());
+                    if (!matchesYear)
+                        return false; // 年份不匹配
+
                     boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
+                    if (!matchesDerivation)
+                        return false; // 来源不匹配
+
                     boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
+                    if (!matchesType)
+                        return false; // 类型不匹配
+
                     boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
-                    return matchesYear && matchesDerivation && matchesType && matchesTheme;
+                    if (!matchesTheme)
+                        return false; // 主题不匹配
+
+                    return true;
                 })
                 .collect(Collectors.toList());
 
-        List<SearchResultPaper> papers = sortPapers(filteredPapers, sortType, order);
-        List<SearchResultPaper> sortedPapers = paperSearchServiceImpl.searchByPage(papers, size, offset);
+        List<SearchResultPaper> sortedPapers = sortPapers(filteredPapers, sortType, order);
+        List<SearchResultPaper> resultPapers = paperSearchServiceImpl.searchByPage(sortedPapers, size, offset);
 
         HashMap<String, Object> returnValues = new HashMap<>();
-        returnValues.put("resultPapers", sortedPapers);
+        returnValues.put("resultPapers", resultPapers);
         returnValues.put("total", sortedPapers.size());
         return returnValues;
     }
