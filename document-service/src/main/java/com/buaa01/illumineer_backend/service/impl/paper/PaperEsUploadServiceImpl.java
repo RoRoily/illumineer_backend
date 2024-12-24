@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,11 +31,16 @@ public class PaperEsUploadServiceImpl implements PaperEsUploadService {
     public CustomResponse UploadPaperInEs(){
         int pageNum = 1;
 
-        while(true){// 创建分页对象
+        while (true) {
+            // 创建分页对象
             Page<Paper> page = new Page<>(pageNum, PAGE_SIZE);
+
+            System.out.println("Start update Batch: " + pageNum);
 
             // 查询当前页的数据
             IPage<Paper> paperPage = paperMapper.selectPage(page, new QueryWrapper<>());
+
+
 
             // 获取当前页的数据
             List<Paper> papers = paperPage.getRecords();
@@ -44,13 +50,22 @@ public class PaperEsUploadServiceImpl implements PaperEsUploadService {
                 break;
             }
 
-            for(Paper paper : papers){
-                elasticSearchTool.addPaper(paper);
+            try {
+                for (Paper paper : papers) {
+                    System.out.println(paper);
+                    //elasticSearchTool.addPaper(paper);
+                }
+                System.out.println("Success update Batch: " + pageNum);
+            } catch (Exception e) {
+                System.err.println("Error processing batch: " + pageNum);
+                e.printStackTrace();
+                break; // 可选择退出或继续处理下一个批次
             }
-            System.out.println("Success update Batch: " + pageNum);
+
             // 处理完一批数据后，继续查询下一批
             pageNum++;
         }
+
         return new CustomResponse(200,"更新到ElasticSearch成功",null);
 }
 
