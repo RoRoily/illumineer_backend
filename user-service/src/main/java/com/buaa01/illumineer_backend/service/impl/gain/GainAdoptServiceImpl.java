@@ -83,7 +83,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         }
         //已有
         List<Long> pids = redisTool.getAllList(needClaimKey,Long.class);
-        return paperServiceClient.getPaperAdoByList(pids);
+        return paperServiceClient.getPaperAdoByList(pids,name);
     }
 
     /**
@@ -100,7 +100,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
             return List.of();
         }
         List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
-        return paperServiceClient.getPaperAdoByList(pids);
+        return paperServiceClient.getPaperAdoByList(pids,name);
     }
 
     @Override
