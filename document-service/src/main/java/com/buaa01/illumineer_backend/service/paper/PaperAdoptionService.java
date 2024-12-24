@@ -23,7 +23,7 @@ public interface PaperAdoptionService {
      * 根据pids中的各个pid找到Paper，转换成PaperAdo并返回
      * @param pids
      * **/
-    List<PaperAdo> getPaperAdoptionsByList(List<Long> pids);
+    List<PaperAdo> getPaperAdoptionsByList(List<Long> pids, String name);
 
     /***
      * 根据category返回该category的认领条目列表

@@ -67,7 +67,7 @@ public class HistoryServiceImpl implements HistoryService {
         Integer total = idList.size();
         List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
         List<PaperAdo> papers = new LinkedList<>();
-        for (int i=total-1; i >= 0; i--) {
+        for (int i = historyPaperList.size() - 1; i >= 0; i--) {
             papers.add(historyPaperList.get(i));
         }
 
@@ -94,7 +94,7 @@ public class HistoryServiceImpl implements HistoryService {
 //                        map.put("publishDate", paper.getPublishDate());
 //                    }, taskExecutor);
 
-                    // 使用join()等待全部任务完成
+        // 使用join()等待全部任务完成
 //                    userFuture.join();
 //                    categoryFuture.join();
 //                    long end = System.currentTimeMillis();
