@@ -59,7 +59,10 @@ public class UserClientController {
     }
     public Integer getCurrentUserIdHandler(BlockException exception){return 1;}
 
-
+    @GetMapping("/user/currentUser")
+    public User getCurrentUser(){
+        return currentUser.getUser();
+    }
     @PostMapping("/user/currentUser/isAdmin")
     @SentinelResource(value = "currentIsAdmin",blockHandler = "currentIsAdminHandler")
     public Boolean currentIsAdmin(){
