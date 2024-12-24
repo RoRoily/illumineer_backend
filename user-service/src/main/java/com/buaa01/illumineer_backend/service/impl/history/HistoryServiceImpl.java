@@ -104,13 +104,9 @@ public class HistoryServiceImpl implements HistoryService {
 //                })
 //                .collect(Collectors.toList());
 
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("result", papers);
-        result.put("total", total);
         CustomResponse customResponse = new CustomResponse();
         customResponse.setMessage("分页查询结果成功");
-        customResponse.setData(result);
+        customResponse.setData(papers);
         customResponse.setCode(200);
 //        end = System.currentTimeMillis();
 //        System.out.println("封装耗时：" + (end - start));
