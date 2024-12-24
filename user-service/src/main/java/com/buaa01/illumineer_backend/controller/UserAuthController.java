@@ -83,6 +83,7 @@ public class UserAuthController {
     @GetMapping("/auth/getListToClaim")
     public CustomResponse getListToClaim(){
         try {
+
             CustomResponse customResponse = new CustomResponse();
             List<PaperAdo> paperAdoList = gainAdoptService.getAllGainToClaim(currentUser.getUser().getName());
             customResponse.setCode(200);

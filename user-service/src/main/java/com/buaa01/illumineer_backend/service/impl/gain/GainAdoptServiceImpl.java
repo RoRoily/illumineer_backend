@@ -78,6 +78,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
      **/
     @Override
     public List<PaperAdo> getAllGainToClaim(String name) {
+        System.out.println("getAllGainToClaim" + name);
         String needClaimKey = "needClaim :" + name;
         if(!redisTool.isExist(needClaimKey)){
             //初始化key
@@ -106,6 +107,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
+        System.out.println("pidss" + pidss);
         return paperServiceClient.getPaperAdoByList(pidss,name);
     }
 
@@ -117,6 +119,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
      **/
     @Override
     public List<PaperAdo> getAllGainClaimed(String name) {
+        System.out.println("getAllGainToClaim" + name);
         String ClaimedKey = "Claimed :" + name;
         //键值的初始化在认领中完成
         if(!redisTool.isExist(ClaimedKey)){
@@ -140,11 +143,13 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
+        System.out.println(pidss);
         return paperServiceClient.getPaperAdoByList(pidss,name);
     }
 
     @Override
     public CustomResponse claimAPaper(Integer uid, Long pid) {
+        System.out.println("claimAPaper" + uid + "pid" + pid);
         User user = userService.getUserByUId(uid);
         String needClaimKey = "needClaim :" + user.getName();
         String ClaimedKey = "Claimed :" + user.getName();
@@ -156,6 +161,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         String AuthList = "paperBelonged:" + pid;
         redisTool.addSetMember(paperList,pid);
         redisTool.addSetMember(AuthList,uid);
+        System.out.println("success ClaimAPaper");
 
         //处理paper实体类的归属
         paperServiceClient.modifyAuth(pid, user.getName(), uid);
