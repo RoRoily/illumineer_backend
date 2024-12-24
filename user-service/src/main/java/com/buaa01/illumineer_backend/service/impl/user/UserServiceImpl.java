@@ -114,26 +114,30 @@ public class UserServiceImpl implements UserService {
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
-//        String name = (String) info.get("name");
         String nick_name = (String) info.get("username");
-        String email = (String) info.get("email");
-//        int gender = (int) info.get("gender");
-        String institution = (String) info.get("institution");
-//        String description = (String) info.get("description");
+        String name = (String) info.get("name");
+        if(nick_name!=null){
+            String email = (String) info.get("email");
+            String institution = (String) info.get("institution");
+            user.setNickName(nick_name);
+            user.setEmail(email);
+            user.setInstitution(institution);
+            if (userMapper.getUserByNickName(nick_name) != null)
+                return -1;
+            if (userMapper.getUserByEmail(email) != null)
+                return -2;
+        }//个人主页
+        else if(name!=null){
+            int gender = (int) info.get("gender");
+            String description = (String) info.get("description");
 //        List<String> category_ids = List.of(((String) info.get("category")).split(","));
 //        List<String> category = paperServiceClient.getCategory(category_ids);
-//        List<String> category = List.of(((String) info.get("category")).split(","));
-//        user.setName(name);
-        user.setNickName(nick_name);
-        user.setEmail(email);
-//        user.setGender(gender);
-        user.setInstitution(institution);
-//        user.setDescription(description);
-//        user.setField(category);
-        if (userMapper.getUserByNickName(nick_name) != null)
-            return -1;
-        if (userMapper.getUserByEmail(email) != null)
-            return -2;
+            List<String> category = List.of(((String) info.get("category")).split(","));
+            user.setName(name);
+            user.setGender(gender);
+            user.setDescription(description);
+            user.setField(category);
+        }//学者主页
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
@@ -189,7 +193,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void modifyAuthInfo(String name,String institutionName,String address){
+    public void modifyAuthInfo(String name, String institutionName, String address) {
         Integer loginUserId = currentUser.getUserId();
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
