@@ -114,30 +114,40 @@ public class UserServiceImpl implements UserService {
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
-        String nick_name = (String) info.get("username");
-        String name = (String) info.get("name");
-        if(nick_name!=null){
-            String email = (String) info.get("email");
-            String institution = (String) info.get("institution");
-            user.setNickName(nick_name);
-            user.setEmail(email);
-            user.setInstitution(institution);
+        if (info.get("username") != null) {
+            String nick_name = (String) info.get("username");
             if (userMapper.getUserByNickName(nick_name) != null)
                 return -1;
+            user.setNickName(nick_name);
+        }
+        if (info.get("name") != null) {
+            String name = (String) info.get("name");
+            user.setName(name);
+        }
+        if (info.get("email") != null) {
+            String email = (String) info.get("email");
             if (userMapper.getUserByEmail(email) != null)
                 return -2;
-        }//个人主页
-        else if(name!=null){
+            user.setEmail(email);
+        }
+        if (info.get("institution") != null) {
+            String institution = (String) info.get("institution");
+            user.setInstitution(institution);
+        }
+        if (info.get("gender") != null) {
             int gender = (int) info.get("gender");
+            user.setGender(gender);
+        }
+        if (info.get("description") != null) {
             String description = (String) info.get("description");
+            user.setDescription(description);
+        }
+        if (info.get("category") != null) {
 //        List<String> category_ids = List.of(((String) info.get("category")).split(","));
 //        List<String> category = paperServiceClient.getCategory(category_ids);
             List<String> category = List.of(((String) info.get("category")).split(","));
-            user.setName(name);
-            user.setGender(gender);
-            user.setDescription(description);
             user.setField(category);
-        }//学者主页
+        }
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
