@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,18 +24,17 @@ public class PaperFilterServiceImpl implements PaperFilterService {
     private PaperSearchServiceImpl paperSearchServiceImpl;
 
     @Override
-    public List<SearchResultPaper> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
+    public Map<String, Object> filterSearchResult(FilterCondition sc, Integer size, Integer offset,
             Integer sortType, Integer order) {
 
         boolean isYearEmpty = sc.getYear().isEmpty();
         boolean isDerivationEmpty = sc.getDerivation().isEmpty();
-        // boolean isTypeEmpty = sc.getType().isEmpty();
+        boolean isTypeEmpty = sc.getType().isEmpty();
         boolean isThemeEmpty = sc.getTheme().isEmpty();
 
         Set<String> filterYears = isYearEmpty ? Collections.emptySet() : new HashSet<>(sc.getYear());
         Set<String> filterDerivations = isDerivationEmpty ? Collections.emptySet() : new HashSet<>(sc.getDerivation());
-        // Set<String> filterTypes = isTypeEmpty ? Collections.emptySet() : new
-        // HashSet<>(sc.getType());
+        Set<String> filterTypes = isTypeEmpty ? Collections.emptySet() : new HashSet<>(sc.getType());
         Set<String> filterThemes = isThemeEmpty ? Collections.emptySet() : new HashSet<>(sc.getTheme());
 
         List<SearchResultPaper> filteredPapers = paperSearchServiceImpl.getFromRedis().parallelStream()
@@ -42,17 +42,19 @@ public class PaperFilterServiceImpl implements PaperFilterService {
                     boolean matchesYear = isYearEmpty
                             || filterYears.contains(String.valueOf(paper.getPublishDate().getYear()));
                     boolean matchesDerivation = isDerivationEmpty || filterDerivations.contains(paper.getDerivation());
-                    // boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
+                    boolean matchesType = isTypeEmpty || filterTypes.contains(paper.getType());
                     boolean matchesTheme = isThemeEmpty || filterThemes.contains(paper.getTheme());
-                    // return matchesYear && matchesDerivation && matchesType && matchesTheme;
-                    return matchesYear && matchesDerivation && matchesTheme;
+                    return matchesYear && matchesDerivation && matchesType && matchesTheme;
                 })
                 .collect(Collectors.toList());
 
         List<SearchResultPaper> papers = sortPapers(filteredPapers, sortType, order);
         List<SearchResultPaper> sortedPapers = paperSearchServiceImpl.searchByPage(papers, size, offset);
 
-        return sortedPapers;
+        HashMap<String, Object> returnValues = new HashMap<>();
+        returnValues.put("resultPapers", sortedPapers);
+        returnValues.put("total", sortedPapers.size());
+        return returnValues;
     }
 
     List<SearchResultPaper> sortPapers(List<SearchResultPaper> papers, Integer sortType, Integer order) {

@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.service.paper;
 
 import java.util.List;
+import java.util.Map;
 
 import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.utils.FilterCondition;
@@ -16,6 +17,6 @@ public interface PaperFilterService {
      * 
      * @return List<SearchResultPaper>
      */
-    List<SearchResultPaper> filterSearchResult(FilterCondition sc, Integer size, Integer offset, Integer sortType,
+    Map<String, Object> filterSearchResult(FilterCondition sc, Integer size, Integer offset, Integer sortType,
             Integer order);
 }
