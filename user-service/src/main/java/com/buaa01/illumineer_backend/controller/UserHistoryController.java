@@ -43,7 +43,7 @@ public class UserHistoryController {
 
     /**
      * 删除历史记录
-     * @param pid 文献对应的pid
+     * @param pids 文献对应的pid
      * @return customeResponce实体类
      */
     @PostMapping("/history/delete")
