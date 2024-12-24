@@ -46,7 +46,7 @@ public class HistoryServiceImpl implements HistoryService {
      * 并行处理
      */
     @Override
-    public CustomResponse getHistoryByPage(Integer uid, Integer quantity, Integer index) {
+    public CustomResponse getHistoryByPage(Integer uid) {
         //从redis中获取历史记录条目集合
         String hisKey = "uForHis:" + uid;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -59,29 +59,17 @@ public class HistoryServiceImpl implements HistoryService {
             e.printStackTrace();
         }
 
-        if (index == null) {
-            index = 1;
-        }
-        if (quantity == null) {
-            quantity = 10;
-        }
-        int startIndex = (index - 1) * quantity;
-        int endIndex = startIndex + quantity;
-        // 检查数据是否足够满足分页查询
-        if (startIndex > pidList.size()) {
-            // 如果数据不足以填充当前分页，返回空列表
-            return new CustomResponse(200, "已查询结束", null);
-        }
-        // 使用线程安全的集合类 CopyOnWriteArrayList 保证多线程处理共享List不会出现并发问题
-        List<Paper> paperList = new CopyOnWriteArrayList<>();
-
         // 直接数据库分页查询    （平均耗时 13ms）
-        List<Long> idList = new ArrayList<>(pidList);
-        endIndex = Math.min(endIndex, idList.size());
+        List<Long> idList = new LinkedList<>(pidList);
+        Integer endIndex = Math.min(50, idList.size());
         //history的查询集合
-        List<Long> sublist = idList.subList(startIndex, endIndex);
+        List<Long> sublist = idList.subList(0, endIndex);
         Integer total = idList.size();
         List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(sublist);
+        List<PaperAdo> papers = new LinkedList<>();
+        for (int i=total-1; i >= 0; i--) {
+            papers.add(historyPaperList.get(i));
+        }
 
         // 并行处理每一个history条目，提高效率
         // 先将videoList转换为Stream
@@ -116,13 +104,9 @@ public class HistoryServiceImpl implements HistoryService {
 //                })
 //                .collect(Collectors.toList());
 
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("result", historyPaperList);
-        result.put("total", total);
         CustomResponse customResponse = new CustomResponse();
         customResponse.setMessage("分页查询结果成功");
-        customResponse.setData(result);
+        customResponse.setData(papers);
         customResponse.setCode(200);
 //        end = System.currentTimeMillis();
 //        System.out.println("封装耗时：" + (end - start));

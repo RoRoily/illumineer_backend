@@ -61,11 +61,10 @@ public class UserHistoryController {
 
     /**
      * 分页返回历史记录中的条目
-     * @param quantity,index 每次需要返回的条目数量  偏移量，用于定位需要返回的页面
      * @return CunstomResponce实体类
      */
     @GetMapping("/history/getAPage")
-    public CustomResponse getAPage(@RequestParam("quantity")Integer quantity,@RequestParam("index")Integer index, HttpServletRequest request){
+    public CustomResponse getAPage(HttpServletRequest request){
         String token = request.getHeader("Authorization");
         if (token.isEmpty()) {
             CustomResponse customResponse = new CustomResponse();
@@ -74,7 +73,7 @@ public class UserHistoryController {
         }
         token = token.substring(7);
         String userId = JsonWebTokenTool.getSubjectFromToken(token);
-        return historyService.getHistoryByPage(Integer.parseInt(userId) ,quantity,index);
+        return historyService.getHistoryByPage(Integer.parseInt(userId));
 //        return historyService.getHistoryByPage(currentUser.getUserUid(),quantity,index);
     }
 }
