@@ -33,16 +33,23 @@ public class AIAssistantController {
      * @throws Exception 异常情况（AI接口调用异常）
      */
     @GetMapping("/AI/generateKeywords")
-    public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
+    public CustomResponse generateKeywords(@RequestParam String query) throws Exception{
         CompletableFuture<String> future = aiAssistantService.StartChat(
                 "推荐“" + query + "”" +
-                        "领域的2个英文关键词，尽量简短，每个占一行" +
+                        "领域的3个英文关键词，尽量简短，每个占一行" +
                         "（只输出关键词，不要附加其他内容）");
         String keywords = future.get();
         keywords = keywords.replaceAll("[^a-zA-Z\\s\\n]", "");
         // 使用正则表达式来识别分割
-        String keywordList = keywords.replaceAll("\n", ",");
-        return ResponseEntity.ok(keywordList);
+        List<String> keywordList = Arrays
+                .stream(keywords.split("\\n+"))
+                .collect(Collectors.toList());
+
+        CustomResponse response = new CustomResponse();
+        response.setCode(200);
+        response.setData(keywordList);
+        response.setMessage("OK");
+        return response;
     }
 
     /**
