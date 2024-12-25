@@ -29,7 +29,7 @@ public class RedisTool {
     private RedisTemplate<String,Object> redisTemplate;
 
     // 默认的存活时间：60*60=3600
-    public static final long REDIS_DEFAULT_EXPIRE_TIME = 60 * 60;
+    public static final long REDIS_DEFAULT_EXPIRE_TIME = 5 * 60;
     // 设置默认的时间单位：秒，也就是说所有的Redis相关时间操作单位都是“秒”
     public static final TimeUnit REDIS_DEFAULT_EXPIRE_TIME_UNIT = TimeUnit.SECONDS;
 

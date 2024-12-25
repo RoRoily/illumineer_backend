@@ -131,12 +131,12 @@ public class ESTool {
      * @param text
      * @return 推荐搜索词列表
      */
-    public List<String> getMatchingWord(String text) {
+    public List<String> getMatchingWord1(String text) {
         try {
             List<String> list = new ArrayList<>();
             //使用simpleQueryString
             //匹配content字段中完全包含text的文档，要求所有关键词匹配(Operator.And)
-            Query query = Query.of(q -> q.simpleQueryString(s -> s.fields("content").query(text).defaultOperator(Operator.And)));   // 关键词全匹配
+            Query query = Query.of(q -> q.simpleQueryString(s -> s.fields("content").query(text).defaultOperator(Operator.Or)));   // 关键词全匹配
             //使用prefix
             //以text为前缀来匹配content字段中的内容
             Query query1 = Query.of(q -> q.prefix(p -> p.field("content").value(text)));
@@ -159,4 +159,47 @@ public class ESTool {
             return Collections.emptyList();
         }
     }
+
+    /**
+     * 获取推荐搜索词
+     * @param text
+     * @return 推荐搜索词列表
+     */
+    public List<String> getMatchingWord(String text) {
+        try {
+            List<String> list = new ArrayList<>();
+
+            // 使用 match_phrase_prefix 查询，以实现前缀匹配
+            Query matchPhrasePrefixQuery = Query.of(q -> q.matchPhrasePrefix(mpp -> mpp.field("content").query(text)));
+
+            // 使用 prefix 查询
+            Query prefixQuery = Query.of(q -> q.prefix(p -> p.field("content").value(text)));
+
+            // 将 match_phrase_prefix 和 prefix 查询结合在一起
+            Query boolQuery = Query.of(q -> q.bool(b -> b.should(matchPhrasePrefixQuery).should(prefixQuery)));
+
+            // 构建 SearchRequest，指定查询条件和分页信息
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("search_word")
+                    .query(boolQuery)
+                    .from(0)
+                    .size(10)
+                    .build();
+
+            // 执行搜索并解析结果
+            SearchResponse<ESSearchWord> searchResponse = client.search(searchRequest, ESSearchWord.class);
+            for (Hit<ESSearchWord> hit : searchResponse.hits().hits()) {
+                if (hit.source() != null) {
+                    list.add(hit.source().getContent());
+                }
+            }
+            return list;
+        } catch (IOException e) {
+            log.error("获取ES搜索提示词时出错了：" + e);
+            return Collections.emptyList();
+        }
+    }
+
+
 }
+
