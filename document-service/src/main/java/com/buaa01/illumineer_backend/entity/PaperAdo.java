@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 
@@ -31,7 +34,9 @@ public class PaperAdo {
         paperAdo.pid = (Long) paper.get("pid");
         paperAdo.title = (String) paper.get("title");
         paperAdo.auths = (Map<String, Integer>) paper.get("auths");
-        paperAdo.publishDate = (Date) paper.get("publish_date");
+        LocalDateTime localDateTime = (LocalDateTime) paper.get("publish_date"); // 你的 LocalDateTime 对象
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+        paperAdo.publishDate = Date.from(instant);
         paperAdo.stats = (Boolean) paper.get("stats") ? 1 : 0;
         paperAdo.hasBeenAdoptedByTheAuth = false;
 

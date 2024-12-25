@@ -149,8 +149,9 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
-        System.out.println("claimed pids:" + pidss);
+//        System.out.println("claimed pids:" + pidss);
         List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByList(pidss, name);
+//        System.out.println("claimed pids:" + paperAdoptions);
         String paperList = "property:" + currentUser.getUserId();
         Set<Object> paperSet = redisTool.getSetMembers(paperList);
         List<Long> hasPids = paperSet.stream()
@@ -165,6 +166,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .toList();
         for (PaperAdo paperAdo : paperAdoptions) {
+            System.out.println(paperAdo.getPid());
             if (!hasPids.contains(paperAdo.getPid()))
                 paperAdo.setHasBeenAdoptedByTheAuth(true);
         }
