@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.buaa01.illumineer_backend.entity.CustomResponse;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.service.AIAssistantService;
 import com.buaa01.illumineer_backend.service.impl.paper.PaperSearchServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,6 @@ public class AIAssistantController {
                         "领域的2个英文关键词，尽量简短，每个占一行" +
                         "（只输出关键词，不要附加其他内容）");
         String keywords = future.get();
-        keywords = keywords.replaceAll("[^a-zA-Z\\s\\n]", "");
-        System.out.println("keywords: " + keywords);
         return ResponseEntity.ok(future.get());
     }
 
@@ -64,40 +63,20 @@ public class AIAssistantController {
                         "（只输出关键词，不要附加其他内容）");
         String keywords = future.get();
         keywords = keywords.replaceAll("[^a-zA-Z\\s\\n]", "");
-        System.out.println("keywords: " + keywords);
-        String[] keywordSplit = keywords.split("\\n+");
         // 使用正则表达式来识别分割
-        List<String> keywordList = Arrays.stream(keywordSplit).collect(Collectors.toList());
-        List<String> logicList = new ArrayList<>();
-        List<String> conditionList = new ArrayList<>();
-        for (int i = 0; i < keywordList.size(); i++) {
-            if (i == 0) {
-                logicList.add("0");
-            }
-            else {
-                logicList.add("2"); // or instead of and
-            }
-            conditionList.add("title");
-        }
-        for (String condition: conditionList) {
-            System.out.print(condition + ",");
-        }
-        System.out.println();
-        for (String logic: logicList) {
-            System.out.print(logic + ",");
-        }
-        System.out.println();
-        for (String keyword: keywordList) {
-            System.out.print(keyword + ",");
-        }
-        System.out.println();
+        List<String> keywordList = Arrays
+                .stream(keywords.split("\\n+"))
+                .collect(Collectors.toList());
 
-        String logic = String.join(",", logicList);
-        String condition = String.join(",", conditionList);
-        String keyword = String.join(",", keywordList);
-        Object data = paperSearchService.advancedSearchPapers(logic, condition, keyword, size, offset, sortType, order).getData();
-        Map<String, Object> result = (Map<String, Object>) data;
-        result.put("generatedKeywords", keywordList);
-        return new CustomResponse(200, "OK", result);
+        Map<String, Object> searchResults = new HashMap<>();
+        for (String keyword: keywordList) {
+            searchResults.putAll((Map<String, Object>) (
+                    paperSearchService.searchPapers("title", keyword, size, offset, sortType, order)
+                            .getData()
+            ));
+        }
+
+        searchResults.put("generatedKeywords", keywordList);
+        return new CustomResponse(200, "OK", searchResults);
     }
 }

@@ -87,9 +87,6 @@ public class AIAssistantService {
                 super.onOpen(webSocket, response);
                 // 10秒后检查并关闭 WebSocket
                 scheduler.schedule(() -> {
-                    if (!webSocket.close(1000, "Timeout")) {
-                        System.out.println("WebSocket timeout, closed after 10 seconds");
-                    }
                     latch.countDown();
                 }, 10, TimeUnit.SECONDS); // 10秒后执行定时任务
             }
@@ -106,7 +103,6 @@ public class AIAssistantService {
                 // 拼接回复内容
                 for (MsgDTO msgDTO : responseData.getPayload().getChoices().getText()) {
                     String content = msgDTO.getContent();
-                    System.out.println(content);
                     allResponse.getAndAccumulate(content, (acc, newContent) -> acc + newContent);
                 }
 
@@ -116,13 +112,11 @@ public class AIAssistantService {
                     webSocket.close(1000, "Complete");
                     latch.countDown();
                 }
-                System.out.println("status = " + responseData.getHeader().getStatus());
             }
 
             @Override
             public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, Response response) {
                 super.onFailure(webSocket, t, response);
-                System.out.println("Error occurred, closing WebSocket...");
                 webSocket.close(1400, "Failure");
                 latch.countDown();
             }
@@ -130,7 +124,6 @@ public class AIAssistantService {
             @Override
             public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
                 super.onClosed(webSocket, code, reason);
-                System.out.println("WebSocket closed with code: " + code + ", reason: " + reason);
                 latch.countDown();
             }
         });
