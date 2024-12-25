@@ -62,6 +62,7 @@ public class PaperServiceImpl implements PaperService {
             paper.put("theme", searchPaper.get("theme"));
             paper.put("contentUrl", searchPaper.get("contentUrl"));
             paper.put("category", searchPaper.get("category"));
+            paper.put("essAbs", searchPaper.get("ess_abs"));
             papers.add(paper);
         }
         customResponse.setData(papers);

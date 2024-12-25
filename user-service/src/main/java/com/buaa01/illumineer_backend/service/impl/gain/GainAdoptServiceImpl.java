@@ -102,12 +102,12 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .toList();
-        System.out.println(longPids);
+        //System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
-        System.out.println("pidss" + pidss);
+        System.out.println("pids to Claim : " + pidss);
         return paperServiceClient.getPaperAdoByList(pidss,name);
     }
 
@@ -119,10 +119,11 @@ public class GainAdoptServiceImpl implements GainAdoptService {
      **/
     @Override
     public List<PaperAdo> getAllGainClaimed(String name) {
-        System.out.println("getAllGainToClaim" + name);
+        System.out.println("getAllGainClaimed" + name);
         String ClaimedKey = "Claimed :" + name;
         //键值的初始化在认领中完成
         if(!redisTool.isExist(ClaimedKey)){
+            //redisTool.addSetMember(ClaimedKey,1);
             return List.of();
         }
         //List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
@@ -138,23 +139,44 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .toList();
-        System.out.println(longPids);
+        //System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
-        System.out.println(pidss);
+        System.out.println("claimed pids:" + pidss);
         return paperServiceClient.getPaperAdoByList(pidss,name);
     }
 
     @Override
     public CustomResponse claimAPaper(Integer uid, Long pid) {
-        System.out.println("claimAPaper" + uid + "pid" + pid);
+        System.out.println("claimAPaper  " + uid + "pid  " + pid);
         User user = userService.getUserByUId(uid);
         String needClaimKey = "needClaim :" + user.getName();
         String ClaimedKey = "Claimed :" + user.getName();
         //处理显示集合
         redisTool.addSetMember(ClaimedKey,pid);
+        System.out.println("claimed pid:" + pid);
+        //-----------------------------------------------------------
+        Set<Object> pids = redisTool.getSetMembers(ClaimedKey);
+        List<Long> longPids = pids.stream()
+                .map(item -> {
+                    try {
+                        return Long.parseLong(item.toString());
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid value: " + item);
+                        return null; // 处理转换失败的情况
+                    }
+                })
+                .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
+                .toList();
+        //System.out.println(longPids);
+        // 将 List<Long> 转换为逗号分隔的字符串
+        String pidss = longPids.stream()
+                .map(String::valueOf) // 将每个 Long 转换为 String
+                .collect(Collectors.joining(",")); // 使用逗号连接
+        System.out.println("claimed pids(In claim a Paper):" + pidss);
+        //-----------------------------------------------------------
         redisTool.deleteSetMember(needClaimKey,pid);
         //处理表示归属的集合
         String paperList = "property:" + uid;

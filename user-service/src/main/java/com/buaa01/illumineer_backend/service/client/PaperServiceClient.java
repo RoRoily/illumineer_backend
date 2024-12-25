@@ -19,6 +19,8 @@ public interface PaperServiceClient {
     //从paperService中寻找提供的服务
     @GetMapping("/document/paper/{pid}")
     Paper getPaperById(@PathVariable("pid") Integer pid);
+    @GetMapping("/document/paper/getPaperByPId")
+    CustomResponse getPaperByPid(@RequestParam("pid") Integer pid);
 
 
     @GetMapping("/document/paper/getAuthUid")

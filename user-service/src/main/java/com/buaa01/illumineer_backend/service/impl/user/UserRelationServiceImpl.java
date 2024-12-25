@@ -87,6 +87,7 @@ public class UserRelationServiceImpl implements UserRelationService {
             return customResponse;
         }
         UserRelation userRelation = userRelationMapper.selectOne(wrapper.eq("uid", uid));
+
         customResponse.setData(userRelation.getRelevant());
         customResponse.setMessage("成功返回用户的关系网络");
         return customResponse;
