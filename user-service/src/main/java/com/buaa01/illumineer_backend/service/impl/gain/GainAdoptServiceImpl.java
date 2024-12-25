@@ -108,14 +108,14 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .collect(Collectors.toList());
-        // System.out.println(longPids);
+         System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
         System.out.println("pids to Claim : " + pidss);
-        pidss = name + ":" + pids;
-        return paperServiceClient.getPaperAdoByList(pidss);
+//        pidss = name + ":" + pids;
+        return paperServiceClient.getPaperAdoByList2(pidss, name);
     }
 
     /**
@@ -152,8 +152,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
 //        System.out.println("claimed pids:" + pidss);
-        pidss = name + ":" + pids;
-        List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByList(pidss);
+        List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByList2(pidss, name);
 //        System.out.println("claimed pids:" + paperAdoptions);
         String paperList = "property:" + currentUser.getUserId();
         Set<Object> paperSet = redisTool.getSetMembers(paperList);
