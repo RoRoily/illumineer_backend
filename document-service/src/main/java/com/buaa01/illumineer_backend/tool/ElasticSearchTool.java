@@ -157,6 +157,26 @@ public class ElasticSearchTool {
     }
 
     /**
+     * 模糊匹配，分页根据查询条件
+     * @param condition 查询条件
+     * @param keyword   查询关键词
+     * @param page  第几页 从1开始
+     * @param size  每页查多少条数据 一般30条
+     * @param onlyPass 是否只查询没有删除的论文
+     * @return 包含查到的paper列表，按匹配分数排序
+     */
+    public List<Paper> searchPapersByCondition(String condition, String keyword, Integer page, Integer size, boolean onlyPass) {
+        try {
+            List<Paper> list = new ArrayList<>();
+            Query query = Query.of(q -> q.multiMatch(m -> m.fields(condition).query(keyword).fuzziness("AUTO")));
+            return getPapers(page, size, onlyPass, list, query);
+        } catch (IOException e) {
+            log.error("查询ES相关论文时出错了：{}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * 模糊匹配，分页根据作者名查询
      * @param keyword   查询关键词
      * @param page  第几页 从1开始
@@ -180,10 +200,18 @@ public class ElasticSearchTool {
         Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(0)))));
         Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
         SearchRequest searchRequest;
-        if (onlyPass) {
-            searchRequest = new SearchRequest.Builder().index("paper").query(bool).from((page - 1) * size).size(size).build();
-        } else {
-            searchRequest = new SearchRequest.Builder().index("paper").query(query).from((page - 1) * size).size(size).build();
+        if(page==null){
+            if (onlyPass){
+                searchRequest = new SearchRequest.Builder().index("paper").query(bool).build();
+            }
+            else searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
+        }
+        else{
+            if (onlyPass) {
+                searchRequest = new SearchRequest.Builder().index("paper").query(bool).from((page - 1) * size).size(size).build();
+            } else {
+                searchRequest = new SearchRequest.Builder().index("paper").query(query).from((page - 1) * size).size(size).build();
+            }
         }
         SearchResponse<Paper> searchResponse = elasticsearchClient.search(searchRequest, Paper.class);
         for (Hit<Paper> hit : searchResponse.hits().hits()) {

@@ -28,7 +28,11 @@ public class PaperSearchController {
     @GetMapping("/get/id")
     public CustomResponse getPaperByPid(@RequestParam("pid") Long pid) {
         try {
-            return paperSearchService.getPaperByPid(pid);
+            CustomResponse customResponse = paperSearchService.getPaperByPidES(pid);
+            if(customResponse.getData()==null){
+                customResponse = paperSearchService.getPaperByPid(pid);
+            }
+            return customResponse;
         } catch (Exception e) {
             e.printStackTrace();
             CustomResponse customResponse = new CustomResponse();

@@ -14,6 +14,7 @@ import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.mapper.SearchResultPaperMapper;
 import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
+import com.buaa01.illumineer_backend.tool.ElasticSearchTool;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import com.buaa01.illumineer_backend.utils.PaperSortScorer;
 
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -52,6 +54,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     @Autowired
     @Qualifier("taskExecutor")
     private Executor taskExecutor;
+    @Autowired
+    private ElasticSearchTool elasticSearchTool;
 
     /**
      * 根据pid获取文献信息
@@ -80,6 +84,56 @@ public class PaperSearchServiceImpl implements PaperSearchService {
 
             // refs 的转换
             List<Long> refs = objectMapper.readValue(paper.get("refs").toString(), new TypeReference<List<Long>>() {
+            });
+            paper.put("refs", refs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        customResponse.setData(paper);
+        return customResponse;
+    }
+    @Override
+    public CustomResponse getPaperByPidES(Long pid){
+        CustomResponse customResponse = new CustomResponse();
+        List<Paper> papers = elasticSearchTool.searchPapersByCondition("pid",pid.toString(),null,null,true);
+        if(papers==null||papers.isEmpty()){
+            customResponse.setCode(500);
+            customResponse.setData(null);
+            return customResponse;
+        }
+        Map<String, Object> paper = new HashMap<>();
+        Class<?> clazz = papers.get(0).getClass();
+
+        // 遍历所有字段（包括私有字段）
+        try{
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true); // 设置字段可访问
+                String fieldName = field.getName();
+                Object fieldValue = field.get(papers.get(0));
+                paper.put(fieldName, fieldValue);
+            }
+        }catch (IllegalAccessException illegalAccessException){
+            illegalAccessException.printStackTrace();
+            customResponse.setCode(500);
+            customResponse.setData(null);
+            return customResponse;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            // keywords 的转换
+            List<String> keywords = objectMapper.readValue(paper.get("keywords").toString(),
+                    new TypeReference<>() {
+                    });
+            paper.put("keywords", keywords);
+
+            // auths 的转换
+            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(),
+                    new TypeReference<>() {
+                    });
+            paper.put("auths", auths);
+
+            // refs 的转换
+            List<Long> refs = objectMapper.readValue(paper.get("refs").toString(), new TypeReference<>() {
             });
             paper.put("refs", refs);
         } catch (Exception e) {
@@ -393,13 +447,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      */
     List<Map<String, Object>> searchByKeyword(String condition, String keyword) {
         List<Paper> list = null;
-        /*
-        try {
-
+        /*try {
             if (checkIndexExists("paper")) {
                 Query query;
-
-                // query = Query.of(q -> q.match(m -> m.field(condition).query(keyword)));
                 query = Query.of(q -> q.bool(b -> {
                     b.must(m -> m.match(ma -> ma.field(condition).query(keyword)));
                     b.must(m -> m.match(ma -> ma.field("stats").query(0)));
@@ -413,20 +463,14 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                         list.add(hit.source());
                     }
                 }
-                if (list.size() == 0) {
-                    list = null;
-                }
-            } else {
-                list = null;
             }
         } catch (IOException e) {
             log.error("查询ES相关文献文档时出错了：" + e);
-            list = null;
-        }
-         */
+        }*/
+        list = elasticSearchTool.searchPapersByCondition(condition,keyword,null,null,true);
         System.out.println(list);
         List<Map<String, Object>> paperList;
-        if (list == null) {
+        if (list == null || list.isEmpty()) {
             String cond = "";
             if (condition.equals("auths")) {
                 cond = "str_auths";
@@ -439,7 +483,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 paperList = paperMapper.searchByKeyword(cond, keyword);
             }
         } else {
-            paperList = new ArrayList<Map<String, Object>>();
+            paperList = new ArrayList<>();
             for (Paper paper : list) {
                 Map<String, Object> paperMap = new HashMap<>();
                 paperMap.put("pid", paper.getPid());
