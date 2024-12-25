@@ -52,7 +52,9 @@ public class PaperEsUploadServiceImpl implements PaperEsUploadService {
                 List<? extends Future<?>> futures = papers.stream()
                         .map(paper -> executorService.submit(() -> {
                             try {
-                                elasticSearchTool.addPaper(paper);
+                                if(!elasticSearchTool.isExistPaper(paper.getPid())){
+                                    elasticSearchTool.addPaper(paper);
+                                }
                             } catch (Exception e) {
                                 // 单条数据处理异常，记录日志或处理
                                 e.printStackTrace();

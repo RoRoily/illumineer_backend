@@ -51,6 +51,15 @@ public class ElasticSearchTool {
         }
     }
 
+    public boolean isExistPaper(Long pid){
+        try{
+            return elasticsearchClient.exists(e -> e.index("paper").id(pid.toString())).value();
+        }catch (IOException e){
+            log.error("查询paper是否存在出错：{}", e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * 删除论文
      * @param pid
