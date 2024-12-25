@@ -38,6 +38,9 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
     @Autowired
     private PaperServiceClient paperServiceClient;
 
+    @Autowired
+    private UserServiceImpl userServiceImpl;
+
     /**
      * 创建一收藏夹
      *
@@ -49,14 +52,15 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 
         try {
             String favKey = "uForFav:" + userID;
-            Long fidBias = redisTool.getZSetNumber(favKey);
-            Integer fID = (int) (fidBias * 10000 + userID);
+            Integer fidBias = currentUser.getUser().getFavBias();
+            Integer fID = (int) ((fidBias + 1) * 10000 + userID);
             if (favName == null) {
                 favName = "收藏夹" + fID;
             }
 
             redisTool.storeZSetByTime(favKey, fID);
             favoriteMapper.insert(new Favorite(fID, userID, 2, favName, 0, 0));
+            userServiceImpl.updataUserFavBias();
             customResponse.setMessage("新建收藏夹成功");
             customResponse.setData(fID);
         } catch (Exception e) {
@@ -207,8 +211,14 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 fav.put("fid", fid);
                 fav.put("favName", favorite.getTitle());
                 fav.put("num", pids_List.size());
+
+                // Map<Integer, String> pidMap = new HashMap<>();
+                // for (Integer pid : pids_List) {
+                // pidMap.put(pid, paperServiceClient.getPaperByPid(pid).getData());
+                // }
+                // fav.put("pidInfo", pidMap);
                 fav.put("pidList", pids_List);
-                
+
                 data.add(fav);
             }
             customResponse.setData(data);
@@ -275,9 +285,6 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
             List<Integer> retFids = new ArrayList<>();
 
             for (Integer fid : userFids) {
-                if (fid == 0) { // FIXME :为什么会出现一个零，这玩意哪来的？
-                    continue;
-                }
                 String fidKey = "fid:" + fid;
                 if (redisTool.isExistInZSet(fidKey, pid)) {
                     retFids.add(fid);
