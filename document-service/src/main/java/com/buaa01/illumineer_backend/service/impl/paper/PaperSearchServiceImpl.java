@@ -393,7 +393,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      */
     List<Map<String, Object>> searchByKeyword(String condition, String keyword) {
         List<Paper> list = null;
+        /*
         try {
+
             if (checkIndexExists("paper")) {
                 Query query;
 
@@ -421,6 +423,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             log.error("查询ES相关文献文档时出错了：" + e);
             list = null;
         }
+         */
         System.out.println(list);
         List<Map<String, Object>> paperList;
         if (list == null) {
