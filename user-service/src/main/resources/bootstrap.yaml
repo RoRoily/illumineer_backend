@@ -1,5 +1,5 @@
 spring:
-  host: localhost
+  host: 115.120.239.233
   application:
     name: user-service
   cloud:

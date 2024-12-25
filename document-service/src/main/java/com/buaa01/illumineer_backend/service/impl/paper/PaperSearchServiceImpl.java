@@ -450,7 +450,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             log.error("查询ES相关文献文档时出错了：" + e);
         }*/
         list = elasticSearchTool.searchPapersByCondition(condition,keyword,null,size*offset,true);
-        System.out.println("查询es" + list);
+        //System.out.println("查询es" + list);
         List<Map<String, Object>> paperList;
         if (list == null || list.isEmpty()) {
             String cond = "";
