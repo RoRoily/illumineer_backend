@@ -6,6 +6,7 @@ import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.service.gain.GainAdoptService;
 import com.buaa01.illumineer_backend.service.user.UserService;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class GainAdoptServiceImpl implements GainAdoptService {
     private UserService userService;
     @Autowired
     private JpaProperties jpaProperties;
+    @Autowired
+    private CurrentUser currentUser;
 
     /**
      * 给出符合条件的文献
@@ -147,7 +150,26 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
         System.out.println("claimed pids:" + pidss);
-        return paperServiceClient.getPaperAdoByList(pidss, name);
+        //return paperServiceClient.getPaperAdoByList(pidss, name);
+        List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByList(pidss, name);
+        String paperList = "property:" + currentUser.getUserId();
+        Set<Object> paperSet = redisTool.getSetMembers(paperList);
+        List<Long> hasPids = paperSet.stream()
+                .map(item -> {
+            try {
+                return Long.parseLong(item.toString());
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid value: " + item);
+                return null; // 处理转换失败的情况
+            }
+        })
+                .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
+                .collect(Collectors.toList());
+        for (PaperAdo paperAdo : paperAdoptions) {
+            if (!hasPids.contains(paperAdo.getPid()))
+                paperAdo.setHasBeenAdoptedByTheAuth(true);
+        }
+        return paperAdoptions;
     }
 
     @Override
