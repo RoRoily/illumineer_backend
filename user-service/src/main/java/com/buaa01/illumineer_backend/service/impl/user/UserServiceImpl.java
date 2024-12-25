@@ -218,9 +218,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void modifyAuthInfoWithRedis(String name, String institutionName, String address){
-        Integer loginUserId =redisTool.getObjectByClass("orcid", Integer.class);
-        System.out.println("save in redis:" + loginUserId);
+    public void modifyAuthInfoWithRedis(String name, String institutionName, String address) {
+        Integer loginUserId = redisTool.getObjectByClass("orcid", Integer.class);
         User user = redisTool.getObjectByClass("user:" + loginUserId, User.class);
         if (user == null)
             user = userMapper.selectById(loginUserId);
@@ -230,5 +229,18 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(user);
         User finalUser = user;
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
+    }
+
+    @Override
+    public void updataUserFavBias(boolean plusOne) {
+        User user = userMapper.selectById(currentUser.getUserId());
+        if (plusOne) { // 加一
+            user.setFavBias(user.getFavBias() + 1);
+        } else {// 减一
+            user.setFavBias(user.getFavBias() - 1);
+        }
+        userMapper.updateById(user);
+        CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" +
+                user.getUid(), user));
     }
 }
