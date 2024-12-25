@@ -81,6 +81,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
      * **/
     @Override
     public List<PaperAdo> getPaperAdoptionsByList(List<Long> pids, String name) {
+        System.out.println(pids);
         List<PaperAdo> paperAdos = new ArrayList<>();
         for (Long pid : pids) {
             Map<String, Object> paper = null;
@@ -114,7 +115,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                 } else {
                     stats = Integer.parseInt(paper.get("stats").toString().strip());
                 }
-                System.out.println(paper);
+//                System.out.println(paper);
                 paperAdo = paperAdo.setNewPaperAdo(paper, name);
 //                boolean hasBeenAdopted = false;
 //                if (name != null && auths.get(name) != null) {
