@@ -1,6 +1,7 @@
 package com.buaa01.illumineer_backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Institution;
 import com.buaa01.illumineer_backend.entity.User;
@@ -106,7 +107,11 @@ public class EmailAuthController {
         user.setIsVerify(true);
         user.setInstitution(verifiedInstitution.getName());
         // 2. 更新用户认证状态
-        //userRepository.save(user);
+        UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
+        userUpdateWrapper.eq("uid",user.getUid());
+        userUpdateWrapper.set("is_verify",true);
+        userUpdateWrapper.set("institution",verifiedInstitution.getName());
+        userMapper.update(null,userUpdateWrapper);
         customResponse.setCode(200);
         customResponse.setMessage("Email Verified");
         return customResponse;
