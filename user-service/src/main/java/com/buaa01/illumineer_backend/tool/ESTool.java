@@ -165,7 +165,7 @@ public class ESTool {
      * @param text
      * @return 推荐搜索词列表
      */
-    public List<String> getMatchingWord(String text) {
+    public List<String> getMatchingWord2(String text) {
         try {
             List<String> list = new ArrayList<>();
 
@@ -199,6 +199,57 @@ public class ESTool {
             return Collections.emptyList();
         }
     }
+
+    /**
+     * 获取推荐搜索词
+     * @param text
+     * @return 推荐搜索词列表
+     */
+    public List<String> getMatchingWord(String text) {
+        try {
+            List<String> list = new ArrayList<>();
+
+            // 使用 match_phrase_prefix 查询，以实现前缀匹配
+            Query matchPhrasePrefixQuery = Query.of(q -> q.matchPhrasePrefix(mpp -> mpp.field("content").query(text)));
+
+            // 使用 prefix 查询
+            Query prefixQuery = Query.of(q -> q.prefix(p -> p.field("content").value(text)));
+
+            // 将 match_phrase_prefix 和 prefix 查询结合在一起
+            Query boolQuery = Query.of(q -> q.bool(b -> b.should(matchPhrasePrefixQuery).should(prefixQuery)));
+
+            // 构建 SearchRequest，指定查询条件和分页信息
+            SearchRequest searchRequest = new SearchRequest.Builder()
+                    .index("search_word")
+                    .query(boolQuery)
+                    .from(0)
+                    .size(10) // 限制最多返回10个结果
+                    .build();
+
+            // 执行搜索并解析结果
+            SearchResponse<ESSearchWord> searchResponse = client.search(searchRequest, ESSearchWord.class);
+
+            int maxResults = 10; // 最大返回结果数
+            int count = 0; // 当前结果计数
+
+            for (Hit<ESSearchWord> hit : searchResponse.hits().hits()) {
+                if (hit.source() != null) {
+                    list.add(hit.source().getContent());
+                    count++;
+                }
+                // 如果已收集到10个结果，提前终止循环
+                if (count >= maxResults) {
+                    break;
+                }
+            }
+
+            return list;
+        } catch (IOException e) {
+            log.error("获取ES搜索提示词时出错了：" + e);
+            return Collections.emptyList();
+        }
+    }
+
 
 
 }
