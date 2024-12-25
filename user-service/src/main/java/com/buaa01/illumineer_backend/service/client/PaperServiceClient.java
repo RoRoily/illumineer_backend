@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.client;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.buaa01.illumineer_backend.config.FeignConfig;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
@@ -21,6 +22,8 @@ public interface PaperServiceClient {
     Paper getPaperById(@PathVariable("pid") Integer pid);
     @GetMapping("/document/paper/getPaperByPId")
     CustomResponse getPaperByPid(@RequestParam("pid") Integer pid);
+
+
 
 
     @GetMapping("/document/paper/getAuthUid")

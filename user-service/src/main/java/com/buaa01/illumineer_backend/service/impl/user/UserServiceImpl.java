@@ -231,14 +231,14 @@ public class UserServiceImpl implements UserService {
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
     }
 
+    /*
+     * UserFavBias 自增
+     */
     @Override
-    public void updataUserFavBias(boolean plusOne) {
+    public void updataUserFavBias() {
         User user = userMapper.selectById(currentUser.getUserId());
-        if (plusOne) { // 加一
-            user.setFavBias(user.getFavBias() + 1);
-        } else {// 减一
-            user.setFavBias(user.getFavBias() - 1);
-        }
+        user.setFavBias(user.getFavBias() + 1);
+
         userMapper.updateById(user);
         CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" +
                 user.getUid(), user));
