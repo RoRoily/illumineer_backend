@@ -65,12 +65,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserHomeInfo(Integer uid) {
-        User user = redisTool.getObjectByClass("user:" + uid, User.class);
-        if (user == null) {
-            user = userMapper.selectById(uid);
+        //User user = redisTool.getObjectByClass("user:" + uid, User.class);
+        //if (user == null) {
+            User user = userMapper.selectById(uid);
             User finalUser = user;
             CompletableFuture.runAsync(() -> redisTool.setObjectValue("user:" + finalUser.getUid(), finalUser));
-        }
+       // }
         return new UserDTO(user);
     }
 
