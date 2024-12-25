@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.controller;
 
+import cn.hutool.json.JSON;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.SearchResultPaper;
 import com.buaa01.illumineer_backend.service.AIAssistantService;
@@ -31,14 +32,31 @@ public class AIAssistantController {
      * @return 返回关键词（用空格隔开）
      * @throws Exception 异常情况（AI接口调用异常）
      */
-    @PostMapping("/AI/generateKeywords")
-    public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
+    @GetMapping("/AI/generateKeywords")
+    public CustomResponse generateKeywords(@RequestParam String query) throws Exception{
         CompletableFuture<String> future = aiAssistantService.StartChat(
                 "推荐“" + query + "”" +
-                        "领域的2个英文关键词，尽量简短，每个占一行" +
+                        "领域的3个英文关键词，尽量简短，每个占一行" +
                         "（只输出关键词，不要附加其他内容）");
         String keywords = future.get();
-        return ResponseEntity.ok(future.get());
+        keywords = keywords.replaceAll("[^a-zA-Z\\s\\n]", "");
+        // 使用正则表达式来识别分割
+        List<String> keywordList = Arrays
+                .stream(keywords.split("\\n+"))
+                .toList();
+
+        List<String> retKeywordList = new ArrayList<>();
+
+        for (String keyword: keywordList) {
+            if (keyword.startsWith(" "))
+                retKeywordList.add(keyword.replaceFirst(" ", ""));
+        }
+
+        CustomResponse response = new CustomResponse();
+        response.setCode(200);
+        response.setData(retKeywordList);
+        response.setMessage("OK");
+        return response;
     }
 
     /**
@@ -51,7 +69,7 @@ public class AIAssistantController {
      * @return 文献信息
      * @throws Exception 异常情况（AI接口调用异常）
      */
-    @PostMapping("/AI/searchPaper")
+    @GetMapping("/AI/searchPaper")
     public CustomResponse searchPaper(@RequestParam("query") String query,
                                       @RequestParam("size") Integer size,
                                       @RequestParam("offset") Integer offset,

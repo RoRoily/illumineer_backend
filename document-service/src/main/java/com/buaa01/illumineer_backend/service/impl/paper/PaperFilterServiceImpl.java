@@ -154,7 +154,6 @@ public class PaperFilterServiceImpl implements PaperFilterService {
 
     public Map<String, Object> getFilterCondition() {
         String temp = (String) redisTool.getValue("FilterCondition");
-        System.err.println(temp);
         return JSON.parseObject(temp, Map.class);
     }
 

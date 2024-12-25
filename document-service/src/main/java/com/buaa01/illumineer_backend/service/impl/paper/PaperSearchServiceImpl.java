@@ -34,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -95,21 +96,23 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     @Override
     public CustomResponse getPaperByPidES(Long pid){
         CustomResponse customResponse = new CustomResponse();
-        List<Paper> papers = elasticSearchTool.searchPapersByCondition("pid",pid.toString(),null,null,true);
+        List<Paper> papers = elasticSearchTool.searchPapersByPid(pid,null,null,true);
+        System.out.println("getPaperByPidES "+papers);
         if(papers==null||papers.isEmpty()){
             customResponse.setCode(500);
             customResponse.setData(null);
             return customResponse;
         }
+        Paper paper1 = paperMapper.selectById(papers.get(0).getPid());
         Map<String, Object> paper = new HashMap<>();
-        Class<?> clazz = papers.get(0).getClass();
+        Class<?> clazz = paper1.getClass();
 
         // 遍历所有字段（包括私有字段）
         try{
             for (Field field : clazz.getDeclaredFields()) {
                 field.setAccessible(true); // 设置字段可访问
                 String fieldName = field.getName();
-                Object fieldValue = field.get(papers.get(0));
+                Object fieldValue = field.get(paper1);
                 paper.put(fieldName, fieldValue);
             }
         }catch (IllegalAccessException illegalAccessException){
@@ -117,27 +120,6 @@ public class PaperSearchServiceImpl implements PaperSearchService {
             customResponse.setCode(500);
             customResponse.setData(null);
             return customResponse;
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            // keywords 的转换
-            List<String> keywords = objectMapper.readValue(paper.get("keywords").toString(),
-                    new TypeReference<>() {
-                    });
-            paper.put("keywords", keywords);
-
-            // auths 的转换
-            Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(),
-                    new TypeReference<>() {
-                    });
-            paper.put("auths", auths);
-
-            // refs 的转换
-            List<Long> refs = objectMapper.readValue(paper.get("refs").toString(), new TypeReference<>() {
-            });
-            paper.put("refs", refs);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         customResponse.setData(paper);
         return customResponse;
@@ -191,13 +173,13 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType,
             Integer order) {
         // 模糊搜索：keyword
-        List<Map<String, Object>> papers = searchByKeyword(condition, keyword);
+        List<Map<String, Object>> papers = searchByKeyword(condition, keyword, size, offset);
 
         List<SearchResultPaper> searchResultPapers = papersToSearchResultPaper(papers);
-
-        deleteFromRedis(); // 清空上次缓存的搜索结果
-        saveToRedis(searchResultPapers); // 存储新的搜索结果
-
+        CompletableFuture.runAsync(() -> {
+            deleteFromRedis(); // 清空上次缓存的搜索结果
+            saveToRedis(searchResultPapers); // 存储新的搜索结果
+        }, taskExecutor);
         return getSearchResult(searchResultPapers, sortType, order, size, offset);
     }
 
@@ -445,7 +427,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @param keyword 搜索内容
      * @return 文献信息
      */
-    List<Map<String, Object>> searchByKeyword(String condition, String keyword) {
+    List<Map<String, Object>> searchByKeyword(String condition, String keyword, Integer size, Integer offset) {
         List<Paper> list = null;
         /*try {
             if (checkIndexExists("paper")) {
@@ -467,8 +449,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         } catch (IOException e) {
             log.error("查询ES相关文献文档时出错了：" + e);
         }*/
-        list = elasticSearchTool.searchPapersByCondition(condition,keyword,null,null,true);
-        System.out.println(list);
+        list = elasticSearchTool.searchPapersByCondition(condition,keyword,null,size*offset,true);
+        System.out.println("查询es" + list);
         List<Map<String, Object>> paperList;
         if (list == null || list.isEmpty()) {
             String cond = "";
@@ -483,22 +465,25 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                 paperList = paperMapper.searchByKeyword(cond, keyword);
             }
         } else {
-            paperList = new ArrayList<>();
-            for (Paper paper : list) {
-                Map<String, Object> paperMap = new HashMap<>();
-                paperMap.put("pid", paper.getPid());
-                paperMap.put("title", paper.getTitle());
-                paperMap.put("keywords", paper.getKeywords());
-                paperMap.put("auths", paper.getAuths());
-                paperMap.put("field", paper.getCategory());
-                paperMap.put("type", paper.getType());
-                paperMap.put("theme", paper.getTheme());
-                paperMap.put("publish_date", paper.getPublishDate());
-                paperMap.put("derivation", paper.getDerivation());
-                paperMap.put("ref_times", paper.getRefTimes());
-                paperMap.put("fav_time", paper.getFavTimes());
-                paperList.add(paperMap);
-            }
+            paperList = list.parallelStream()
+                    .map(paper -> {
+                        /*
+                        Map<String, Object> paperMap = new HashMap<>();
+                        paperMap.put("pid", detailedPaper.getPid());
+                        paperMap.put("title", detailedPaper.getTitle());
+                        paperMap.put("keywords", detailedPaper.getKeywords());
+                        paperMap.put("auths", detailedPaper.getAuths());
+                        paperMap.put("field", detailedPaper.getCategory());
+                        paperMap.put("type", detailedPaper.getType());
+                        paperMap.put("theme", detailedPaper.getTheme());
+                        paperMap.put("publish_date", detailedPaper.getPublishDate());
+                        paperMap.put("derivation", detailedPaper.getDerivation());
+                        paperMap.put("ref_times", detailedPaper.getRefTimes());
+                        paperMap.put("fav_time", detailedPaper.getFavTimes());*/
+
+                        return paperMapper.getPaperByPid(paper.getPid());
+                    })
+                    .collect(Collectors.toList());
         }
         return paperList;
     }

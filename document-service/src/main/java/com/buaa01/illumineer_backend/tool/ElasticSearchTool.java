@@ -1,6 +1,8 @@
 package com.buaa01.illumineer_backend.tool;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -9,15 +11,22 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.buaa01.illumineer_backend.entity.ElasticSearchPaper;
 import com.buaa01.illumineer_backend.entity.ElasticSearchWord;
 import com.buaa01.illumineer_backend.entity.Paper;
+import com.buaa01.illumineer_backend.entity.SearchResultPaper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -45,8 +54,34 @@ public class ElasticSearchTool {
      */
     public void addPaper(Paper paper) {
         try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            Date date;
+            // 判断是否是 ISO 格式，转换date格式
+            if (!paper.getPublishDate().toString().contains(" ")) {
+                date = Date.from(
+                        LocalDateTime.parse(paper.getPublishDate().toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                .atZone(ZoneId.systemDefault()).toInstant());
+            } else {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                date = Date.from(LocalDateTime.parse(paper.getPublishDate().toString(), formatter)
+                        .atZone(ZoneId.systemDefault()).toInstant());
+            }
+
+            SearchResultPaper searchResultPaper = new SearchResultPaper(
+                    paper.getPid(),
+                    paper.getTitle() == null ? "" : paper.getTitle(),
+                    paper.getKeywords() == null ? "" : paper.getKeywords().toString(),
+                    paper.getAuths() == null ? "" : paper.getAuths().toString(),
+                    paper.getCategory() == null ? "" : paper.getCategory(),
+                    paper.getType() == null ? "" : paper.getType(),
+                    paper.getTheme() == null ? "" : paper.getTheme(),
+                    date,
+                    paper.getDerivation() == null ? "" : paper.getDerivation(),
+                    paper.getRefTimes(),
+                    paper.getFavTimes(),
+                    paper.getContentUrl());
             elasticsearchClient.index(
-                    i -> i.index("paper").id(paper.getPid().toString()).document(paper));
+                    i -> i.index("search_result_paper").id(paper.getPid().toString()).document(searchResultPaper));
         }catch (IOException e){
             log.error("添加论文至ElasticSearch出错：{}", e.getMessage());
         }
@@ -75,7 +110,32 @@ public class ElasticSearchTool {
 
     public void updatePaper(Paper paper) {
         try{
-            elasticsearchClient.update(i->i.index("paper").id(paper.getPid().toString()).doc(paper),ElasticSearchPaper.class);
+            Date date;
+            // 判断是否是 ISO 格式，转换date格式
+            if (!paper.getPublishDate().toString().contains(" ")) {
+                date = Date.from(
+                        LocalDateTime.parse(paper.getPublishDate().toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                .atZone(ZoneId.systemDefault()).toInstant());
+            } else {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                date = Date.from(LocalDateTime.parse(paper.getPublishDate().toString(), formatter)
+                        .atZone(ZoneId.systemDefault()).toInstant());
+            }
+
+            SearchResultPaper searchResultPaper = new SearchResultPaper(
+                    paper.getPid(),
+                    paper.getTitle() == null ? "" : paper.getTitle(),
+                    paper.getKeywords() == null ? "" : paper.getKeywords().toString(),
+                    paper.getAuths() == null ? "" : paper.getAuths().toString(),
+                    paper.getCategory() == null ? "" : paper.getCategory(),
+                    paper.getType() == null ? "" : paper.getType(),
+                    paper.getTheme() == null ? "" : paper.getTheme(),
+                    date,
+                    paper.getDerivation() == null ? "" : paper.getDerivation(),
+                    paper.getRefTimes(),
+                    paper.getFavTimes(),
+                    paper.getContentUrl());
+            elasticsearchClient.update(i->i.index("paper").id(paper.getPid().toString()).doc(searchResultPaper),ElasticSearchPaper.class);
         }catch (IOException e){
             log.error("更新论文至ElasticSearch出错：{}", e.getMessage());
         }
@@ -125,9 +185,9 @@ public class ElasticSearchTool {
         Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
         SearchRequest searchRequest;
         if (onlyPass) {
-            searchRequest = new SearchRequest.Builder().index("paper").query(bool).from((page - 1) * size).size(size).build();
+            searchRequest = new SearchRequest.Builder().index("Paper").query(bool).from((page - 1) * size).size(size).build();
         } else {
-            searchRequest = new SearchRequest.Builder().index("paper").query(query).from((page - 1) * size).size(size).build();
+            searchRequest = new SearchRequest.Builder().index("Paper").query(query).from((page - 1) * size).size(size).build();
         }
         SearchResponse<Paper> searchResponse = elasticsearchClient.search(searchRequest, Paper.class);
         for (Hit<Paper> hit : searchResponse.hits().hits()) {
@@ -167,12 +227,21 @@ public class ElasticSearchTool {
      * @return 包含查到的paper列表，按匹配分数排序
      */
     public List<Paper> searchPapersByCondition(String condition, String keyword, Integer page, Integer size, boolean onlyPass) {
-        try {
+        try{
             List<Paper> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields(condition).query(keyword).fuzziness("AUTO")));
-            if(Objects.equals(condition, "pid")){
-                query = Query.of(q -> q.term(t -> t.field("_id").value(Long.parseLong(keyword)))); // 精确匹配 Long 类型字段
-            }
+            return getPapers(page, size, onlyPass, list, query);
+            //return getPapers(page, size, onlyPass, condition, keyword);
+        }catch (IOException e){
+            log.error("查询ES相关论文时出错了：{}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    public List<Paper> searchPapersByPid(Long pid, Integer page, Integer size, boolean onlyPass){
+        try {
+            List<Paper> list = new ArrayList<>();
+            Query query = Query.of(q -> q.term(t -> t.field("pid").value(pid)));
             return getPapers(page, size, onlyPass, list, query);
         } catch (IOException e) {
             log.error("查询ES相关论文时出错了：{}", e.getMessage());
@@ -193,6 +262,7 @@ public class ElasticSearchTool {
             List<Paper> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields("auths").query(keyword).fuzziness("AUTO")));
             return getPapers(page, size, onlyPass, list, query);
+            //return getPapers(page, size, onlyPass, "auths", keyword);
         } catch (IOException e) {
             log.error("查询ES相关论文时出错了：{}", e.getMessage());
             return Collections.emptyList();
@@ -201,22 +271,26 @@ public class ElasticSearchTool {
 
     // 将query与状态查询结合起来
     private List<Paper> getPapers(Integer page, Integer size, boolean onlyPass, List<Paper> list, Query query) throws IOException {
-        Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(0)))));
+        Query query1 = Query.of(f -> f.term(t -> t.field("status").value(0L)));
         Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
         SearchRequest searchRequest;
-        if(page==null){
-            if (onlyPass){
+        if(page==null && size==null){
+            /*if (onlyPass){
                 searchRequest = new SearchRequest.Builder().index("paper").query(bool).build();
             }
-            else searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
+            else*/ searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
+        }
+        else if(page==null){
+            searchRequest = new SearchRequest.Builder().index("paper").query(query).size(size).build();
         }
         else{
-            if (onlyPass) {
+            /*if (onlyPass) {
                 searchRequest = new SearchRequest.Builder().index("paper").query(bool).from((page - 1) * size).size(size).build();
-            } else {
+            } else*/ {
                 searchRequest = new SearchRequest.Builder().index("paper").query(query).from((page - 1) * size).size(size).build();
             }
         }
+
         SearchResponse<Paper> searchResponse = elasticsearchClient.search(searchRequest, Paper.class);
         for (Hit<Paper> hit : searchResponse.hits().hits()) {
             if (hit.source() != null) {
