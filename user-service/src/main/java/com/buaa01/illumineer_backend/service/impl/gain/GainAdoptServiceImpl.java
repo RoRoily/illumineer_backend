@@ -108,7 +108,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
                 .collect(Collectors.toList());
-         System.out.println(longPids);
+        System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
@@ -204,7 +204,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .collect(Collectors.joining(",")); // 使用逗号连接
         System.out.println("claimed pids(In claim a Paper):" + pidss);
         //-----------------------------------------------------------
-        redisTool.deleteSetMember(needClaimKey, pid);
+//        redisTool.deleteSetMember(needClaimKey, pid);
         //处理表示归属的集合
         String paperList = "property:" + uid;
         String AuthList = "paperBelonged:" + pid;
