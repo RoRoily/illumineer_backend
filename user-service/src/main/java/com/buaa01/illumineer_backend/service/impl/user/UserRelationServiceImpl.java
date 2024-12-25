@@ -40,10 +40,11 @@ public class UserRelationServiceImpl implements UserRelationService {
     @Override
     public CustomResponse updateRelationByUid(Integer uid){
         QueryWrapper<UserRelation> wrapper = new QueryWrapper<>();
-        UserRelation userRelation = redisTool.getObjectByClass("user_relation:"+uid, UserRelation.class);
-        if(userRelation == null){
-            userRelation = userRelationMapper.selectOne(wrapper.eq("uid", uid));
-        }
+        wrapper.eq("uid", uid);
+//        UserRelation userRelation = redisTool.getObjectByClass("user_relation:"+uid, UserRelation.class);
+//        if(userRelation == null){
+          UserRelation userRelation = userRelationMapper.selectOne(wrapper);
+//        }
         CustomResponse customResponse = new CustomResponse();
         Map<Integer,Integer> relationNet = new HashMap<>();
         User user = userService.getUserByUId(uid);
@@ -53,7 +54,6 @@ public class UserRelationServiceImpl implements UserRelationService {
         for(Object pid : paperSet){
             //获取文章所认领作者的集合
             Map<String, Object> paper = paperServiceClient.getPaperById(Long.parseLong(pid.toString()));
-            System.out.println(paper);
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Integer> auths = null;
             try {
@@ -65,26 +65,33 @@ public class UserRelationServiceImpl implements UserRelationService {
 //            String AuthList = "paperBelonged:" + pid;
 //            Set<Object> userSet = redisTool.getSetMembers(AuthList);
             Collection<Integer> userSet = auths.values();
-            System.out.println(userSet);
             for(Integer auth : userSet){
-                if(!relationNet.containsKey(auth)){
-                    relationNet.put(auth, 1);
-                } else {
-                    Integer coNum = relationNet.get(auth) + 1;
-                    relationNet.put(auth, coNum);
+                if (auth != 0 && auth != uid) {
+                    if (!relationNet.containsKey(auth)) {
+                        relationNet.put(auth, 1);
+                    } else {
+                        Integer coNum = relationNet.get(auth) + 1;
+                        relationNet.put(auth, coNum);
+                    }
                 }
             }
         }
-        System.out.println(paperSet);
+        List<Integer> relevants = null;
+        if (userRelation.getRelevant() == null) {
+            relevants = new ArrayList<>();
+        } else {
+            relevants = userRelation.getRelevant();
+        }
         //更新用户的relationNet
-        for (Map.Entry<Integer, Integer> entry : relationNet.entrySet()) {
-            if (entry.getValue() >= 1) {
+        for (Integer auth: relationNet.keySet()) {
+            if (relationNet.get(auth) >= 1) {
                 // 这里是值 >= 1 时的处理逻辑
-                if(!userRelation.getRelevant().contains(entry.getKey())){
-                    userRelation.getRelevant().add(entry.getKey());
+                if(relevants != null && !relevants.contains(auth)){
+                    relevants.add(auth);
                 }
             }
         }
+        userRelation.setRelevant(relevants);
         UpdateWrapper updateWrapper = new UpdateWrapper();
         updateWrapper.eq("uid", uid);
         userRelationMapper.update(userRelation, updateWrapper);
@@ -116,6 +123,9 @@ public class UserRelationServiceImpl implements UserRelationService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        QueryWrapper<UserRelation> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uid", 11);
+        userRelationMapper.delete(queryWrapper);
         customResponse.setData(userRelation);
         customResponse.setMessage("成功返回用户的关系网络");
         return customResponse;
