@@ -173,7 +173,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
     public CustomResponse searchPapers(String condition, String keyword, Integer size, Integer offset, Integer sortType,
             Integer order) {
         // 模糊搜索：keyword
-        List<Map<String, Object>> papers = searchByKeyword(condition, keyword);
+        List<Map<String, Object>> papers = searchByKeyword(condition, keyword, size, offset);
 
         List<SearchResultPaper> searchResultPapers = papersToSearchResultPaper(papers);
         CompletableFuture.runAsync(() -> {
@@ -427,7 +427,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      * @param keyword 搜索内容
      * @return 文献信息
      */
-    List<Map<String, Object>> searchByKeyword(String condition, String keyword) {
+    List<Map<String, Object>> searchByKeyword(String condition, String keyword, Integer size, Integer offset) {
         List<Paper> list = null;
         /*try {
             if (checkIndexExists("paper")) {
@@ -449,7 +449,7 @@ public class PaperSearchServiceImpl implements PaperSearchService {
         } catch (IOException e) {
             log.error("查询ES相关文献文档时出错了：" + e);
         }*/
-        list = elasticSearchTool.searchPapersByCondition(condition,keyword,null,null,true);
+        list = elasticSearchTool.searchPapersByCondition(condition,keyword,null,size*offset,true);
         System.out.println("查询es" + list);
         List<Map<String, Object>> paperList;
         if (list == null || list.isEmpty()) {

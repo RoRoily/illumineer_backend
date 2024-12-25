@@ -210,8 +210,7 @@ public class ElasticSearchTool {
         try {
             List<Paper> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields("title").query(keyword).fuzziness("AUTO")));
-            //return getPapers(page, size, onlyPass, list, query);
-            return getPapers(page, size, onlyPass, "title", keyword);
+            return getPapers(page, size, onlyPass, list, query);
         } catch (IOException e) {
             log.error("查询ES相关论文时出错了：{}", e.getMessage());
             return Collections.emptyList();
@@ -272,14 +271,17 @@ public class ElasticSearchTool {
 
     // 将query与状态查询结合起来
     private List<Paper> getPapers(Integer page, Integer size, boolean onlyPass, List<Paper> list, Query query) throws IOException {
-        Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(0L)))));
+        Query query1 = Query.of(f -> f.term(t -> t.field("status").value(0L)));
         Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));
         SearchRequest searchRequest;
-        if(page==null){
+        if(page==null && size==null){
             /*if (onlyPass){
                 searchRequest = new SearchRequest.Builder().index("paper").query(bool).build();
             }
             else*/ searchRequest = new SearchRequest.Builder().index("paper").query(query).build();
+        }
+        else if(page==null){
+            searchRequest = new SearchRequest.Builder().index("paper").query(query).size(size).build();
         }
         else{
             /*if (onlyPass) {
@@ -296,38 +298,6 @@ public class ElasticSearchTool {
             }
         }
         return list;
-    }
-
-    private List<Paper> getPapers(Integer page, Integer size, boolean onlyPass, String condition, String keyword) throws IOException {
-        Query query = Query.of(q -> q.multiMatch(m -> m.fields(condition).query(keyword)));
-        Query filterQuery = Query.of(q -> q.term(t -> t.field("status").value(0)));
-
-        Query finalQuery = Query.of(q -> q.bool(b -> {
-            if (onlyPass) {
-                b.filter(filterQuery);
-            }
-            b.must(query);
-            return b;
-        }));
-
-        int offset = (page != null && size != null) ? (page - 1) * size : 0;
-
-        SearchRequest.Builder builder = new SearchRequest.Builder()
-                .index("Paper")
-                .query(finalQuery)
-                .size(size != null ? size : 10);
-
-        if (offset > 0) {
-            builder.from(offset);
-        }
-
-        SearchRequest searchRequest = builder.build();
-        SearchResponse<Paper> searchResponse = elasticsearchClient.search(searchRequest, Paper.class);
-
-        return searchResponse.hits().hits().stream()
-                .map(Hit::source)
-                .filter(Objects::nonNull)
-                .toList();
     }
 
     /**
