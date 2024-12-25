@@ -62,7 +62,7 @@ public class PaperAdoptionController {
      * 返回该用户G指数和H指数
      * @param name 姓名
      * **/
-    @GetMapping("/user/exponent")
+    @GetMapping("/number/exponent")
     public CustomResponse getUserPaperExponent(@RequestParam("name") String name) {
         try {
             Map<String, Object> result = (Map<String, Object>) paperAdoptionService.getPaperBelongedByName(name).getData();
