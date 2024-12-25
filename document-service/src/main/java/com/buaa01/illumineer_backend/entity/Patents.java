@@ -15,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class Patents{
     @TableId(type = IdType.AUTO)
-    private Integer pid;
+    private Long pid;
     /** 申请人 */
     private Map<String, Integer> applicants;
     /** 专利名 */

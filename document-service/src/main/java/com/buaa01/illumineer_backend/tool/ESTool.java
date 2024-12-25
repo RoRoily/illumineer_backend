@@ -49,7 +49,7 @@ public class ESTool {
      * 删除文章文档
      * @param pid
      */
-    public void deletePaper(Integer pid) throws IOException {
+    public void deletePaper(Long pid) throws IOException {
         try {
             client.delete(d -> d.index("paper").id(pid.toString()));
         } catch (IOException e) {
@@ -108,9 +108,9 @@ public class ESTool {
      * @param size  每页查多少条数据 一般30条
      * @return 包含查到的数据id列表，按匹配分数排序
      */
-    public List<Integer> searchPapersByKeyword(String keyword, Integer page, Integer size, boolean onlyPass) {
+    public List<Long> searchPapersByKeyword(String keyword, Integer page, Integer size, boolean onlyPass) {
         try {
-            List<Integer> list = new ArrayList<>();
+            List<Long> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields("title", "tags").query(keyword)));
             Query query1 = Query.of(q -> q.constantScore(c -> c.filter(f -> f.term(t -> t.field("status").value(1)))));
             Query bool = Query.of(q -> q.bool(b -> b.must(query1).must(query)));

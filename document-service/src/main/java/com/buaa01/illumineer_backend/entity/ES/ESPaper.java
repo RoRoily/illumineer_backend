@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ESPaper {
-    private Integer pid;
+    private Long pid;
     // 文章的相关信息
     private String title; // 文章题目
     //    private String essAbs; // 文章摘要

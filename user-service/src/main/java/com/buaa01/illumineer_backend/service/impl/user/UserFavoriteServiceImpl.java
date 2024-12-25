@@ -213,7 +213,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 fav.put("num", pids_List.size());
 
                 // Map<Integer, String> pidMap = new HashMap<>();
-                // for (Integer pid : pids_List) {
+                // for (Long pid : pids_List) {
                 // pidMap.put(pid, paperServiceClient.getPaperByPid(pid).getData());
                 // }
                 // fav.put("pidInfo", pidMap);

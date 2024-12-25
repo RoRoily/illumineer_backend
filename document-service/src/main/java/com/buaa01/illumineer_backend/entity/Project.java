@@ -16,7 +16,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class Project {
     @TableId(type = IdType.AUTO)
-    private Integer pid;
+    private Long pid;
     /** 主持人 */
     private Map<String, Integer> presider;
     /** 所属机构 */

@@ -47,6 +47,7 @@ public class HistoryServiceImpl implements HistoryService {
      */
     @Override
     public CustomResponse getHistoryByPage(Integer uid) {
+        System.out.println(uid);
         //从redis中获取历史记录条目集合
         String hisKey = "uForHis:" + uid;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -74,7 +75,8 @@ public class HistoryServiceImpl implements HistoryService {
         String pids = sublist.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
-        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(pids, user.getName());
+        pids = user.getName() + ":" + pids;
+        List<PaperAdo> historyPaperList = paperServiceClient.getPaperAdoByList(pids);
         List<PaperAdo> papers = new LinkedList<>();
         for (int i = historyPaperList.size() - 1; i >= 0; i--) {
             papers.add(historyPaperList.get(i));

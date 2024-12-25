@@ -27,7 +27,7 @@ public class UserAuthServiceImpl implements UserAuthService {
      * property : 某个作者拥有文章的pid集合
      * **/
     @Override
-    public CustomResponse claim(Integer add , List<Integer> pids){
+    public CustomResponse claim(Integer add , List<Long> pids){
         CustomResponse customResponse = new CustomResponse();
         User user = currentUser.getUser();
         //初始化
@@ -38,7 +38,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         String adoptionKey = "adoption :" + user.getName();
         //添加文章
         if(add==1) {
-            for (Integer pid : pids) {
+            for (Long pid : pids) {
                if (redisTool.isSetMember(fidKey, pid)) {
                 }
                 //收藏论文
@@ -62,7 +62,7 @@ public class UserAuthServiceImpl implements UserAuthService {
             }
         }else {
             //删除操作
-            for (Integer pid : pids) {
+            for (Long pid : pids) {
                 if (!redisTool.isExist(fidKey)) {
                     customResponse.setCode(500);
                     customResponse.setMessage("Redis中该用户实名下的论文集合未创建，可能未在实名过程中调用创建函数");

@@ -58,7 +58,7 @@ public class UserPaperServiceImpl implements UserPaperService {
      * @return 更新后的数据信息
      */
     @Override
-    public User2Paper updateAccess(Integer uid, Integer pid) {
+    public User2Paper updateAccess(Integer uid, Long pid) {
         QueryWrapper<User2Paper> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid", uid).eq("pid", pid);
         User2Paper userPaper = userPaperMapper.selectOne(queryWrapper);
@@ -90,7 +90,7 @@ public class UserPaperServiceImpl implements UserPaperService {
      * @return 返回更新后的信息
      */
     @Override
-    public void collectOrCancel(Integer uid, Integer pid, boolean isCollect, Integer fid) {
+    public void collectOrCancel(Integer uid, Long pid, boolean isCollect, Integer fid) {
         UpdateWrapper<User2Paper> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("uid", uid).eq("pid", pid);
         if (isCollect) {
@@ -109,7 +109,7 @@ public class UserPaperServiceImpl implements UserPaperService {
     }
 
     // 增加相应cid的权重
-    private void updateIntention(Integer uid, Integer pid, Integer addWeight) {
+    private void updateIntention(Integer uid, Long pid, Integer addWeight) {
         Integer cid = getCid(pid);
         User user = getUser(uid);
 
@@ -128,19 +128,19 @@ public class UserPaperServiceImpl implements UserPaperService {
     }
 
     // 根据pid获得cid
-    private int getCid(Integer pid) {
+    private int getCid(Long pid) {
         // 根据pid找category
         Paper paper = getPaper(pid);
 
         return paper.getCategoryId();
     }
 
-    private Paper getPaper(Integer pid) {
+    private Paper getPaper(Long pid) {
         // Paper paper = null;
         // QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
         // paperQueryWrapper.eq("pid", pid);
         // paper = paperMapper.selectOne(paperQueryWrapper);
-        return paperServiceClient.getPaperById(pid);
+        return (Paper) paperServiceClient.getPaperById(pid);
     }
 
     private User getUser(Integer uid) {

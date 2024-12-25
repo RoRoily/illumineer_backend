@@ -8,6 +8,7 @@ import com.buaa01.illumineer_backend.entity.PaperAdo;
 import com.buaa01.illumineer_backend.mapper.PaperMapper;
 import com.buaa01.illumineer_backend.service.CategoryService;
 import com.buaa01.illumineer_backend.service.paper.PaperAdoptionService;
+import com.buaa01.illumineer_backend.service.paper.PaperSearchService;
 import com.buaa01.illumineer_backend.service.paper.PaperService;
 
 import java.util.*;
@@ -36,10 +37,23 @@ public class ClientController {
     private PaperService paperService;
 
     @Autowired
+    private PaperSearchService paperSearchService;
+
+    @Autowired
     private PaperAdoptionService paperAdoptionService;
 
     @Autowired
     private CategoryService categoryService;
+
+    @GetMapping("/paper")
+    @SentinelResource(value = "getPaperById",blockHandler = "getPaperByIdHandler")
+    public Map<String, Object> getPaperById(@RequestParam("pid") Long pid) {
+        Map<String, Object> paper = paperMapper.getPaperByPid(pid);
+        return paper;
+    }
+    public List<PaperAdo> getPaperByIdHandler(@RequestParam("pids") String pids, @RequestParam("name")String name) {
+        return null;
+    }
 
     /***
      * 根据文章列表返回对应文章列表
@@ -48,10 +62,12 @@ public class ClientController {
      **/
     @GetMapping("/ado/subList")
     @SentinelResource(value = "getPaperAdoptionsByList",blockHandler = "getPaperAdoptionsByListHandler")
-    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") String pids, @RequestParam("name")String name) {
-        List<Long> subList = Arrays.stream(pids.split(","))
+    public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") String pids) {
+        String[] pidss = pids.split(":");
+        List<Long> subList = Arrays.stream(pidss[1].split(","))
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
+        String name = pidss[0];
         return paperAdoptionService.getPaperAdoptionsByList(subList, name);
     }
     public List<PaperAdo> getPaperAdoptionsByListHandler(@RequestParam("pids") String pids, @RequestParam("name")String name) {

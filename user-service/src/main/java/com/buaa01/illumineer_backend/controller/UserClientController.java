@@ -91,11 +91,11 @@ public class UserClientController {
     public CustomResponse setAuthPaper(@RequestParam("add") Integer add ,
                                       @RequestParam("pids") String pids){
         CustomResponse customResponse = new CustomResponse();
-        List<Integer> paperList = new ArrayList<>();
+        List<Long> paperList = new ArrayList<>();
         List<String> papers = List.of(pids.split(","));
         for (String s : papers) {
             try {
-                paperList.add(Integer.parseInt(s));
+                paperList.add(Long.parseLong(s));
             } catch (NumberFormatException e) {
                 // 处理可能的转换异常
                 System.err.println("Invalid number format: " + s);

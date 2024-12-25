@@ -15,7 +15,7 @@ public class User2Paper {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private Integer uid;
-    private Integer pid;
+    private Long pid;
 
     private Integer collect; //收藏 0未收藏 1已收藏
     //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Shanghai")

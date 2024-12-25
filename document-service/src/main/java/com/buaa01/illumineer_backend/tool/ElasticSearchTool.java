@@ -65,7 +65,7 @@ public class ElasticSearchTool {
      * 删除论文
      * @param pid
      */
-    public void deletePaper(Integer pid) {
+    public void deletePaper(Long pid) {
         try{
             elasticsearchClient.delete(i->i.index("paper").id(pid.toString()));
         }catch (IOException e){
