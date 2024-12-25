@@ -77,9 +77,7 @@ public interface UserService {
     void modifyAuthInfoWithRedis(String name, String institutionName, String address);
 
     /**
-     * 更新用户的收藏夹偏移量(新建收藏夹，删除收藏夹用)
-     * 
-     * @param isAdd ture表示增加，false表示减少
+     * 更新用户的收藏夹偏移量(新建收藏夹用)
      */
-    void updataUserFavBias(boolean isAdd);
+    void updataUserFavBias();
 }

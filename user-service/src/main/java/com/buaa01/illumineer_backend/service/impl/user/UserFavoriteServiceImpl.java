@@ -60,7 +60,7 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
 
             redisTool.storeZSetByTime(favKey, fID);
             favoriteMapper.insert(new Favorite(fID, userID, 2, favName, 0, 0));
-            userServiceImpl.updataUserFavBias(true);
+            userServiceImpl.updataUserFavBias();
             customResponse.setMessage("新建收藏夹成功");
             customResponse.setData(fID);
         } catch (Exception e) {
@@ -89,7 +89,6 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
         } else {
             redisTool.deleteZSetMember(favKey, fid);
             favoriteMapper.deleteById(fid);
-            userServiceImpl.updataUserFavBias(false);
         }
         return customResponse;
     }
