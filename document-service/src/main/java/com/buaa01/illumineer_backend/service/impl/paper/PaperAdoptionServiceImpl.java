@@ -67,7 +67,6 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
 
         List<PaperAdo> paperAdos = getPapersBelonged(name, false);
         total = paperAdos.size();
-
         Map<String, Object> result = new HashMap<>();
         result.put("result", paperAdos);
         result.put("total", total);

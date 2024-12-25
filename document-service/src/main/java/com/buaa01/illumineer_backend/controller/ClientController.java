@@ -61,13 +61,27 @@ public class ClientController {
      * @param pids 文章id列表
      **/
     @GetMapping("/ado/subList")
-    @SentinelResource(value = "getPaperAdoptionsByList",blockHandler = "getPaperAdoptionsByListHandler")
+    //@SentinelResource(value = "getPaperAdoptionsByList",blockHandler = "getPaperAdoptionsByListHandler")
     public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") String pids) {
         String[] pidss = pids.split(":");
         List<Long> subList = Arrays.stream(pidss[1].split(","))
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
         String name = pidss[0];
+        return paperAdoptionService.getPaperAdoptionsByList(subList, name);
+    }
+
+    /***
+     * 根据文章列表返回对应文章列表
+     *
+     * @param pids 文章id列表
+     **/
+    @GetMapping("/ado/subList2")
+    @SentinelResource(value = "getPaperAdoptionsByList",blockHandler = "getPaperAdoptionsByListHandler")
+    public List<PaperAdo> getPaperAdoptionsByList2(@RequestParam("pids") String pids, @RequestParam("name")String name) {
+        List<Long> subList = Arrays.stream(pids.split(","))
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
         return paperAdoptionService.getPaperAdoptionsByList(subList, name);
     }
     public List<PaperAdo> getPaperAdoptionsByListHandler(@RequestParam("pids") String pids, @RequestParam("name")String name) {
