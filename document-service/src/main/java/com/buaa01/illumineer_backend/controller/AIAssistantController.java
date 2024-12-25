@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @RestController
 public class AIAssistantController {
@@ -66,7 +67,7 @@ public class AIAssistantController {
         System.out.println("keywords: " + keywords);
         String[] keywordSplit = keywords.split("\\n+");
         // 使用正则表达式来识别分割
-        List<String> keywordList = Arrays.stream(keywordSplit).toList();
+        List<String> keywordList = Arrays.stream(keywordSplit).collect(Collectors.toList());
         List<String> logicList = new ArrayList<>();
         List<String> conditionList = new ArrayList<>();
         for (int i = 0; i < keywordList.size(); i++) {
@@ -95,16 +96,7 @@ public class AIAssistantController {
         String condition = String.join(",", conditionList);
         String keyword = String.join(",", keywordList);
         Object data = paperSearchService.advancedSearchPapers(logic, condition, keyword, size, offset, sortType, order).getData();
-        Map<String, Object> result = new HashMap<>();
-        if (data instanceof Map<?, ?> map) {
-            // 2. 检查键是否为 String 类型，值是否为 Object 类型
-            Set<?> keys = map.keySet();
-            for (Object key : keys) {
-                if (key instanceof String keyInStr) {
-                    result.put(keyInStr, map.get(key));
-                }
-            }
-        }
+        Map<String, Object> result = (Map<String, Object>) data;
         result.put("generatedKeywords", keywordList);
         return new CustomResponse(200, "OK", result);
     }

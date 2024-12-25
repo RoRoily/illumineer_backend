@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -52,13 +53,15 @@ public class PaperEsUploadServiceImpl implements PaperEsUploadService {
                 List<? extends Future<?>> futures = papers.stream()
                         .map(paper -> executorService.submit(() -> {
                             try {
-                                elasticSearchTool.addPaper(paper);
+                                if(!elasticSearchTool.isExistPaper(paper.getPid())){
+                                    elasticSearchTool.addPaper(paper);
+                                }
                             } catch (Exception e) {
                                 // 单条数据处理异常，记录日志或处理
                                 e.printStackTrace();
                             }
                         }))
-                        .toList();
+                        .collect(Collectors.toList());
 
                 // 等待所有任务完成
                 for (Future<?> future : futures) {
