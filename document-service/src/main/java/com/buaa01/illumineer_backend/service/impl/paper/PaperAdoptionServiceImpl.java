@@ -42,7 +42,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
      * @param name 姓名
      * **/
     @Override
-    public CustomResponse getPaperBelongedByName(String name){
+    public CustomResponse getPaperBelongedByName(String name) {
         CustomResponse customResponse = new CustomResponse();
         int total = 0;
 
@@ -61,7 +61,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
      * @param name 姓名
      * **/
     @Override
-    public CustomResponse getPaperAdoptionsByName(String name){
+    public CustomResponse getPaperAdoptionsByName(String name) {
         CustomResponse customResponse = new CustomResponse();
         int total = 0;
 
@@ -87,7 +87,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
             paper = paperMapper.getPaperByPid(pid);
 
             ObjectMapper objectMapper = new ObjectMapper();
-            PaperAdo paperAdo = null;
+            PaperAdo paperAdo = new PaperAdo();
             try {
                 // auths 的转换
                 Map<String, Integer> auths = objectMapper.readValue(paper.get("auths").toString(), new TypeReference<Map<String, Integer>>() {
@@ -114,12 +114,13 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
                 } else {
                     stats = Integer.parseInt(paper.get("stats").toString().strip());
                 }
-
-                boolean hasBeenAdopted = false;
-                if (name != null && auths.get(name) != null) {
-                    hasBeenAdopted = true;
-                }
-                paperAdo = new PaperAdo(pid, paper.get("title").toString(), auths, date, stats, hasBeenAdopted);
+                System.out.println(paper);
+                paperAdo = paperAdo.setNewPaperAdo(paper, name);
+//                boolean hasBeenAdopted = false;
+//                if (name != null && auths.get(name) != null) {
+//                    hasBeenAdopted = true;
+//                }
+//                paperAdo = new PaperAdo(pid, paper.get("title").toString(), auths, date, stats, hasBeenAdopted);
                 paperAdos.add(paperAdo);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -141,7 +142,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
         QueryWrapper<Paper> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("category_id", category.getMainClassId());
         papers = paperMapper.selectList(queryWrapper);
-        for (Paper paper: papers) {
+        for (Paper paper : papers) {
             pids.add(paper.getPid());
         }
         paperAdos = getPaperAdoptionsByList(pids, null);
@@ -155,7 +156,7 @@ public class PaperAdoptionServiceImpl implements PaperAdoptionService {
         List<Map<String, Object>> papers = paperMapper.searchByKeywordWithStrictBooleanMode("str_auths", name);
         List<PaperAdo> paperAdos = new ArrayList<>();
 
-        for (Map<String, Object> paper: papers) {
+        for (Map<String, Object> paper : papers) {
             if (paper.get("auths") != null) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 try {
