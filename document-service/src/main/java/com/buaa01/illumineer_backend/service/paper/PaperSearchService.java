@@ -8,6 +8,7 @@ import java.util.Map;
 public interface PaperSearchService {
 
     CustomResponse getPaperByPid(Long pid);
+    CustomResponse getPaperByPidES(Long pid);
 
     CustomResponse getPaperByStats(Integer stats, Integer size, Integer offset, Integer sortType, Integer order);
 

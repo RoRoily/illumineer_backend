@@ -7,6 +7,7 @@ import com.buaa01.illumineer_backend.entity.User;
 import com.buaa01.illumineer_backend.service.gain.GainAdoptService;
 import com.buaa01.illumineer_backend.service.user.UserService;
 import com.buaa01.illumineer_backend.service.utils.CurrentUser;
+import com.buaa01.illumineer_backend.service.utils.CurrentUser;
 import com.buaa01.illumineer_backend.tool.RedisTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class GainAdoptServiceImpl implements GainAdoptService {
     private JpaProperties jpaProperties;
     @Autowired
     private CurrentUser currentUser;
+    @Autowired
+    private CurrentUser currentUser;
 
     /**
      * 给出符合条件的文献
@@ -42,7 +45,11 @@ public class GainAdoptServiceImpl implements GainAdoptService {
      * @param name 认领者的真实姓名
      *             需要将文章对象进行缓存，在完成认领的时候需要重新调用
      **/
+    *需要将文章对象进行缓存，在完成认领的时候需要重新调用**/
+
     @Override
+    public List<PaperAdo> getAllGain(String name) {
+
     public List<PaperAdo> getAllGain(String name) {
         String adoptionKey = "adoption :" + name;
         if (!redisTool.isExist(adoptionKey)) {
@@ -72,6 +79,9 @@ public class GainAdoptServiceImpl implements GainAdoptService {
     @Override
     public CustomResponse updateAdoption(List<Integer> pids, Integer uid) {
         CustomResponse customResponse = new CustomResponse(200, "待修改", null);
+
+    public CustomResponse updateAdoption(List<Integer> pids, Integer uid) {
+        CustomResponse customResponse = new CustomResponse(200, "待修改", null);
         return customResponse;
     }
 
@@ -90,11 +100,13 @@ public class GainAdoptServiceImpl implements GainAdoptService {
             List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByName(name);
             for (PaperAdo paperAdoption : paperAdoptions) {
                 redisTool.addSetMember(needClaimKey, paperAdoption.getPid());
+            for (PaperAdo paperAdoption : paperAdoptions) {
+                redisTool.addSetMember(needClaimKey, paperAdoption.getPid());
             }
             return paperAdoptions;
         }
-        //已有
-        //List<Long> pids = redisTool.getAllList(needClaimKey,Long.class);
+        // 已有
+        // List<Long> pids = redisTool.getAllList(needClaimKey,Long.class);
         Set<Object> pids = redisTool.getSetMembers(needClaimKey);
         List<Long> longPids = pids.stream()
                 .map(item -> {
@@ -106,13 +118,14 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                     }
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
-                .toList();
-        //System.out.println(longPids);
+                .collect(Collectors.toList());
+        // System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
                 .collect(Collectors.joining(",")); // 使用逗号连接
         System.out.println("pids to Claim : " + pidss);
+        return paperServiceClient.getPaperAdoByList(pidss, name);
         return paperServiceClient.getPaperAdoByList(pidss, name);
     }
 
@@ -131,7 +144,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
             //redisTool.addSetMember(ClaimedKey,1);
             return List.of();
         }
-        //List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
+        // List<Long> pids = redisTool.getAllList(ClaimedKey,Long.class);
         Set<Object> pids = redisTool.getSetMembers(ClaimedKey);
         List<Long> longPids = pids.stream()
                 .map(item -> {
@@ -143,8 +156,8 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                     }
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
-                .toList();
-        //System.out.println(longPids);
+                .collect(Collectors.toList());
+        // System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
@@ -180,7 +193,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         //处理显示集合
         redisTool.addSetMember(ClaimedKey, pid);
         System.out.println("claimed pid:" + pid);
-        //-----------------------------------------------------------
+        // -----------------------------------------------------------
         Set<Object> pids = redisTool.getSetMembers(ClaimedKey);
         List<Long> longPids = pids.stream()
                 .map(item -> {
@@ -192,8 +205,8 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                     }
                 })
                 .filter(Objects::nonNull) // 过滤掉转换失败的 null 值
-                .toList();
-        //System.out.println(longPids);
+                .collect(Collectors.toList());
+        // System.out.println(longPids);
         // 将 List<Long> 转换为逗号分隔的字符串
         String pidss = longPids.stream()
                 .map(String::valueOf) // 将每个 Long 转换为 String
@@ -206,13 +219,15 @@ public class GainAdoptServiceImpl implements GainAdoptService {
         String AuthList = "paperBelonged:" + pid;
         redisTool.addSetMember(paperList, pid);
         redisTool.addSetMember(AuthList, uid);
+        redisTool.addSetMember(paperList, pid);
+        redisTool.addSetMember(AuthList, uid);
         System.out.println("success ClaimAPaper");
 
-        //处理paper实体类的归属
+        // 处理paper实体类的归属
         paperServiceClient.modifyAuth(pid, user.getName(), uid);
+        return new CustomResponse(200, "成功认领", null);
         return new CustomResponse(200, "成功认领", null);
 
     }
-
 
 }

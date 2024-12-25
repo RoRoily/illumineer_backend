@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.service.client;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.buaa01.illumineer_backend.config.FeignConfig;
 import com.buaa01.illumineer_backend.entity.Paper;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
@@ -16,31 +17,33 @@ import java.util.List;
 @FeignClient(name = "document-service")
 public interface PaperServiceClient {
 
-    //从paperService中寻找提供的服务
+    // 从paperService中寻找提供的服务
     @GetMapping("/document/paper/{pid}")
     Paper getPaperById(@PathVariable("pid") Integer pid);
+
     @GetMapping("/document/paper/getPaperByPId")
     CustomResponse getPaperByPid(@RequestParam("pid") Integer pid);
 
-
     @GetMapping("/document/paper/getAuthUid")
-    Integer getAuthId(@RequestParam("name")String name,@RequestParam("pid")Long pid);
+    Integer getAuthId(@RequestParam("name") String name, @RequestParam("pid") Long pid);
 
     @GetMapping("/document/paper/{name}")
     List<PaperAdo> getPaperAdoByName(@PathVariable("name") String name);
 
-    /*@GetMapping("/paper/paperStatus/{pid}")
-    PaperStatus getPaperStatusById(@PathVariable("pid") Integer pid);*/
+    /*
+     * @GetMapping("/paper/paperStatus/{pid}")
+     * PaperStatus getPaperStatusById(@PathVariable("pid") Integer pid);
+     */
 
     @PostMapping("/document/paper/updateStatus")
     CustomResponse updatePaperStatus(@RequestParam("pid") Integer pid,
-                                     @RequestParam("statusType") String statusType,
-                                     @RequestParam("increment") Boolean increment,
-                                     @RequestParam("count") Integer count);
+            @RequestParam("statusType") String statusType,
+            @RequestParam("increment") Boolean increment,
+            @RequestParam("count") Integer count);
 
     @GetMapping("/document/ado/subList")
     List<PaperAdo> getPaperAdoByList(@RequestParam("pids") String subList,
-                                     @RequestParam("name") String name);
+            @RequestParam("name") String name);
 
     @GetMapping("/document/paper/propider/test/{message}")
     public String getPropiderTest(@PathVariable("message") String message);
@@ -51,14 +54,12 @@ public interface PaperServiceClient {
     @GetMapping("/document/paper/getByFid")
     CustomResponse getPaperByFid(@RequestParam("fid") Integer fid);
 
-    //FIXME:在函数头添加了document
+    // FIXME:在函数头添加了document
     @PostMapping("/document/paper/modiftAuth")
-    CustomResponse modifyAuth(@RequestParam("pid")Long Pid,
-                              @RequestParam("name")String name,
-                              @RequestParam("uid")Integer uid
-    );
+    CustomResponse modifyAuth(@RequestParam("pid") Long Pid,
+            @RequestParam("name") String name,
+            @RequestParam("uid") Integer uid);
 
     @GetMapping("/document/paper/getCategory")
     List<String> getCategory(@RequestParam List<String> ids);
 }
-

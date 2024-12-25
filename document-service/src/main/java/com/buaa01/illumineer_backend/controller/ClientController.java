@@ -1,5 +1,6 @@
 package com.buaa01.illumineer_backend.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.buaa01.illumineer_backend.entity.Category;
 import com.buaa01.illumineer_backend.entity.CustomResponse;
 import com.buaa01.illumineer_backend.entity.Paper;
@@ -46,12 +47,17 @@ public class ClientController {
      * @param pids 文章id列表
      **/
     @GetMapping("/ado/subList")
+    @SentinelResource(value = "getPaperAdoptionsByList",blockHandler = "getPaperAdoptionsByListHandler")
     public List<PaperAdo> getPaperAdoptionsByList(@RequestParam("pids") String pids, @RequestParam("name")String name) {
         List<Long> subList = Arrays.stream(pids.split(","))
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
         return paperAdoptionService.getPaperAdoptionsByList(subList, name);
     }
+    public List<PaperAdo> getPaperAdoptionsByListHandler(@RequestParam("pids") String pids, @RequestParam("name")String name) {
+        return new ArrayList<>();
+    }
+
 
     /***
      * 根据category返回该category的认领条目列表
@@ -59,6 +65,7 @@ public class ClientController {
      * @param total 总数
      * **/
     @GetMapping("/ado/category")
+    @SentinelResource(value = "getPaperAdoptionsByName",blockHandler = "getPaperAdoptionsByNameHandler")
     public CustomResponse getPaperAdoptionsByName(@RequestParam("category") Category category, @RequestParam("total") Integer total) {
         CustomResponse customResponse = new CustomResponse();
         try {
@@ -70,6 +77,10 @@ public class ClientController {
         }
         return customResponse;
     }
+    public CustomResponse getPaperAdoptionsByNameHandler(@RequestParam("category") Category category, @RequestParam("total") Integer total) {
+       return new CustomResponse(200,"熔断，请稍后再试",null);
+    }
+
 
     /**
      * 查找用户收藏夹内所有文献
@@ -79,17 +90,24 @@ public class ClientController {
      */
 
     @GetMapping("/paper/getByFid")
+    @SentinelResource(value = "getPaperByFid",blockHandler = "getPaperByFidHandler")
     public CustomResponse getPaperByFid(@RequestParam("fid") Integer fid) {
         return paperService.getPaperByFid(fid);
     }
-
+    public CustomResponse getPaperByFidHandler(@RequestParam("fid") Integer fid) {
+        return new CustomResponse(200,"熔断，请稍后再试",null);
+    }
 
     @GetMapping("/paper/getCategory")
+    @SentinelResource(value = "getCategory",blockHandler = "getCategoryHandler")
     List<String> getCategory(@RequestParam List<String> ids) throws JsonProcessingException {
         List<String> result = new ArrayList<>();
         for (String id : ids)
             result.add(categoryService.getCategoryByID(id).toJsonString());
         return result;
+    }
+    List<String> getCategoryHandler(@RequestParam List<String> ids) throws JsonProcessingException {
+        return new ArrayList<>();
     }
 
 
@@ -102,12 +120,19 @@ public class ClientController {
      * @return
      */
     @PostMapping("/paper/modiftAuth")
+    @SentinelResource(value = "modifyAutb",blockHandler = "modifyAuthHandler")
     CustomResponse modifyAuth(@RequestParam("pid")Long Pid,
                               @RequestParam("name")String name,
                               @RequestParam("uid")Integer uid
     ){
         System.out.println("ok");
         return paperService.modifyAuth(Pid,name,uid);
+    }
+    CustomResponse modifyAuthHandler(@RequestParam("pid")Long Pid,
+                              @RequestParam("name")String name,
+                              @RequestParam("uid")Integer uid
+    ){
+       return new CustomResponse(200,"熔断,请稍等",null);
     }
 
     /**
@@ -117,6 +142,7 @@ public class ClientController {
      * @return
      */
     @GetMapping("/paper/getAuthUid")
+
     Integer getAuthId(@RequestParam("name")String name,@RequestParam("pid")Long pid)
     {
         ObjectMapper objectMapper = new ObjectMapper();
