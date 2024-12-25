@@ -50,7 +50,10 @@ public class SearchResultPaper {
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> keywords = null;
         try {
-            keywords = objectMapper.readValue(this.keywords, new TypeReference<List<String>>() {});
+            if (!this.keywords.isEmpty()) {
+                keywords = objectMapper.readValue(this.keywords, new TypeReference<List<String>>() {
+                });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,7 +64,10 @@ public class SearchResultPaper {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Integer> auths = null;
         try {
-            auths = objectMapper.readValue(this.auths, new TypeReference<Map<String, Integer>>() {});
+            if (!this.auths.isEmpty()) {
+                auths = objectMapper.readValue(this.auths, new TypeReference<Map<String, Integer>>() {
+                });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

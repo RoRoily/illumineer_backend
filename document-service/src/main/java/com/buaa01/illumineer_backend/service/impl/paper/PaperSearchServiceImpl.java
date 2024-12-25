@@ -246,8 +246,8 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                     paper.get("theme") == null ? "" : paper.get("theme").toString(),
                     date,
                     paper.get("derivation") == null ? "" : paper.get("derivation").toString(),
-                    Integer.parseInt(paper.get("ref_times").toString()),
-                    Integer.parseInt(paper.get("fav_times").toString()),
+                    Integer.parseInt(paper.get("ref_times") == null ? "0" : paper.get("ref_times").toString()),
+                    Integer.parseInt(paper.get("fav_times") == null ? "0" : paper.get("fav_times").toString()),
                     paper.get("content_url") == null ? "" : paper.get("content_url").toString());
             searchResultPapers.add(searchResultPaper);
         }
@@ -393,7 +393,9 @@ public class PaperSearchServiceImpl implements PaperSearchService {
      */
     List<Map<String, Object>> searchByKeyword(String condition, String keyword) {
         List<Paper> list = null;
+        /*
         try {
+
             if (checkIndexExists("paper")) {
                 Query query;
 
@@ -411,23 +413,30 @@ public class PaperSearchServiceImpl implements PaperSearchService {
                         list.add(hit.source());
                     }
                 }
+                if (list.size() == 0) {
+                    list = null;
+                }
+            } else {
+                list = null;
             }
         } catch (IOException e) {
             log.error("查询ES相关文献文档时出错了：" + e);
             list = null;
         }
+         */
+        System.out.println(list);
         List<Map<String, Object>> paperList;
         if (list == null) {
             String cond = "";
             if (condition.equals("auths")) {
                 cond = "str_auths";
-                paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
+                paperList = paperMapper.searchByKeywordWithStrictBooleanMode(cond, keyword);
             } else if (condition.equals("keywords")) {
                 cond = "str_keywords";
                 paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
             } else {
                 cond = condition;
-                paperList = paperMapper.searchByKeywordWithBooleanMode(cond, keyword);
+                paperList = paperMapper.searchByKeyword(cond, keyword);
             }
         } else {
             paperList = new ArrayList<Map<String, Object>>();
