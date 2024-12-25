@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -169,6 +170,9 @@ public class ElasticSearchTool {
         try {
             List<Paper> list = new ArrayList<>();
             Query query = Query.of(q -> q.multiMatch(m -> m.fields(condition).query(keyword).fuzziness("AUTO")));
+            if(Objects.equals(condition, "pid")){
+                query = Query.of(q -> q.term(t -> t.field("_id").value(Long.parseLong(keyword)))); // 精确匹配 Long 类型字段
+            }
             return getPapers(page, size, onlyPass, list, query);
         } catch (IOException e) {
             log.error("查询ES相关论文时出错了：{}", e.getMessage());
