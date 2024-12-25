@@ -39,11 +39,13 @@ public class SearchRecommendController {
     @GetMapping("/search/word/get")
     public CustomResponse getSearchWord(@RequestParam("keyword") String keyword) throws UnsupportedEncodingException {
         keyword = URLDecoder.decode(keyword, "UTF-8");  // 解码经过url传输的字符串
+        System.out.println("keyword used to get Recommend:" + keyword);
         CustomResponse customResponse = new CustomResponse();
         if (keyword.trim().length() == 0) {
             customResponse.setData(Collections.emptyList());
         } else {
             customResponse.setData(searchService.getMatchingWord(keyword));
+            System.out.println("Recommend" + searchService.getMatchingWord(keyword));
         }
         return customResponse;
     }
