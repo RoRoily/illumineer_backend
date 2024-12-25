@@ -1,4 +1,4 @@
-host: localhost
+host: 115.120.239.233
 
 spring:
   application:
