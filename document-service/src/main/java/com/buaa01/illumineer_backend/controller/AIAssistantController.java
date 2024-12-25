@@ -31,13 +31,12 @@ public class AIAssistantController {
      * @return 返回关键词（用空格隔开）
      * @throws Exception 异常情况（AI接口调用异常）
      */
-    @PostMapping("/AI/generateKeywords")
+    @GetMapping("/AI/generateKeywords")
     public ResponseEntity<String> generateKeywords(@RequestParam String query) throws Exception{
         CompletableFuture<String> future = aiAssistantService.StartChat(
                 "推荐“" + query + "”" +
                         "领域的2个英文关键词，尽量简短，每个占一行" +
                         "（只输出关键词，不要附加其他内容）");
-        String keywords = future.get();
         return ResponseEntity.ok(future.get());
     }
 
@@ -51,7 +50,7 @@ public class AIAssistantController {
      * @return 文献信息
      * @throws Exception 异常情况（AI接口调用异常）
      */
-    @PostMapping("/AI/searchPaper")
+    @GetMapping("/AI/searchPaper")
     public CustomResponse searchPaper(@RequestParam("query") String query,
                                       @RequestParam("size") Integer size,
                                       @RequestParam("offset") Integer offset,
