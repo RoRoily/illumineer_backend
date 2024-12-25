@@ -71,8 +71,11 @@ public class AIAssistantController {
         Map<String, Object> searchResults = new HashMap<>();
         for (String keyword: keywordList) {
             searchResults.putAll((Map<String, Object>) (
-                    paperSearchService.searchPapers("title", keyword, size, offset, sortType, order)
-                            .getData()
+                    paperSearchService.searchPapers(
+                    "title",
+                            keyword.replaceFirst(" ", ""),
+                                    size, offset, sortType, order)
+                    .getData()
             ));
         }
 
