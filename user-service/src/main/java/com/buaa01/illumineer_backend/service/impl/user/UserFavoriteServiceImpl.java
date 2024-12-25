@@ -202,10 +202,10 @@ public class UserFavoriteServiceImpl implements UserFavoriteService {
                 Integer fid = favorite.getFid();
                 String fidKey = "fid:" + fid;
                 Set<Object> pids_Set = redisTool.zRange(fidKey, 0, -1);
-                List<Integer> pids_List = pids_Set.stream()
-                        .filter(obj -> obj instanceof Integer)
-                        .map(obj -> (Integer) obj)
-                        .collect(Collectors.toCollection(ArrayList::new));
+                List<Number> pids_List = pids_Set.stream()
+                        .filter(obj -> obj instanceof Integer || obj instanceof Long)
+                        .map(obj -> (Number) obj)
+                        .collect(Collectors.toList());
 
                 Map<String, Object> fav = new HashMap<>();
                 fav.put("fid", fid);
