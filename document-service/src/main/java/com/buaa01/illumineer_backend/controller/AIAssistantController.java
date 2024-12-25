@@ -43,11 +43,18 @@ public class AIAssistantController {
         // 使用正则表达式来识别分割
         List<String> keywordList = Arrays
                 .stream(keywords.split("\\n+"))
-                .collect(Collectors.toList());
+                .toList();
+
+        List<String> retKeywordList = new ArrayList<>();
+
+        for (String keyword: keywordList) {
+            if (keyword.startsWith(" "))
+                retKeywordList.add(keyword.replaceFirst(" ", ""));
+        }
 
         CustomResponse response = new CustomResponse();
         response.setCode(200);
-        response.setData(keywordList);
+        response.setData(retKeywordList);
         response.setMessage("OK");
         return response;
     }
