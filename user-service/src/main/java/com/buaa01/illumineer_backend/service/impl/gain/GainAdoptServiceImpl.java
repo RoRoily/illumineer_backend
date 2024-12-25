@@ -151,6 +151,7 @@ public class GainAdoptServiceImpl implements GainAdoptService {
                 .collect(Collectors.joining(",")); // 使用逗号连接
         System.out.println("claimed pids:" + pidss);
         //return paperServiceClient.getPaperAdoByList(pidss, name);
+
         List<PaperAdo> paperAdoptions = paperServiceClient.getPaperAdoByList(pidss, name);
         String paperList = "property:" + currentUser.getUserId();
         Set<Object> paperSet = redisTool.getSetMembers(paperList);
