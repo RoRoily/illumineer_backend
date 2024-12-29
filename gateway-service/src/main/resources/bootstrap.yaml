@@ -1,5 +1,5 @@
 spring:
-  host: 115.120.239.233
+  host: localhost
   application:
     name: gateway-service
   cloud:
@@ -17,7 +17,7 @@ spring:
         namespace: public
         group: DEFAULT_GROUP
       discovery:
-
+        ip: ${spring.host}
         server-addr: ${spring.host}:8848  # Nacos 服务器地址
     gateway:
       discovery:
